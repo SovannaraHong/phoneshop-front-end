@@ -1,0 +1,31 @@
+/* :host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 99px;
+} */
+
+/* Hide scrollbar (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar (Firefox) */
+* {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar (IE, old Edge) */
+* {
+  -ms-overflow-style: none;
+}

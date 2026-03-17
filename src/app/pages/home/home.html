@@ -1,0 +1,208 @@
+<div class="flex h-screen bg-[#f5f4f2] overflow-hidden text-sm">
+  <main class="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div
+        class="bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+      >
+        <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          Total Sold
+        </div>
+        <div class="text-2xl font-bold text-gray-900">{{ fmtSold(totalSold) }}</div>
+        <div class="text-[11px] text-green-500 font-semibold mt-1 flex items-center gap-0.5">
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+          {{ current.soldTrend }}
+        </div>
+      </div>
+      <div
+        class="bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+      >
+        <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          Revenue
+        </div>
+        <div class="text-2xl font-bold text-gray-900">{{ fmtRev(totalRev) }}</div>
+        <div class="text-[11px] text-green-500 font-semibold mt-1 flex items-center gap-0.5">
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+          {{ current.revTrend }}
+        </div>
+      </div>
+      <div
+        class="bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+      >
+        <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          Avg. Rating
+        </div>
+        <div class="text-2xl font-bold text-gray-900">★ {{ avgRating }}</div>
+        <div class="text-[11px] text-gray-400 mt-1">Across top products</div>
+      </div>
+      <div
+        class="bg-white border border-gray-100 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+      >
+        <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          #1 Product
+        </div>
+        <div class="text-sm font-bold text-gray-900 leading-snug">{{ products[0].short }}</div>
+        <div class="text-[11px] text-orange-500 font-semibold mt-1">Best performer</div>
+      </div>
+    </div>
+
+    <!-- Chart + Revenue Share -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <!-- Horizontal Bar Chart -->
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-6 lg:col-span-3 hover:shadow-md transition-shadow"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <div class="text-sm font-bold text-gray-900">Units Sold</div>
+            <div class="text-xs text-gray-400 mt-0.5">Ranked by volume</div>
+          </div>
+          <span
+            class="text-[10px] font-semibold text-orange-500 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full"
+          >
+            {{ current.label }}
+          </span>
+        </div>
+        <!-- Bar rows -->
+        <div class="flex flex-col gap-3">
+          <div
+            *ngFor="let p of products; let i = index; trackBy: trackByIndex"
+            class="flex items-center gap-3"
+          >
+            <div class="w-5 text-center text-[11px] font-bold text-gray-400">#{{ i + 1 }}</div>
+            <div class="w-20 text-xs font-semibold text-gray-700 truncate">{{ p.short }}</div>
+            <div class="flex-1 h-7 bg-gray-50 rounded-lg overflow-hidden">
+              <div
+                class="h-full rounded-lg flex items-center px-1 transition-all duration-700"
+                [style.width.%]="barPct(p.sold)"
+                [style.background]="color(i) + '22'"
+              >
+                <div
+                  class="h-3.5 rounded-md transition-all duration-700"
+                  [style.width.%]="barPct(p.sold)"
+                  [style.background]="color(i)"
+                ></div>
+              </div>
+            </div>
+            <div class="w-10 text-right text-xs font-bold text-gray-800">
+              {{ fmtSold(p.sold) }}
+            </div>
+            <div class="w-14 text-right text-[10px] font-semibold text-gray-400">
+              {{ fmtRev(p.rev) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Share -->
+      <div
+        class="bg-white border border-gray-100 rounded-2xl p-6 lg:col-span-2 hover:shadow-md transition-shadow"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <div class="text-sm font-bold text-gray-900">Revenue Share</div>
+            <div class="text-xs text-gray-400 mt-0.5">By product</div>
+          </div>
+          <div class="w-10 h-10 shrink-0">
+            <canvas #donutCanvas></canvas>
+          </div>
+        </div>
+        <div class="flex flex-col gap-0">
+          <div
+            *ngFor="let p of products; let i = index; trackBy: trackByIndex"
+            class="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0"
+          >
+            <div class="w-2 h-2 rounded-full shrink-0" [style.background]="color(i)"></div>
+            <div class="flex-1 text-xs font-medium text-gray-700 truncate">{{ p.short }}</div>
+            <div class="text-xs font-bold text-gray-900">{{ fmtRev(p.rev) }}</div>
+            <div class="w-10 text-right text-[10px] font-semibold text-gray-400">
+              {{ revShare(p.rev) }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pb-2">
+      <div
+        *ngFor="let p of products; let i = index; trackBy: trackByIndex"
+        class="bg-white border border-gray-100 rounded-2xl overflow-hidden group hover:shadow-md transition-all duration-200"
+      >
+        <!-- Image area -->
+        <div class="relative bg-gray-50 p-4 pb-3">
+          <div
+            class="absolute top-2.5 left-2.5 w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold"
+            [style.background]="color(i)"
+          >
+            #{{ i + 1 }}
+          </div>
+          <span
+            class="absolute top-2.5 right-2.5 text-[9px] font-semibold px-2 py-0.5 rounded-full border"
+            [ngClass]="p.badgeClass"
+          >
+            {{ p.badge }}
+          </span>
+          <div class="h-[80px] flex items-center justify-center mt-2">
+            <img
+              [src]="p.img"
+              [alt]="p.name"
+              class="h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+              (error)="$any($event.target).style.display = 'none'"
+            />
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="px-3.5 py-3 flex flex-col gap-1.5">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" [style.background]="p.dot"></span>
+            <span class="text-[10px] font-semibold text-gray-400">{{ p.source }}</span>
+            <span class="ml-auto flex items-center gap-0.5 text-[10px]">
+              <svg class="w-2.5 h-2.5 fill-yellow-400" viewBox="0 0 24 24">
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+              <span class="font-semibold text-gray-700">{{ p.rating }}</span>
+            </span>
+          </div>
+          <div class="text-xs font-bold text-gray-900 leading-snug line-clamp-2">
+            {{ p.name }}
+          </div>
+          <div class="flex items-center justify-between pt-1.5 border-t border-gray-50 mt-0.5">
+            <div>
+              <div class="text-[9px] text-gray-400 mb-0.5">Sold</div>
+              <div class="text-xs font-bold text-gray-800">{{ fmtSold(p.sold) }}</div>
+            </div>
+            <div class="text-center">
+              <div class="text-[9px] text-gray-400 mb-0.5">Revenue</div>
+              <div class="text-xs font-bold text-gray-800">{{ fmtRev(p.rev) }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[9px] text-gray-400 mb-0.5">Share</div>
+              <div class="text-xs font-bold" [style.color]="color(i)">{{ revShare(p.rev) }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
