@@ -1,0 +1,329 @@
+<div class="flex min-h-screen bg-slate-50 font-sans">
+  <main class="flex-1 flex flex-col">
+    <header
+      class="h-14 bg-white border-b border-slate-100 flex items-center px-7 gap-3 sticky top-0 z-10"
+    >
+      <div class="flex items-center gap-2 text-sm text-slate-400 flex-1">
+        Dashboard <span class="text-slate-300 mx-1">›</span>
+        <span class="text-slate-700 font-semibold">Users</span>
+      </div>
+      <div
+        class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-56 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all"
+      >
+        <svg
+          class="w-3.5 h-3.5 text-slate-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          class="bg-transparent outline-none text-sm text-slate-700 w-full"
+          placeholder="Search users…"
+        />
+      </div>
+      <button
+        class="relative w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-blue-500 hover:bg-blue-50 transition-all text-sm"
+      >
+        🔔<span
+          class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+        ></span>
+      </button>
+      <button
+        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-blue-500 hover:bg-blue-50 transition-all text-sm"
+      >
+        ⚡
+      </button>
+      <button
+        class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:-translate-y-px"
+      >
+        <span class="text-base leading-none">+</span> Create User
+      </button>
+    </header>
+
+    <!-- Content -->
+    <div class="p-7 flex-1">
+      <!-- Heading -->
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h1 class="font-serif italic text-2xl text-slate-800">User Management</h1>
+          <p class="text-sm text-slate-400 mt-1">Manage and monitor all registered users</p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 transition-all"
+          >
+            📥 Import
+          </button>
+          <button
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 transition-all"
+          >
+            📤 Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div
+          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-lg">
+              👥
+            </div>
+            <span
+              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
+              >↑ 12.4%</span
+            >
+          </div>
+          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
+            {{ user.length }}
+          </div>
+          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+            Total Users
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-lg"
+            >
+              ✅
+            </div>
+            <span
+              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
+              >↑ 8.1%</span
+            >
+          </div>
+          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
+            {{ getActiveUser(user).length }}
+          </div>
+          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+            Active Users
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg">
+              🆕
+            </div>
+            <span
+              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
+              >↑ 5.6%</span
+            >
+          </div>
+          <div class="font-serif text-3xl text-slate-800">87</div>
+          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+            New This Month
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-lg">
+              ⛔
+            </div>
+            <span class="text-[11px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full"
+              >↑ 2.1%</span
+            >
+          </div>
+          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
+            {{ getSuspendedUser(user).length }}
+          </div>
+          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+            Suspended
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+          <div class="flex-1">
+            <span class="text-sm font-bold text-slate-800">All Users</span>
+            <span class="text-xs text-slate-400 ml-2" *ngIf="userList$ | async as user"
+              >· {{ user.length }} total</span
+            >
+          </div>
+          <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+            <button *ngFor="let tab of tabs">
+              {{ tab }}
+            </button>
+            <!-- <button
+              *ngFor="let tab of tabs"
+              [class]="
+                activeTab === tab
+                  ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-800 shadow-sm transition-all'
+                  : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all'
+              "
+            >
+              {{ tab }}
+            </button> -->
+          </div>
+          <button
+            class="px-3.5 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm"
+          >
+            + Add User
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-100">
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  User
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Phone
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Place of Birth
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Role
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Created
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody *ngIf="userList$ | async as userList">
+              <tr
+                *ngFor="let user of userList"
+                class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors"
+              >
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <img
+                      class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                      onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
+                      [src]="user.imagePath"
+                      alt=""
+                    />
+                    <div>
+                      <div class="text-sm font-semibold text-slate-800">
+                        {{ user.firstName }} {{ user.lastName }}
+                      </div>
+                      <div class="text-xs text-slate-400">&#64;{{ user.username }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.phoneNumber || '—' }}</td>
+                <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.placeOfBirth || '—' }}</td>
+                <td class="px-2 py-3.5">
+                  <span
+                    class="text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-lg"
+                  >
+                    {{ getRolesLabels(user.roles) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3.5">
+                  <span
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full">
+                      {{ user.status }}
+                    </span>
+                  </span>
+                </td>
+                <td class="px-4 py-3.5 text-xs text-slate-400">34</td>
+                <td class="px-4 py-3.5">
+                  <div class="flex gap-1.5">
+                    <button
+                      class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-blue-500 hover:bg-blue-50 text-xs transition-all"
+                    >
+                      👁
+                    </button>
+                    <button
+                      class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-blue-500 hover:bg-blue-50 text-xs transition-all"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:border-red-400 hover:bg-red-50 text-xs transition-all"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="(userList$ | async)?.length === 0">
+                <td colspan="7" class="px-5 py-12 text-center text-sm text-slate-400">
+                  No users found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
+        >
+          <span class="text-xs text-slate-400" *ngIf="userList$ | async as users"
+            >Showing {{ users.length }} of {{ users.length }} users</span
+          >
+          <div class="flex gap-1">
+            <button
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+            >
+              ‹
+            </button>
+            <button
+              class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold"
+            >
+              1
+            </button>
+            <button
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+            >
+              2
+            </button>
+            <button
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <!-- <div
+    *ngIf="toastVisible"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 rounded-2xl px-5 py-3 flex items-center gap-3 text-sm font-medium shadow-2xl toast-enter z-[60] whitespace-nowrap"
+  >
+    {{ toastMessage }}
+  </div> -->
+</div>

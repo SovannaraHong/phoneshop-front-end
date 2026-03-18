@@ -7,6 +7,7 @@ export interface ProductType {
   modelName: string;
   colorName: string;
   description: string;
+  active: boolean;
   brandId: number;
 }
 export interface ProductResponse {

@@ -153,9 +153,10 @@
             </p>
           </div>
           <span
-            class="text-[11.5px] bg-[#edf7f1] text-[#2e8a57] font-medium px-3 py-1.5 rounded-full"
+            [ngClass]="pro.active ? 'bg-[#edf7f1] text-[#2e8a57]' : 'bg-[#ef80ae] text-[#ffffff]'"
+            class="text-[11.5px] font-medium px-3 py-1.5 rounded-full"
           >
-            In Stock
+            {{ pro.active ? 'In Stock' : 'Out of Stock' }}
           </span>
         </div>
 

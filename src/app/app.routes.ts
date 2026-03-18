@@ -24,6 +24,15 @@ export const routes: Routes = [
         path: 'product',
         loadComponent: () => import('./pages/product/product').then((m) => m.Product),
       },
+      {
+        path: 'user',
+        loadComponent: () => import('./pages/user/user').then((m) => m.User),
+      },
+      {
+        path: 'bakong',
+        loadComponent: () =>
+          import('./core/intergration/bakong-payment/bakong-payment').then((m) => m.BakongPayment),
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },
