@@ -1,11 +1,24 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { RoleType } from '../../core/models/user.model';
+import { RoleService } from '../../core/services/role/role-service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-product',
-  imports: [],
+  imports: [CommonModule],
+  standalone: true,
   templateUrl: './product.html',
   styleUrl: './product.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Product {
-
+export class Product implements OnInit {
+  roleList$!: Observable<RoleType[]>;
+  private roleService = inject(RoleService);
+  ngOnInit(): void {
+    this.loadRole();
+  }
+  loadRole() {
+    this.roleList$ = this.roleService.getRoles();
+  }
 }

@@ -2,45 +2,47 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../core/services/user/user-service';
-import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 import { RoleType, UserType } from '../../core/models/user.model';
-interface UserD {
-  id: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  phoneNumber: string;
-  placeOfBirth: string;
-  rolesId: number[];
-  status: 'Active' | 'Inactive' | 'Suspended';
-  createdAt: string;
-  avatarGradient: string;
-}
+import { UserForm } from '../../content/user-form/user-form';
 
-interface Role {
-  id: number;
-  label: string;
-}
 @Component({
   selector: 'app-user',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UserForm],
   standalone: true,
   templateUrl: './user.html',
   styleUrl: './user.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class User implements OnInit {
-  constructor(private authService: UserService) {}
-  ngOnInit(): void {
-    this.loadUser();
-  }
-  userList$!: Observable<UserType[]>;
+export class User {
+  isOpenForm = false;
+
   readonly tabs = ['All', 'Active', 'Inactive', 'Suspended'];
+
+  constructor(private authService: UserService) {}
+
+  private refresh$ = new BehaviorSubject<void>(undefined);
+  userList$ = this.refresh$.pipe(switchMap(() => this.authService.getUser()));
+
+  reloadUsers(): void {
+    this.refresh$.next();
+  }
+
+  toggleForm() {
+    this.isOpenForm = !this.isOpenForm;
+  }
+  onOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      this.toggleForm();
+    }
+  }
 
   loadUser() {
     this.userList$ = this.authService.getUser();
   }
-
+  getStatusUser(user: UserType[], status: string) {
+    return user.filter((u) => u.status === status);
+  }
   getRolesLabels(userRoles: RoleType[]): string {
     if (!userRoles || userRoles.length === 0) return 'No Role';
     return userRoles.map((r) => r.name).join(', ');
@@ -49,6 +51,7 @@ export class User implements OnInit {
   getActiveUser(users: UserType[]) {
     return users.filter((u) => u.status === 'Active');
   }
+
   getSuspendedUser(users: UserType[]) {
     return users.filter((u) => u.status === 'Suspended');
   }

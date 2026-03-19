@@ -1,1 +1,7 @@
-<p>product works!</p>
+@if (roleList$ | async; as roleList) {
+  <div>
+    @for (role of roleList; track $index) {
+      <h1>{{ role.name }}</h1>
+    }
+  </div>
+}

@@ -1,0 +1,153 @@
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.role-chip.on {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+.status-option.selected {
+  border-color: #2563eb;
+  background: #eff4ff;
+  color: #2563eb;
+}
+.status-option.selected.inactive {
+  border-color: #9099b8;
+  background: #f1f2f8;
+  color: #4b5573;
+}
+.input-wrap:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #fff;
+}
+.field-group {
+  animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.field-group:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.field-group:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.field-group:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.field-group:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.field-group:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.field-group:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.field-group:nth-child(7) {
+  animation-delay: 0.35s;
+}
+.field-group:nth-child(8) {
+  animation-delay: 0.4s;
+}
+.json-box {
+  display: none;
+}
+.json-box.visible {
+  display: block;
+}
+.toast {
+  transform: translateX(-50%) translateY(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d0d4e8;
+  border-radius: 4px;
+}
+.eye-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #9099b8;
+}
+.eye-btn:hover {
+  color: #4b5573;
+}
+/* focus-within can't be expressed with Tailwind on a parent div */
+.focus-ring:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #fff;
+}
+
+/* Staggered animation delays — can't be done dynamically with Tailwind */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.field-group {
+  animation: fadeUp 0.35s ease both;
+}
+.field-group:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.field-group:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.field-group:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.field-group:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.field-group:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.field-group:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.field-group:nth-child(7) {
+  animation-delay: 0.35s;
+}
+.field-group:nth-child(8) {
+  animation-delay: 0.4s;
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}

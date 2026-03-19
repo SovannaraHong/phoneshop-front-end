@@ -1,6 +1,10 @@
 body {
   -webkit-font-smoothing: antialiased;
 }
+
+.fontDMSans {
+  font-family: 'DM Sans', sans-serif;
+}
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
