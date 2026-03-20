@@ -19,4 +19,9 @@ export class UserService {
   createUser(userData: UserType): Observable<UserType> {
     return this.http.post<UserType>(`${this.api}/auth/register`, userData);
   }
+  uploadImg(id: number, file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.put(`${this.api}/auth/${id}/image`, formData);
+  }
 }

@@ -1,1 +1,5 @@
-<router-outlet></router-outlet>
+@if (isLogin()) {
+  <app-dashboard [toggleLogin]="toggleLogin.bind(this)"></app-dashboard>
+} @else {
+  <app-login [onLoginSuccess]="checkToken.bind(this)"></app-login>
+}

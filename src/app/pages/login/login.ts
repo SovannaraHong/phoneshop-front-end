@@ -1,67 +1,73 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Component, inject, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LoginService } from '../../core/services/login/login-service';
+import { LoginType } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
-  activeTab: 'login' | 'register' = 'login';
-  username = '';
-  password = '';
-  remember = false;
-  showPassword = false;
-  submitted = false;
-  loading = false;
-  success = false;
+export class Login implements OnInit {
+  private fb = inject(FormBuilder);
+  private loginService = inject(LoginService);
+  private cdr = inject(ChangeDetectorRef);
 
-  get usernameError(): boolean {
-    return this.submitted && !this.username.trim();
-  }
-  get passwordError(): boolean {
-    return this.submitted && !this.password.trim();
-  }
+  @Input() onLoginSuccess!: () => void;
+  loginForm!: FormGroup;
 
-  get passwordStrength(): { width: string; color: string } {
-    const v = this.password;
-    if (!v) return { width: '0%', color: '#ef4444' };
-    let score = 0;
-    if (v.length >= 8) score++;
-    if (/[A-Z]/.test(v)) score++;
-    if (/[0-9]/.test(v)) score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
-    const widths = ['25%', '50%', '75%', '100%'];
-    return { width: widths[score - 1] || '15%', color: colors[score - 1] || '#ef4444' };
-  }
+  errorUsername = '';
+  errorPassword = '';
+  isLoading = false;
 
-  switchTab(tab: 'login' | 'register'): void {
-    this.activeTab = tab;
-    this.submitted = false;
-    this.success = false;
-    this.username = '';
-    this.password = '';
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      username: [''],
+      password: [''],
+    });
+
+    // Clear username error only when username field changes
+    this.loginForm.get('username')?.valueChanges.subscribe(() => {
+      this.errorUsername = '';
+    });
+
+    // Clear password error only when password field changes
+    this.loginForm.get('password')?.valueChanges.subscribe(() => {
+      this.errorPassword = '';
+    });
   }
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
-  }
+  onSubmit() {
+    if (this.isLoading) return;
 
-  onSubmit(): void {
-    this.submitted = true;
-    this.success = false;
-    if (!this.username.trim() || !this.password.trim()) return;
-    this.loading = true;
-    // ── Replace with your real auth service call ──
-    setTimeout(() => {
-      this.loading = false;
-      this.success = true;
-      console.log('Login:', { username: this.username, remember: this.remember });
-    }, 900);
-    // ─────────────────────────────────────────────
+    this.errorUsername = '';
+    this.errorPassword = '';
+    this.isLoading = true;
+
+    const data = this.loginForm.value as LoginType;
+
+    this.loginService.login(data).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        localStorage.setItem('accessToken', res.data.accessToken);
+        localStorage.setItem('refreshToken', res.data.refreshToken);
+        this.onLoginSuccess();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        const message: string = err.error?.message ?? 'Something went wrong';
+        const field: string = err.error?.field ?? 'username';
+
+        // Show error on specific field
+        if (field === 'password') {
+          this.errorPassword = message;
+        } else {
+          this.errorUsername = message;
+        }
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

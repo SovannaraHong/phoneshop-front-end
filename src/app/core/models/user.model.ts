@@ -21,3 +21,18 @@ export interface UserResponse {
   skip: number;
   limit: number;
 }
+
+export interface LoginType {
+  username: string;
+  password: string;
+}
+export interface LoginResponse {
+  status: number;
+  message: string;
+  data: {
+    userId: number;
+    accessToken: string;
+    refreshToken: string;
+  };
+  timestamp: string;
+}

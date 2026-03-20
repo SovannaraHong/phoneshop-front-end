@@ -68,7 +68,7 @@
 
       <!-- Nav Links -->
       <nav class="flex flex-col gap-0.5 px-3">
-        <a class="nav-link" [routerLink]="['/dashboard', 'home']" routerLinkActive="active">
+        <a class="nav-link" routerLink="/home" routerLinkActive="active">
           <svg
             class="w-[18px] h-[18px] shrink-0"
             fill="none"
@@ -84,7 +84,7 @@
           </svg>
           Home
         </a>
-        <a class="nav-link" [routerLink]="['/dashboard', 'product']" routerLinkActive="active">
+        <a class="nav-link" routerLink="/product" routerLinkActive="active">
           <svg
             class="w-[18px] h-[18px] shrink-0"
             fill="none"
@@ -100,7 +100,7 @@
           </svg>
           Grocery
         </a>
-        <a class="nav-link" routerLink="/dashboard/productList" routerLinkActive="active">
+        <a class="nav-link" routerLink="/productList" routerLinkActive="active">
           <svg
             class="w-[18px] h-[18px] shrink-0"
             fill="none"
@@ -116,7 +116,7 @@
           </svg>
           Mobiles
         </a>
-        <a class="nav-link" [routerLink]="['/dashboard', 'user']" routerLinkActive="active">
+        <a class="nav-link" routerLink="/user" routerLinkActive="active">
           <svg
             class="w-[18px] h-[18px] shrink-0"
             fill="none"
@@ -273,7 +273,10 @@
         </div>
 
         <div class="flex items-center gap-5 ml-1">
-          <button class="text-gray-400 hover:text-indigo-600 transition-colors" routerLink="/login">
+          <button
+            class="text-gray-400 hover:text-indigo-600 transition-colors"
+            (click)="funToggle()"
+          >
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"

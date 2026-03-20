@@ -1,207 +1,269 @@
-<body class="min-h-screen bg-white flex items-center justify-center px-6 py-10">
-  <div class="w-full max-w-[500px] bg-[#f5f5f5] px-[80px] py-[40px] rounded-[20px]">
-    <!-- Heading -->
-    <h1 class="text-2xl font-extrabold text-gray-900 mb-1" style="font-family: 'Syne', sans-serif">
-      Sign in
-    </h1>
-    <p class="text-xs text-gray-400 mb-6">Enter your credentials to access your dashboard</p>
-
-    <!-- Success toast -->
+<body class="min-h-screen bg-[#f7f7f8] flex items-center justify-center p-4">
+  <div
+    class="w-full max-w-[900px] min-h-[520px] bg-white rounded-[28px] shadow-[0_32px_80px_rgba(0,0,0,.12)] overflow-hidden flex"
+  >
+    <!-- ── LEFT PANEL ── -->
     <div
-      id="toast"
-      class="hidden items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold rounded-xl px-4 py-3 mb-5"
+      class="hidden md:flex flex-col justify-between w-[380px] flex-shrink-0 relative overflow-hidden p-10"
+      style="background: linear-gradient(145deg, #0f0c1a 0%, #1a1028 40%, #0d1a2e 100%)"
     >
-      <svg
-        class="w-3.5 h-3.5 shrink-0"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-      Signed in successfully!
-    </div>
+      <div
+        class="absolute top-[-60px] left-[-60px] w-72 h-72 rounded-full opacity-30"
+        style="background: radial-gradient(circle, #f97316 0%, transparent 70%)"
+      ></div>
+      <div
+        class="absolute bottom-[-40px] right-[-40px] w-64 h-64 rounded-full opacity-20"
+        style="background: radial-gradient(circle, #818cf8 0%, transparent 70%)"
+      ></div>
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-10"
+        style="background: radial-gradient(circle, #fb7185 0%, transparent 70%)"
+      ></div>
 
-    <!-- Username -->
-    <div class="mb-4">
-      <label class="block text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5"
-        >Username</label
-      >
-      <div class="relative">
-        <i
-          class="fa-regular fa-user w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-        ></i>
-        <input
-          id="username"
-          type="text"
-          placeholder="your_username"
-          autocomplete="username"
-          class="w-full pl-9 pr-4 py-3 text-sm bg-gray-50 border-[1.5px] border-gray-100 rounded-xl text-gray-900 placeholder:text-gray-300 outline-none focus:border-orange-400 focus:bg-white transition-all"
-        />
-      </div>
-      <p id="u-err" class="hidden items-center gap-1 text-[11px] text-red-500 mt-1.5">
-        <svg
-          class="w-3 h-3 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-          />
-        </svg>
-        Username is required.
-      </p>
-    </div>
+      <div
+        class="float-1 absolute top-[22%] left-[12%] w-3 h-3 rounded-full bg-orange-400 shadow-lg shadow-orange-500/60"
+      ></div>
+      <div
+        class="float-2 absolute top-[55%] right-[14%] w-2 h-2 rounded-full bg-indigo-400 shadow-lg shadow-indigo-500/60"
+      ></div>
+      <div
+        class="float-3 absolute top-[38%] right-[22%] w-1.5 h-1.5 rounded-full bg-rose-400"
+      ></div>
 
-    <!-- Password -->
-    <div class="mb-5">
-      <label class="block text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5"
-        >Password</label
-      >
-      <div class="relative">
-        <i
-          class="fa-solid fa-lock w-4 h-4 text-gray-300 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-        ></i>
+      <div
+        class="absolute inset-0 opacity-[0.04]"
+        style="
+          background-image:
+            linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+          background-size: 32px 32px;
+        "
+      ></div>
 
-        <input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          autocomplete="current-password"
-          class="w-full pl-9 pr-10 py-3 text-sm bg-gray-50 border-[1.5px] border-gray-100 rounded-xl text-gray-900 placeholder:text-gray-300 outline-none focus:border-orange-400 focus:bg-white transition-all"
-        />
-        <button
-          type="button"
-          id="toggle-pw"
-          class="toggle-pw absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
-        >
-          <svg id="eye-icon" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-            />
-          </svg>
-        </button>
-      </div>
-      <!-- Strength bar -->
-      <div id="str-bar" class="hidden mt-2 h-[3px] bg-gray-100 rounded-full overflow-hidden">
+      <div class="relative z-10">
         <div
-          id="str-fill"
-          class="h-full rounded-full transition-all duration-300"
-          style="width: 0%"
-        ></div>
-      </div>
-      <p id="p-err" class="hidden items-center gap-1 text-[11px] text-red-500 mt-1.5">
-        <svg
-          class="w-3 h-3 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          viewBox="0 0 24 24"
+          class="w-10 h-10 rounded-xl flex items-center justify-center mb-8"
+          style="
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+          "
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-          />
-        </svg>
-        Password is required.
-      </p>
-    </div>
-
-    <!-- Remember / Forgot -->
-    <div class="flex items-center justify-between mb-6">
-      <label class="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          id="remember"
-          class="w-3.5 h-3.5 rounded accent-orange-500 cursor-pointer"
-        />
-        <span class="text-xs text-gray-500">Remember me</span>
-      </label>
-      <a
-        href="#"
-        class="text-xs font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-        >Forgot password? ></a
-      >
-    </div>
-
-    <button
-      routerLink="/dashboard"
-      id="submit-btn"
-      type="button"
-      onclick="handleLogin()"
-      class="w-full flex items-center cursor-pointer justify-center gap-2.5 bg-gray-900 text-white font-bold text-sm py-3 rounded-xl hover:bg-gray-800 active:scale-[.98] transition-all duration-150 mb-4 disabled:opacity-60"
-      style="font-family: 'Syne', sans-serif; letter-spacing: 0.02em"
-    >
-      <span id="btn-label">Sign in</span>
-      <div class="w-5 h-5 bg-orange-500 rounded-md flex items-center justify-center">
-        <i class="fa-solid fa-angle-right w-2.5 h-2.5 text-white text-[10px]"></i>
+          <i class="fa-solid fa-bolt text-white text-sm"></i>
+        </div>
+        <div
+          class="text-[10px] font-semibold text-white/30 uppercase tracking-[2px] mb-3 font-syne"
+        >
+          Welcome back
+        </div>
+        <h2 class="font-syne font-extrabold text-white text-3xl leading-tight mb-4">
+          Your workspace<br />awaits you.
+        </h2>
+        <p class="text-sm text-white/40 leading-relaxed font-light">
+          Sign in to pick up right where<br />you left off.
+        </p>
       </div>
-    </button>
 
-    <!-- Divider -->
-    <div class="flex items-center gap-3 mb-4">
-      <hr class="flex-1 border-gray-100" />
-      <span class="text-[11px] text-gray-300 whitespace-nowrap">or continue with</span>
-      <hr class="flex-1 border-gray-100" />
+      <div class="relative z-10 flex flex-col gap-2.5">
+        <div
+          class="flex items-center gap-3 bg-white/[0.06] border border-white/[0.08] rounded-2xl px-4 py-3 backdrop-blur-sm"
+        >
+          <div
+            class="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-shield-halved text-orange-400 text-xs"></i>
+          </div>
+          <span class="text-[12px] font-medium text-white/60">Enterprise-grade security</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white/[0.06] border border-white/[0.08] rounded-2xl px-4 py-3 backdrop-blur-sm"
+        >
+          <div
+            class="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fa-solid fa-bolt text-indigo-400 text-xs"></i>
+          </div>
+          <span class="text-[12px] font-medium text-white/60">Instant access, zero wait</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Social buttons -->
-    <div class="grid grid-cols-2 gap-2 mb-6">
-      <button
-        type="button"
-        class="flex items-center justify-center gap-2 border-[1.5px] border-gray-100 rounded-xl py-2.5 text-xs font-semibold text-gray-600 bg-white hover:bg-gray-50 active:scale-[.98] transition-all"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24">
-          <path
-            fill="#4285F4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-          />
-        </svg>
-        Google
-      </button>
-      <button
-        type="button"
-        class="flex items-center justify-center gap-2 border-[1.5px] border-gray-100 rounded-xl py-2.5 text-xs font-semibold text-gray-600 bg-white hover:bg-gray-50 active:scale-[.98] transition-all"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2">
-          <path
-            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-          />
-        </svg>
-        Facebook
-      </button>
-    </div>
+    <!-- ── RIGHT PANEL ── -->
+    <div class="flex-1 flex flex-col justify-center px-10 py-12">
+      <!-- Mobile logo -->
+      <div class="md:hidden mb-6">
+        <div
+          class="w-10 h-10 rounded-xl flex items-center justify-center"
+          style="
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+          "
+        >
+          <i class="fa-solid fa-bolt text-white text-sm"></i>
+        </div>
+      </div>
 
-    <p class="text-center text-xs text-gray-400">
-      Don't have an account?
-      <a href="#" class="text-orange-500 font-semibold hover:text-orange-600 transition-colors"
-        >Create one free</a
-      >
-    </p>
+      <!-- Heading -->
+      <div class="anim-1 mb-7">
+        <h1
+          class="font-syne font-extrabold text-[1.75rem] text-slate-900 tracking-tight leading-tight mb-1"
+        >
+          Sign in
+        </h1>
+        <p class="text-[12.5px] text-slate-400 font-medium">
+          Enter your credentials to access your dashboard
+        </p>
+      </div>
+
+      <form [formGroup]="loginForm">
+        <!-- ── USERNAME ── -->
+        <div class="anim-2 mb-4">
+          <label
+            class="block text-[10px] font-black text-slate-400 uppercase tracking-[1.2px] mb-2"
+          >
+            Username
+          </label>
+          <div class="relative group">
+            <div
+              class="absolute left-0 top-0 h-full w-[46px] flex items-center justify-center rounded-l-2xl border-r border-slate-100 bg-slate-50 pointer-events-none z-10 group-focus-within:bg-orange-50 group-focus-within:border-orange-200 transition-all duration-200"
+            >
+              <i
+                class="fa-regular fa-user text-slate-300 text-sm group-focus-within:text-orange-400 transition-colors duration-200"
+              ></i>
+            </div>
+            <input
+              id="username"
+              type="text"
+              formControlName="username"
+              placeholder="your_username"
+              autocomplete="username"
+              class="w-full pl-[58px] pr-4 h-[50px] text-[13.5px] font-medium bg-slate-50 border rounded-2xl text-slate-800 placeholder:text-slate-300 focus:outline-none focus:shadow-[0_0_0_4px_rgba(251,146,60,.12)] transition-all"
+              [class.border-slate-200]="!errorUsername"
+              [class.border-rose-400]="errorUsername"
+            />
+          </div>
+          <!-- Error shown here — outside relative div -->
+          @if (errorUsername) {
+            <p class="flex items-center gap-1.5 text-[11px] font-semibold text-rose-500 mt-2">
+              <svg
+                class="w-3 h-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                />
+              </svg>
+              {{ errorUsername }}
+            </p>
+          }
+        </div>
+
+        <!-- ── PASSWORD ── -->
+        <div class="anim-3 mb-7">
+          <label
+            class="block text-[10px] font-black text-slate-400 uppercase tracking-[1.2px] mb-2"
+          >
+            Password
+          </label>
+          <div class="relative group">
+            <div
+              class="absolute left-0 top-0 h-full w-[46px] flex items-center justify-center rounded-l-2xl border-r border-slate-100 bg-slate-50 pointer-events-none z-10 group-focus-within:bg-orange-50 group-focus-within:border-orange-200 transition-all duration-200"
+            >
+              <i
+                class="fa-solid fa-lock text-slate-300 text-sm group-focus-within:text-orange-400 transition-colors duration-200"
+              ></i>
+            </div>
+            <input
+              formControlName="password"
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="w-full pl-[58px] pr-12 h-[50px] text-[13.5px] font-medium bg-slate-50 border rounded-2xl text-slate-800 placeholder:text-slate-300 focus:outline-none focus:shadow-[0_0_0_4px_rgba(251,146,60,.12)] transition-all"
+              [class.border-slate-200]="!errorPassword"
+              [class.border-rose-400]="errorPassword"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-orange-500 hover:bg-orange-50 transition-all duration-150"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+          <!-- Error shown here — outside relative div -->
+          @if (errorPassword) {
+            <p class="flex items-center gap-1.5 text-[11px] font-semibold text-rose-500 mt-2">
+              <svg
+                class="w-3 h-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                />
+              </svg>
+              {{ errorPassword }}
+            </p>
+          }
+        </div>
+
+        <!-- ── SUBMIT ── -->
+        <div class="anim-4">
+          <button
+            type="button"
+            (click)="onSubmit()"
+            class="w-full flex items-center justify-center gap-3 h-[52px] rounded-2xl font-syne font-extrabold text-[14px] tracking-wide text-white cursor-pointer"
+            style="
+              background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+              box-shadow: 0 8px 24px rgba(17, 24, 39, 0.3);
+            "
+          >
+            <span>Sign in</span>
+            <div
+              class="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
+              style="
+                background: linear-gradient(135deg, #f97316, #fb923c);
+                box-shadow: 0 4px 12px rgba(249, 115, 22, 0.55);
+              "
+            >
+              <i class="fa-solid fa-angle-right text-white text-[10px]"></i>
+            </div>
+          </button>
+        </div>
+      </form>
+
+      <!-- Footer -->
+      <div class="anim-5 flex items-center justify-center gap-2 mt-6">
+        <i class="fa-solid fa-shield-halved text-slate-200 text-xs"></i>
+        <span class="text-[11px] text-slate-300 font-medium"
+          >Protected by end-to-end encryption</span
+        >
+      </div>
+    </div>
   </div>
 </body>
