@@ -3,10 +3,11 @@ import { Observable } from 'rxjs';
 import { RoleType } from '../../core/models/user.model';
 import { RoleService } from '../../core/services/role/role-service';
 import { CommonModule } from '@angular/common';
+import { ProductForm } from '../../content/product-form/product-form';
 
 @Component({
   selector: 'app-product',
-  imports: [CommonModule],
+  imports: [CommonModule, ProductForm],
   standalone: true,
   templateUrl: './product.html',
   styleUrl: './product.css',

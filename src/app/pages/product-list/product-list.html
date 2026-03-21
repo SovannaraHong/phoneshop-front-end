@@ -21,7 +21,16 @@
     </div>
   } -->
   <div *ngIf="brandList$ | async as brandList" class="flex flex-wrap gap-2 mb-5">
-    <button (click)="showAll()" class="px-3 py-1 rounded">All</button>
+    <button
+      (click)="showAll()"
+      [ngClass]="{
+        'bg-blue-500 text-white': !selectedBrand,
+        'bg-white text-gray-700': selectedBrand,
+      }"
+      class="px-3 py-1 rounded"
+    >
+      All
+    </button>
     <button
       *ngFor="let brand of brandList"
       (click)="setActive(brand)"

@@ -7,6 +7,7 @@ export interface ProductType {
   modelName: string;
   colorName: string;
   description: string;
+  typeSell: string;
   active: boolean;
   brandId: number;
 }

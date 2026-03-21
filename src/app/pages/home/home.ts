@@ -1,7 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ArcElement, Chart, DoughnutController, Tooltip } from 'chart.js';
+import { Observable } from 'rxjs';
+import { ProductType } from '../../core/models/product.model';
+import { ProductService } from '../../core/services/product/product-service';
 
 Chart.register(DoughnutController, ArcElement, Tooltip);
 
@@ -32,7 +43,9 @@ export interface RangeData {
   styleUrl: './home.css',
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
+  private productService = inject(ProductService);
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
+  productList$!: Observable<ProductType[]>;
 
   currentRange = '7d';
   donutChart: Chart | null = null;
@@ -355,7 +368,9 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     return i;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.productList$ = this.productService.getProducts();
+  }
 
   ngAfterViewInit(): void {
     this.initDonut();

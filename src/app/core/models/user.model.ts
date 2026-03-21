@@ -10,6 +10,7 @@ export interface UserType {
   lastName: string;
   username: string;
   placeOfBirth: string;
+  password: string;
   status: string;
   phoneNumber: string;
   roles: RoleType[];

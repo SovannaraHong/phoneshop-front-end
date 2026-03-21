@@ -24,4 +24,10 @@ export class UserService {
     formData.append('image', file);
     return this.http.put(`${this.api}/auth/${id}/image`, formData);
   }
+  deleteUser(id: number) {
+    return this.http.delete(`${this.api}/auth/${id}`);
+  }
+  updateUser(id: number, user: UserType): Observable<UserType> {
+    return this.http.put<UserType>(`${this.api}/auth/${id}`, user);
+  }
 }

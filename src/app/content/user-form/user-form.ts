@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject, // step 1 inject service
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RoleService } from '../../core/services/role/role-service';
 import { tap } from 'rxjs';
@@ -16,18 +25,74 @@ import { toSignal } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserForm implements OnInit {
+  // ── step 1: inject services ───────────────────────────────────
   private fb = inject(FormBuilder);
   private roleService = inject(RoleService);
   private userService = inject(UserService);
 
+  // ── step 2: inputs & outputs ──────────────────────────────────
+  editUser = input<UserType | null>(null);
   userCreated = output<void>();
-  selectedFile: File | null = null;
-  previewUrl = signal<string | null>(null);
 
+  // ── step 3: state signals ─────────────────────────────────────
+  selectedFile = signal<File | null>(null);
+  previewUrl = signal<string | null>(null);
   isLoading = signal(false);
-  isSuccess = signal(false);
+
+  // ── step 4: form group ────────────────────────────────────────
   userForm!: FormGroup;
 
+  // ── step 5: getters ───────────────────────────────────────────
+  get isEditMode(): boolean {
+    return !!this.editUser();
+  }
+
+  get roleArrays(): FormArray {
+    return this.userForm.get('roles') as FormArray;
+  }
+
+  get getStatus() {
+    return this.userForm.get('status');
+  }
+
+  // ── step 6: effect — patch form when editUser changes ─────────
+  constructor() {
+    effect(() => {
+      const user = this.editUser();
+      if (!this.userForm) return; // guard: form not ready yet
+
+      if (user) {
+        // patch all basic fields
+        this.userForm.patchValue({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          phone: user.phoneNumber,
+          pob: user.placeOfBirth,
+          status: user.status,
+        });
+
+        // patch image preview
+        if (user.imagePath) {
+          this.previewUrl.set(user.imagePath);
+        }
+
+        // patch role checkboxes
+        const roleList = this.roleList();
+        if (roleList.length && user.roles) {
+          roleList.forEach((role, i) => {
+            const isSelected = user.roles.some((r: RoleType) => r.id === role.id);
+            this.roleArrays.at(i).setValue(isSelected);
+          });
+        }
+      } else {
+        // clear form when switching to create mode
+        this.onReset();
+      }
+    });
+  }
+
+  // ── step 7: init form ─────────────────────────────────────────
   ngOnInit(): void {
     this.userForm = this.fb.group({
       firstName: [''],
@@ -40,82 +105,133 @@ export class UserForm implements OnInit {
       status: ['Inactive'],
       roles: this.fb.array([]),
     });
-  }
-  onSelectFile(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
 
-    this.selectedFile = input.files[0];
-
-    // ← generate preview URL for display
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.previewUrl.set(reader.result as string);
-    };
-    reader.readAsDataURL(this.selectedFile);
+    // fallback patch in case effect fired before form was ready
+    const user = this.editUser();
+    if (user) {
+      this.userForm.patchValue({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        phone: user.phoneNumber,
+        pob: user.placeOfBirth,
+        status: user.status,
+      });
+      if (user.imagePath) this.previewUrl.set(user.imagePath);
+    }
   }
+
+  // ── step 8: load roles and patch if editing ───────────────────
   roleList = toSignal(
     this.roleService.getRoles().pipe(
-      tap((role) => {
+      tap((roles) => {
         this.roleArrays?.clear();
-        role.forEach(() => this.roleArrays.push(this.fb.control(false)));
+        // add one control per role, default false
+        roles.forEach(() => this.roleArrays.push(this.fb.control(false)));
+
+        // if editing, check the roles the user already has
+        const user = this.editUser();
+        if (user?.roles) {
+          roles.forEach((role, i) => {
+            const isSelected = user.roles.some((r: RoleType) => r.id === role.id);
+            this.roleArrays.at(i).setValue(isSelected);
+          });
+        }
       }),
     ),
     { initialValue: [] as RoleType[] },
   );
 
+  // ── step 9: get selected role ids for payload ─────────────────
   private getSelectedRole(): number[] {
-    return (this.roleList() ?? []).filter((_, i) => this.roleArrays.at(i).value).map((i) => i.id);
+    return (this.roleList() ?? []).filter((_, i) => this.roleArrays.at(i).value).map((r) => r.id);
   }
 
-  get roleArrays() {
-    return this.userForm.get('roles') as FormArray;
+  // ── step 10: file select ──────────────────────────────────────
+  onSelectFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.selectedFile.set(file);
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
   }
-  onSubmit() {
+
+  // ── step 11: submit ───────────────────────────────────────────
+  onSubmit(): void {
     if (this.userForm.invalid) return;
     this.isLoading.set(true);
-    const { confirmPassword, roles, ...rest } = this.userForm.value;
-    const payload = { ...rest, rolesId: this.getSelectedRole() };
-    this.userService.createUser(payload).subscribe({
-      next: (res: any) => {
-        const id = res.data.id;
-        if (this.selectedFile) {
-          this.userService.uploadImg(id, this.selectedFile).subscribe({
-            next: () => {
-              this.finish();
-            },
-            error: () => {
-              this.finish();
-            },
-          });
-        }
-        this.isLoading.set(false);
-        this.isSuccess.set(true);
-        this.onReset();
-        this.userCreated.emit();
-        setTimeout(() => this.isSuccess.set(false), 5000);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        console.error('Error:', err.error);
-      },
-    });
+
+    const { confirmPassword, roles, phone, pob, password, ...rest } = this.userForm.value;
+
+    const payload: any = {
+      ...rest,
+      phoneNumber: phone,
+      placeOfBirth: pob,
+      rolesId: this.getSelectedRole(),
+    };
+
+    if (this.isEditMode) {
+      if (password && password.trim().length > 0) {
+        payload.password = password;
+      }
+      // ✅ if blank → don't include password in payload at all
+      // backend will keep existing password untouched
+      // ── update flow ───────────────────────────────────────────
+      this.userService.updateUser(this.editUser()!.id, payload).subscribe({
+        next: (res: any) => {
+          const id = res?.data?.id ?? this.editUser()!.id;
+          if (this.selectedFile()) {
+            this.userService.uploadImg(id, this.selectedFile()!).subscribe({
+              next: () => this.finish(),
+              error: () => this.finish(),
+            });
+          } else {
+            this.finish();
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error('Update error:', err.error);
+        },
+      });
+    } else {
+      payload.password = password;
+      // ── create flow ───────────────────────────────────────────
+      this.userService.createUser(payload).subscribe({
+        next: (res: any) => {
+          const id = res.data.id;
+          if (this.selectedFile()) {
+            this.userService.uploadImg(id, this.selectedFile()!).subscribe({
+              next: () => this.finish(),
+              error: () => this.finish(),
+            });
+          } else {
+            this.finish();
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error('Create error:', err.error);
+        },
+      });
+    }
   }
-  private finish() {
+
+  // ── step 12: finish — emit to parent, parent handles toast ────
+  private finish(): void {
     this.isLoading.set(false);
-    this.isSuccess.set(true);
-    this.selectedFile = null;
+    this.selectedFile.set(null);
     this.onReset();
     this.previewUrl.set(null);
-    this.userCreated.emit();
-    setTimeout(() => this.isSuccess.set(false), 5000);
+    this.userCreated.emit(); // parent (user.ts) handles toast + close
   }
-  onReset() {
+
+  // ── step 13: reset form ───────────────────────────────────────
+  onReset(): void {
     this.userForm.reset({ status: 'Inactive' });
-    this.selectedFile = null;
+    this.selectedFile.set(null);
     this.previewUrl.set(null);
-  }
-  get getStatus() {
-    return this.userForm.get('status');
   }
 }
