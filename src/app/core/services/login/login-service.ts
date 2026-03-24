@@ -10,7 +10,10 @@ import { LoginResponse, LoginType } from '../../models/user.model';
 export class LoginService {
   private api = environment.baseUrl;
   private http = inject(HttpClient);
-  login(data: LoginType) {
+  // login(data: LoginType) {
+  //   return this.http.post<LoginResponse>(`${this.api}/login`, data);
+  // }
+  login(data: LoginType): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.api}/login`, data);
   }
 }

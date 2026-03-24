@@ -5,6 +5,9 @@ body {
 .fontDMSans {
   font-family: 'DM Sans', sans-serif;
 }
+.fontPoppins {
+  font-family: 'Poppins', sans-serif;
+}
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;

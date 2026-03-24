@@ -1,17 +1,28 @@
+<!-- ============================================================
+     user.html  —  full Angular template
+     Replace every {{ }} and (event) with your real Angular bindings
+     All *ngIf / *ngFor / @if / @for are already Angular syntax
+     ============================================================ -->
+
 <div class="flex min-h-screen bg-slate-50 fontDMSans">
   <main class="flex-1 flex flex-col">
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
     <header
-      class="h-14 bg-white border-b border-slate-100 flex items-center px-7 gap-3 sticky top-0 z-10"
+      class="h-14 bg-white border-b border-slate-100 flex items-center px-7 gap-3 sticky top-0 z-10 shadow-sm"
     >
-      <div class="flex items-center gap-2 text-sm text-slate-400 flex-1">
-        Dashboard <span class="text-slate-300 mx-1">›</span>
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-1.5 text-sm text-slate-400 flex-1">
+        <span>Dashboard</span>
+        <span class="text-slate-300">›</span>
         <span class="text-slate-700 font-semibold">Users</span>
       </div>
+
+      <!-- Search -->
       <div
-        class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-56 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all"
+        class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-60 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all"
       >
         <svg
-          class="w-3.5 h-3.5 text-slate-400"
+          class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -21,43 +32,63 @@
           <path d="m21 21-4.35-4.35" />
         </svg>
         <input
-          class="bg-transparent outline-none text-sm text-slate-700 w-full"
-          placeholder="Search users…"
+          class="bg-transparent outline-none text-sm text-slate-700 w-full placeholder-slate-400"
+          placeholder="Search user..."
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
         />
+        <!-- X clear button — shows only when typing -->
+        @if (searchQuery()) {
+          <button
+            (click)="searchQuery.set('')"
+            class="text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0 cursor-pointer"
+          >
+            <svg
+              class="w-3 h-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        }
       </div>
+
+      <!-- Action buttons -->
       <button
-        class="relative w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-blue-500 hover:bg-blue-50 transition-all text-sm"
+        class="relative w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 transition-all text-sm"
       >
-        🔔<span
+        🔔
+        <span
           class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
         ></span>
       </button>
       <button
-        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-blue-500 hover:bg-blue-50 transition-all text-sm"
+        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-indigo-400 hover:bg-indigo-50 transition-all text-sm"
       >
         ⚡
       </button>
       <button
         (click)="openFormCreate()"
-        class="flex items-center gap-1.5 cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:-translate-y-px"
+        class="flex items-center gap-1.5 cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:-translate-y-px"
       >
         <span class="text-base leading-none">+</span> Create User
       </button>
     </header>
 
-    <!-- Modal -->
-    @if (isOpenForm) {
-      <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-        (click)="onOverlayClick($event)"
-      >
+    <!-- ── MODAL ───────────────────────────────────────────────── -->
+    @if (isOpenForm()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div
           class="relative w-full max-w-[640px] mx-4 max-h-[92vh] overflow-y-auto bg-white rounded-2xl border border-gray-200 shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
           (click)="$event.stopPropagation()"
         >
           <button
             (click)="toggleForm()"
-            class="absolute top-4 right-4 z-10 bg-red-400 w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-white hover:bg-red-50 hover:border-red-300 hover:text-red-500 transition-all"
+            class="absolute top-4 right-4 z-10 bg-red-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-red-500 transition-all cursor-pointer"
           >
             ✕
           </button>
@@ -70,48 +101,51 @@
       </div>
     }
 
-    <!-- Content -->
+    <!-- ── CONTENT ─────────────────────────────────────────────── -->
     <div class="p-7 flex-1">
+      <!-- Page title -->
       <div class="flex items-start justify-between mb-6">
         <div>
-          <h1 class="text-2xl text-slate-800">User Management</h1>
+          <h1 class="text-2xl font-bold text-slate-800">User Management</h1>
           <p class="text-sm text-slate-400 mt-1">Manage and monitor all registered users</p>
         </div>
         <div class="flex gap-2">
           <button
-            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 transition-all"
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
           >
             📥 Import
           </button>
           <button
-            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 transition-all"
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
           >
             📤 Export
           </button>
         </div>
       </div>
 
-      <!-- Stats -->
+      <!-- ── STATS ─────────────────────────────────────────────── -->
       <div class="grid grid-cols-4 gap-4 mb-6">
+        <!-- Total Users -->
         <div
           class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
         >
           <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-lg">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-lg">
               👥
             </div>
             <span
               class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
-              >↑ 12.4%</span
+              >{{ inUp(totalUsers()) ? '↑' : '↓' }} {{ getPercent(totalUsers()) }}</span
             >
           </div>
-          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
-            {{ user.length }}
-          </div>
+          <!-- signal: totalUsers() -->
+          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ totalUsers() }}</div>
           <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
             Total Users
           </div>
         </div>
+
+        <!-- Active Users -->
         <div
           class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
         >
@@ -123,33 +157,40 @@
             </div>
             <span
               class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
-              >↑ 8.1%</span
+              >{{ inUp(activeUsers()) ? '↑' : '↓' }} {{ getPercent(activeUsers()) }}</span
             >
           </div>
-          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
-            {{ getActiveUser(user).length }}
-          </div>
+          <!-- signal: activeUsers() -->
+          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ activeUsers() }}</div>
           <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
             Active Users
           </div>
         </div>
+
+        <!-- New This Month -->
         <div
-          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+          class="bg-white fontDMSans rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
         >
           <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg">
-              🆕
+              ➖
             </div>
             <span
-              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
-              >↑ 5.6%</span
+              [ngClass]="
+                inUp(inactiveUsers()) ? 'bg-emerald-50 text-emerald-600' : ' text-red-500 bg-red-50'
+              "
+              class="text-[11px] fontPoppins font-bold 0 px-2 py-0.5 rounded-full"
+            >
+              {{ inUp(inactiveUsers()) ? '↑' : '↓' }} {{ getPercent(inactiveUsers()) }}</span
             >
           </div>
-          <div class="font-serif text-3xl text-slate-800">87</div>
+          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ inactiveUsers() }}</div>
           <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
-            New This Month
+            InActive user
           </div>
         </div>
+
+        <!-- Suspended -->
         <div
           class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
         >
@@ -158,49 +199,77 @@
               ⛔
             </div>
             <span class="text-[11px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full"
-              >↑ 2.1%</span
+              >{{ inUp(suspendedUsers()) ? '↑' : '↓' }} {{ getPercent(suspendedUsers()) }}</span
             >
           </div>
-          <div *ngIf="userList$ | async as user" class="font-serif text-3xl text-slate-800">
-            {{ getSuspendedUser(user).length }}
-          </div>
+          <!-- signal: suspendedUsers() -->
+          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ suspendedUsers() }}</div>
           <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
             Suspended
           </div>
         </div>
       </div>
 
-      <!-- Table Card -->
+      <!-- ── TABLE CARD ─────────────────────────────────────────── -->
       <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <!-- Table header -->
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-          <div class="flex-1">
+          <div class="flex-1 flex items-center gap-2">
             <span class="text-sm font-bold text-slate-800">All Users</span>
-            <span class="text-xs text-slate-400 ml-2" *ngIf="userList$ | async as user"
-              >· {{ getFilteredUsers(user).length }} total</span
-            >
+            <!-- signal: filteredUsers().length -->
+            <span class="text-xs text-slate-400">· {{ filteredUsers().length }} total</span>
+
+            <!-- Search badge — shows what you are searching for -->
+            @if (searchQuery()) {
+              <span
+                class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                "{{ searchQuery() }}"
+                <button
+                  (click)="searchQuery.set('')"
+                  class="hover:text-indigo-800 cursor-pointer ml-0.5"
+                >
+                  ✕
+                </button>
+              </span>
+            }
           </div>
+
+          <!-- Tab filters -->
           <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
             @for (tab of tabs; track tab) {
               <button
                 (click)="setTab(tab)"
                 [class]="
                   selectedTab() === tab
-                    ? 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase bg-white text-slate-800 shadow-sm transition-all'
-                    : 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase text-slate-500 hover:text-slate-700 transition-all'
+                    ? 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer bg-white text-slate-800 shadow-sm transition-all'
+                    : 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer text-slate-500 hover:text-slate-700 transition-all'
                 "
               >
                 {{ tab }}
               </button>
             }
           </div>
+
           <button
             (click)="openFormCreate()"
-            class="px-3.5 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm"
+            class="px-3.5 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm cursor-pointer"
           >
             + Add User
           </button>
         </div>
 
+        <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
@@ -242,107 +311,222 @@
                 </th>
               </tr>
             </thead>
-            <tbody *ngIf="userList$ | async as userList">
-              <tr
-                *ngFor="let user of getFilteredUsers(userList)"
-                class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors"
-              >
-                <td class="px-5 py-3.5">
-                  <div class="flex items-center gap-3">
-                    <img
-                      class="w-9 h-9 rounded-xl object-cover shadow-sm"
-                      onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
-                      [src]="user.imagePath"
-                      alt=""
-                    />
-                    <div>
-                      <div class="text-sm font-semibold text-slate-800">
-                        {{ user.firstName }} {{ user.lastName }}
+            <tbody>
+              <!-- Rows — signal: filteredUsers() -->
+              @for (user of filteredUsers(); track user.id) {
+                <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
+                  <!-- User info -->
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <img
+                        class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
+                        [src]="user.imagePath"
+                        onerror="
+                          this.src =
+                            'https://imgs.search.brave.com/lLASPdCMXLG7hjtQIeU4hfNZ3H_KmBYnVGo6c0_00M0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMDkv/NzM0LzU2NC9zbWFs/bC9kZWZhdWx0LWF2/YXRhci1wcm9maWxl/LWljb24tb2Ytc29j/aWFsLW1lZGlhLXVz/ZXItdmVjdG9yLmpw/Zw'
+                        "
+                        alt=""
+                      />
+                      <div>
+                        <div class="text-sm font-semibold text-slate-800">
+                          {{ user.firstName }} {{ user.lastName }}
+                        </div>
+                        <div class="text-xs text-slate-400">&#64;{{ user.username }}</div>
                       </div>
-                      <div class="text-xs text-slate-400">&#64;{{ user.username }}</div>
                     </div>
-                  </div>
-                </td>
-                <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.phoneNumber || '—' }}</td>
-                <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.placeOfBirth || '—' }}</td>
-                <td class="px-2 py-3.5">
-                  <span
-                    class="text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-[5px]"
-                  >
-                    {{ getRolesLabels(user.roles) }}
-                  </span>
-                </td>
-                <td class="px-4 py-3.5">
-                  <span
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-[5px]"
-                    [ngClass]="{
-                      'bg-green-100 text-green-600': user.status === 'Active',
-                      'bg-gray-100 text-gray-500': user.status === 'Inactive',
-                      'bg-red-100 text-red-600': user.status === 'Suspended',
-                    }"
-                  >
+                  </td>
+
+                  <!-- Phone -->
+                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.phoneNumber || '—' }}</td>
+
+                  <!-- Place of birth -->
+                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.placeOfBirth || '—' }}</td>
+
+                  <!-- Roles -->
+                  <td class="px-4 py-3.5">
+                    <div class="flex flex-wrap gap-1">
+                      @for (role of user.roles; track role.id) {
+                        <span
+                          class="text-[11px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-md"
+                        >
+                          {{ role.name }}
+                        </span>
+                      }
+                      @if (!user.roles || user.roles.length === 0) {
+                        <span class="text-xs text-slate-400">No Role</span>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-4 py-3.5">
                     <span
-                      class="w-1.5 h-1.5 rounded-full"
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md"
                       [ngClass]="{
-                        'bg-green-500': user.status === 'Active',
-                        'bg-gray-400': user.status === 'Inactive',
-                        'bg-red-500': user.status === 'Suspended',
+                        'bg-green-50 text-green-600 border border-green-100':
+                          user.status === 'Active',
+                        'bg-slate-100 text-slate-500 border border-slate-200':
+                          user.status === 'Inactive',
+                        'bg-red-50 text-red-500 border border-red-100': user.status === 'Suspended',
                       }"
-                    ></span>
-                    {{ user.status }}
-                  </span>
-                </td>
-                <td class="px-4 py-3.5 text-xs text-slate-400">—</td>
-                <td class="px-4 py-3.5">
-                  <div class="flex gap-1.5">
-                    <button
-                      (click)="openFormEdit(user)"
-                      class="flex px-[10px] py-[6px] bg-green-500 text-white items-center justify-center rounded-lg text-xs hover:bg-green-600 transition-all"
                     >
-                      Edit
-                    </button>
-                    <button
-                      (click)="deleteUser(user.id)"
-                      class="px-[10px] py-[6px] bg-red-500 text-white flex items-center justify-center rounded-lg text-xs hover:bg-red-600 transition-all"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr *ngIf="(userList$ | async)?.length === 0">
-                <td colspan="7" class="px-5 py-12 text-center text-sm text-slate-400">
-                  No users found.
-                </td>
-              </tr>
+                      <span
+                        class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        [ngClass]="{
+                          'bg-green-500': user.status === 'Active',
+                          'bg-slate-400': user.status === 'Inactive',
+                          'bg-red-500': user.status === 'Suspended',
+                        }"
+                      ></span>
+                      {{ user.status }}
+                    </span>
+                  </td>
+
+                  <!-- Created -->
+                  <td class="px-4 py-3.5 text-xs text-slate-400">—</td>
+
+                  <!-- Actions -->
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <button
+                        (click)="openFormEdit(user)"
+                        class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        (click)="confirmDelete(user.id)"
+                        class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                      <div
+                        *ngIf="isDelete()"
+                        class="fixed inset-0 z-50 flex items-center justify-center"
+                      >
+                        <!-- Modal -->
+                        <div class="fixed inset-0 z-50 flex items-center justify-center">
+                          <div class="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
+
+                          <div
+                            class="relative bg-white rounded-2xl shadow-md w-[340px] p-6 flex flex-col items-center gap-4 z-10"
+                          >
+                            <div
+                              class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center"
+                            >
+                              <svg
+                                class="w-7 h-7 text-red-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </div>
+
+                            <div class="text-center">
+                              <h3 class="text-[15px] font-bold text-gray-800">Delete User</h3>
+                              <p class="text-[13px] text-gray-400 mt-1">
+                                Are you sure you want to delete this user?<br />
+                                <span class="text-red-400 font-medium"
+                                  >This action cannot be undone.</span
+                                >
+                              </p>
+                            </div>
+
+                            <div class="flex gap-3 w-full mt-1">
+                              <button
+                                (click)="onCancelDelete()"
+                                class="flex-1 py-2.5 rounded-xl border cursor-pointer border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                (click)="onConfirmDelete()"
+                                class="flex-1 py-2.5 rounded-xl cursor-pointer bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
+                              >
+                                Yes, Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              <!-- Empty state -->
+              @if (filteredUsers().length === 0) {
+                <tr>
+                  <td colspan="7" class="px-5 py-14 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl"
+                      >
+                        🔍
+                      </div>
+                      @if (searchQuery()) {
+                        <div>
+                          <p class="text-sm font-semibold text-slate-600">
+                            No results for "{{ searchQuery() }}"
+                          </p>
+                          <p class="text-xs text-slate-400 mt-1">
+                            Try a different name, username or role
+                          </p>
+                        </div>
+                        <button
+                          (click)="searchQuery.set('')"
+                          class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                        >
+                          Clear search
+                        </button>
+                      } @else {
+                        <div>
+                          <p class="text-sm font-semibold text-slate-600">No users found</p>
+                          <p class="text-xs text-slate-400 mt-1">
+                            Create your first user to get started
+                          </p>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
 
+        <!-- Table footer -->
         <div
           class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
         >
-          <span class="text-xs text-slate-400" *ngIf="userList$ | async as users">
-            Showing {{ users.length }} of {{ users.length }} users
+          <span class="text-xs text-slate-400">
+            Showing {{ filteredUsers().length }} of {{ totalUsers() }} users
           </span>
           <div class="flex gap-1">
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
             >
               ‹
             </button>
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold"
+              class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold"
             >
               1
             </button>
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
             >
               2
             </button>
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-blue-500 transition-all"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
             >
               ›
             </button>
@@ -352,10 +536,13 @@
     </div>
   </main>
 
-  <!-- ── Toast — lives OUTSIDE the modal so it survives close ── -->
+  <!-- ── TOAST ───────────────────────────────────────────────────
+       Lives OUTSIDE modal so it survives modal close
+       signal: showToast(), toastMessage()
+  ──────────────────────────────────────────────────────────────── -->
   @if (showToast()) {
     <div
-      class="fixed top-5 right-5 z-[100] flex items-center gap-3 bg-white border border-slate-100 shadow-2xl shadow-slate-200/80 rounded-2xl px-5 py-4"
+      class="fixed top-5 right-5 z-[100] flex items-center gap-3 bg-white border border-slate-100 shadow-2xl shadow-slate-200/80 rounded-2xl px-5 py-4 animate-in slide-in-from-right-5"
     >
       <div
         class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-200"

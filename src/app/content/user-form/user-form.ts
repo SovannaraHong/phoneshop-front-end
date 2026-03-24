@@ -9,7 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RoleService } from '../../core/services/role/role-service';
 import { tap } from 'rxjs';
 import { RoleType, UserType } from '../../core/models/user.model';
@@ -38,6 +38,8 @@ export class UserForm implements OnInit {
   selectedFile = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
   isLoading = signal(false);
+  showPassword = signal(true);
+  showCfPassword = signal(true);
 
   // ── step 4: form group ────────────────────────────────────────
   userForm!: FormGroup;
@@ -95,9 +97,9 @@ export class UserForm implements OnInit {
   // ── step 7: init form ─────────────────────────────────────────
   ngOnInit(): void {
     this.userForm = this.fb.group({
-      firstName: [''],
-      lastName: [''],
-      username: [''],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      username: ['', Validators.required],
       phone: [''],
       password: [''],
       confirmPassword: [''],
@@ -163,7 +165,7 @@ export class UserForm implements OnInit {
     if (this.userForm.invalid) return;
     this.isLoading.set(true);
 
-    const { confirmPassword, roles, phone, pob, password, ...rest } = this.userForm.value;
+    const { confirmPassword, roles, password, phone, pob, ...rest } = this.userForm.value;
 
     const payload: any = {
       ...rest,
@@ -230,8 +232,26 @@ export class UserForm implements OnInit {
 
   // ── step 13: reset form ───────────────────────────────────────
   onReset(): void {
-    this.userForm.reset({ status: 'Inactive' });
+    this.userForm.reset({ status: 'Active' });
     this.selectedFile.set(null);
     this.previewUrl.set(null);
+  }
+  get username() {
+    return this.userForm.get('username');
+  }
+  get firstName() {
+    return this.userForm.get('firstName');
+  }
+  get lastName() {
+    return this.userForm.get('lastName');
+  }
+  get password() {
+    return this.userForm.get('password');
+  }
+  toggleHidePassword() {
+    this.showPassword.set(!this.showPassword());
+  }
+  toggleHideCfPassword() {
+    this.showCfPassword.set(!this.showCfPassword());
   }
 }

@@ -32,6 +32,8 @@ export interface LoginResponse {
   message: string;
   data: {
     userId: number;
+    username: string;
+    roles: string[];
     accessToken: string;
     refreshToken: string;
   };

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Auth } from './core/services/auth/auth';
 
 @Component({
   selector: 'app-root',
@@ -16,18 +17,19 @@ export class App {
   protected readonly title = signal('phoneshop-frontend');
   isLogin = signal(false);
 
+  constructor(private auth: Auth) {}
+
   ngOnInit() {
     this.checkToken();
   }
 
   checkToken() {
-    const token = localStorage.getItem('accessToken');
+    const token = this.auth.getToken();
     this.isLogin.set(!!token);
   }
 
   toggleLogin() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    this.auth.logout();
     this.isLogin.set(false);
   }
 }

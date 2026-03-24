@@ -237,11 +237,13 @@
               class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[0.72rem] font-extrabold text-white flex-shrink-0"
               style="background: linear-gradient(135deg, #2563eb, #7c3aed)"
             >
-              AD
+              {{ auth.getUsername().slice(0, 2).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
-              <div class="text-[0.82rem] font-bold text-text truncate">Admin User</div>
-              <div class="text-[0.7rem] text-muted">Super Admin</div>
+              <div class="text-[0.82rem] font-bold text-text truncate">
+                {{ auth.getUsername() }}
+              </div>
+              <div class="text-[0.7rem] text-muted">{{ auth.getRole() }}</div>
             </div>
             <span class="text-muted text-[0.8rem]">⋯</span>
           </div>
@@ -346,8 +348,8 @@
               >
             </div>
             <div class="text-left">
-              <div class="text-[9px] text-gray-400 leading-none">Value</div>
-              <div class="text-sm font-bold text-gray-800 leading-tight">$1500</div>
+              <div class="text-[9px] text-gray-400 leading-none">Low</div>
+              <div class="text-sm font-bold text-gray-800 leading-tight">Stock</div>
             </div>
           </button>
         </div>
@@ -357,15 +359,4 @@
       </main>
     </div>
   </div>
-
-  <script>
-    function setActive(el) {
-      document.querySelectorAll('.brand-pill').forEach((b) => b.classList.remove('active'));
-      el.classList.add('active');
-    }
-    function setSort(el) {
-      document.querySelectorAll('.sort-tab').forEach((t) => t.classList.remove('active'));
-      el.classList.add('active');
-    }
-  </script>
 </body>

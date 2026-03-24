@@ -3,6 +3,7 @@ import { Component, inject, Input, OnInit, ChangeDetectorRef } from '@angular/co
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginService } from '../../core/services/login/login-service';
 import { LoginType } from '../../core/models/user.model';
+import { Auth } from '../../core/services/auth/auth';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private loginService = inject(LoginService);
   private cdr = inject(ChangeDetectorRef);
+  private auth = inject(Auth);
 
   @Input() onLoginSuccess!: () => void;
   loginForm!: FormGroup;
@@ -51,9 +53,9 @@ export class Login implements OnInit {
     this.loginService.login(data).subscribe({
       next: (res) => {
         this.isLoading = false;
-        localStorage.setItem('accessToken', res.data.accessToken);
-        localStorage.setItem('refreshToken', res.data.refreshToken);
-        this.onLoginSuccess();
+        this.auth.setToken(res.data.accessToken);
+        this.auth.setUser(res);
+        this.onLoginSuccess?.();
       },
       error: (err) => {
         this.isLoading = false;

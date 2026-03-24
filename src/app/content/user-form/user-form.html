@@ -27,7 +27,7 @@
       </div>
 
       <!-- Avatar -->
-      <div class="relative flex-shrink-0">
+      <!-- <div class="relative flex-shrink-0">
         <div
           class="w-[58px] h-[58px] rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-black text-xl shadow-xl shadow-indigo-200/80 ring-4 ring-indigo-50 overflow-hidden"
         >
@@ -43,7 +43,7 @@
         <div
           class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white shadow-md"
         ></div>
-      </div>
+      </div> -->
     </div>
     <div class="h-px bg-slate-100 mt-6"></div>
   </div>
@@ -167,12 +167,20 @@
           Username <span class="text-rose-400">*</span>
         </label>
         <div
-          class="flex items-center h-[46px] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 focus-within:border-cyan-400 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-cyan-100/70 hover:border-slate-300"
+          class="flex items-center h-[46px] border rounded-xl overflow-hidden transition-all duration-200"
+          [ngClass]="
+            username?.touched && username?.invalid
+              ? 'bg-red-50 border-red-300 shadow-sm shadow-red-100'
+              : 'bg-slate-50 border-slate-200 focus-within:border-cyan-400 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-cyan-100/70 hover:border-slate-300'
+          "
         >
           <span
             class="w-11 h-full flex items-center justify-center border-r border-slate-200 flex-shrink-0"
           >
-            <i class="fa-solid fa-at text-gray-400"></i>
+            <i
+              class="fa-solid fa-at"
+              [ngClass]="username?.touched && username?.invalid ? 'text-red-400' : 'text-gray-400'"
+            ></i>
           </span>
           <input
             formControlName="username"
@@ -181,6 +189,13 @@
             class="flex-1 bg-transparent border-none outline-none text-[13.5px] font-medium text-slate-700 px-3.5 h-full placeholder-slate-300"
           />
         </div>
+        <p
+          *ngIf="username?.touched && username?.invalid"
+          class="text-red-400 text-[11px] font-medium mt-1 ml-1 flex items-center gap-1"
+        >
+          <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+          Username is required
+        </p>
       </div>
 
       <!-- Phone -->
@@ -265,7 +280,6 @@
       </div>
 
       <!-- Section: Security -->
-      <!-- Section: Security -->
       <div class="col-span-2 flex items-center gap-3 pt-1 -mb-0.5">
         <span class="text-[9.5px] font-black text-pink-400 uppercase tracking-[1.6px]"
           >Security</span
@@ -292,10 +306,19 @@
             </span>
             <input
               formControlName="password"
-              type="password"
+              [type]="showPassword() ? 'password' : 'text'"
               placeholder="Min. 8 characters"
               class="flex-1 bg-transparent border-none outline-none text-[13.5px] font-medium text-slate-700 px-3.5 h-full placeholder-slate-300"
             />
+            <div (click)="toggleHidePassword()" class="cursor-pointer">
+              <i
+                [class]="
+                  showPassword()
+                    ? 'fa-regular fa-eye-slash pr-[30px] text-gray-400'
+                    : 'fa-regular fa-eye pr-[30px] text-gray-400'
+                "
+              ></i>
+            </div>
           </div>
         </div>
 
@@ -316,10 +339,19 @@
             </span>
             <input
               formControlName="confirmPassword"
-              type="password"
+              [type]="showCfPassword() ? 'password' : 'text'"
               placeholder="Min. 8 characters"
               class="flex-1 bg-transparent border-none outline-none text-[13.5px] font-medium text-slate-700 px-3.5 h-full placeholder-slate-300"
             />
+            <div (click)="toggleHideCfPassword()" class="cursor-pointer">
+              <i
+                [class]="
+                  showCfPassword()
+                    ? 'fa-regular fa-eye-slash pr-[30px] text-gray-400'
+                    : 'fa-regular fa-eye pr-[30px] text-gray-400'
+                "
+              ></i>
+            </div>
           </div>
         </div>
       }
@@ -375,6 +407,7 @@
       </button>
 
       <button
+        [disabled]="userForm.invalid"
         type="submit"
         [disabled]="isLoading()"
         class="ml-auto inline-flex items-center gap-2.5 px-7 h-10 rounded-xl text-[13px] font-extrabold bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white border-none cursor-pointer shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { UserType } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user/user-service';
 import { CommonModule } from '@angular/common';
+import { Auth } from '../../core/services/auth/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +14,8 @@ import { CommonModule } from '@angular/common';
 })
 export class Dashboard implements OnInit {
   private authService = inject(UserService);
+  public auth = inject(Auth);
+  showProfile = false;
   ngOnInit(): void {
     this.userList$ = this.authService.getUser();
   }

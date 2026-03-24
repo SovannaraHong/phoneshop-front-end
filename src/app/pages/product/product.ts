@@ -7,7 +7,7 @@ import { ProductForm } from '../../content/product-form/product-form';
 
 @Component({
   selector: 'app-product',
-  imports: [CommonModule, ProductForm],
+  imports: [CommonModule],
   standalone: true,
   templateUrl: './product.html',
   styleUrl: './product.css',
