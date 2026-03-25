@@ -1,0 +1,203 @@
+<div class="relative bg-white">
+  <!-- Top color bar -->
+  <div
+    class="h-1 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 rounded-t-xl"
+  ></div>
+
+  <!-- HEADER -->
+  <div class="px-8 pt-7 pb-0">
+    <div class="flex items-start justify-between">
+      <div>
+        <div
+          class="inline-flex items-center gap-2 border border-indigo-100 bg-indigo-50 text-indigo-600 text-[10px] font-black px-3.5 py-1.5 rounded-full mb-4 tracking-[1.2px] uppercase"
+        >
+          <i class="fa-solid fa-shield-halved text-[10px]"></i>
+          {{ isEditMode ? 'Edit Role' : 'New Role' }}
+        </div>
+        <h1 class="text-[1.45rem] font-black text-slate-900 tracking-tight leading-tight">
+          {{ isEditMode ? 'Update Role' : 'Create Role' }}
+        </h1>
+        <p class="text-[12px] text-slate-400 mt-1.5 font-medium">
+          {{
+            isEditMode
+              ? 'Update the role name and its permissions.'
+              : 'Fill in the details below to register a new role.'
+          }}
+        </p>
+      </div>
+    </div>
+    <div class="h-px bg-slate-100 mt-6"></div>
+  </div>
+
+  <!-- FORM -->
+  <form class="px-8 py-7" [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+    <div class="grid grid-cols-2 gap-x-5 gap-y-5">
+      <!-- Section: Role Info -->
+      <div class="col-span-2 flex items-center gap-3 pt-1 -mb-0.5">
+        <span class="text-[9.5px] font-black text-indigo-400 uppercase tracking-[1.6px]"
+          >Role Info</span
+        >
+        <div class="flex-1 h-px bg-gradient-to-r from-indigo-100 to-transparent"></div>
+      </div>
+
+      <!-- Role Name -->
+      <div class="col-span-2 flex flex-col gap-1.5">
+        <label
+          class="text-[10.5px] font-black text-slate-400 uppercase tracking-[0.9px] flex items-center gap-1"
+        >
+          Role Name <span class="text-rose-400">*</span>
+        </label>
+        <div
+          class="flex items-center h-[46px] border rounded-xl overflow-hidden transition-all duration-200"
+          [ngClass]="
+            roleName?.touched && roleName?.invalid
+              ? 'bg-red-50 border-red-300 shadow-sm shadow-red-100'
+              : 'bg-slate-50 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-indigo-100/70 hover:border-slate-300'
+          "
+        >
+          <span
+            class="w-11 h-full flex items-center justify-center border-r border-slate-200 flex-shrink-0"
+          >
+            <i
+              class="fa-solid fa-shield-halved"
+              [ngClass]="roleName?.touched && roleName?.invalid ? 'text-red-400' : 'text-gray-400'"
+            ></i>
+          </span>
+          <input
+            formControlName="name"
+            type="text"
+            placeholder="e.g. Admin, Editor, Viewer"
+            class="flex-1 bg-transparent border-none outline-none text-[13.5px] font-medium text-slate-700 px-3.5 h-full placeholder-slate-300"
+          />
+        </div>
+        <p
+          *ngIf="roleName?.touched && roleName?.invalid"
+          class="text-red-400 text-[11px] font-medium mt-1 ml-1 flex items-center gap-1"
+        >
+          <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+          Role name is required
+        </p>
+      </div>
+
+      <!-- Section: Permissions -->
+      <div class="col-span-2 flex items-center gap-3 pt-1 -mb-0.5">
+        <span class="text-[9.5px] font-black text-violet-400 uppercase tracking-[1.6px]"
+          >Permissions</span
+        >
+        <div class="flex-1 h-px bg-gradient-to-r from-violet-100 to-transparent"></div>
+      </div>
+
+      <!-- Permissions Grid -->
+      <div class="col-span-2 flex flex-col gap-1.5">
+        <label
+          class="text-[10.5px] font-black text-slate-400 uppercase tracking-[0.9px] flex items-center gap-1"
+        >
+          Assign Permissions <span class="text-rose-400">*</span>
+        </label>
+
+        <!-- Group by resource (brand, user, etc.) -->
+        <div
+          formArrayName="permissions"
+          class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200"
+        >
+          @for (group of permissionGroups; track group.resource) {
+            <div class="mb-4 last:mb-0">
+              <!-- Resource label -->
+              <div class="flex items-center gap-2 mb-2">
+                <span
+                  class="text-[9px] font-black uppercase tracking-[1.4px] text-slate-400 px-2 py-0.5 bg-white border border-slate-200 rounded-md"
+                >
+                  {{ group.resource }}
+                </span>
+                <div class="flex-1 h-px bg-slate-100"></div>
+              </div>
+              <!-- Permission checkboxes for this group -->
+              <div class="flex flex-wrap gap-2">
+                @for (perm of group.items; track perm.name) {
+                  <label
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg border text-[12px] font-bold cursor-pointer transition-all duration-150 shadow-sm"
+                    [ngClass]="
+                      isPermissionSelected(perm.name)
+                        ? getPermissionStyle(perm.name)
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600'
+                    "
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="isPermissionSelected(perm.name)"
+                      (change)="onPermissionChange(perm.name, $event)"
+                      class="w-3.5 h-3.5 accent-violet-500 cursor-pointer"
+                    />
+                    {{ perm.name }}
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Validation hint -->
+        <p
+          *ngIf="roleForm.get('permissions')?.touched && selectedPermissions.length === 0"
+          class="text-red-400 text-[11px] font-medium mt-1 ml-1 flex items-center gap-1"
+        >
+          <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+          At least one permission is required
+        </p>
+
+        <!-- Selected count badge -->
+        <p
+          *ngIf="selectedPermissions.length > 0"
+          class="text-[11px] font-bold text-indigo-500 mt-1 ml-1"
+        >
+          <i class="fa-solid fa-check-circle mr-1"></i>
+          {{ selectedPermissions.length }} permission{{ selectedPermissions.length > 1 ? 's' : '' }}
+          selected
+        </p>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="flex items-center gap-2.5 mt-7 pt-5 border-t border-slate-100">
+      <button
+        type="button"
+        (click)="onReset()"
+        class="px-4 h-10 rounded-xl text-[12.5px] font-bold bg-transparent border-none text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-150 cursor-pointer"
+      >
+        Reset
+      </button>
+
+      <button
+        [disabled]="roleForm.invalid || isLoading() || selectedPermissions.length === 0"
+        type="submit"
+        class="ml-auto inline-flex items-center gap-2.5 px-7 h-10 rounded-xl text-[13px] font-extrabold bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white border-none cursor-pointer shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        @if (isLoading()) {
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          {{ isEditMode ? 'Updating...' : 'Creating...' }}
+        } @else {
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {{ isEditMode ? 'Update Role' : 'Create Role' }}
+        }
+      </button>
+    </div>
+  </form>
+</div>

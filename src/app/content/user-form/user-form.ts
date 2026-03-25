@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RoleService } from '../../core/services/role/role-service';
-import { tap } from 'rxjs';
+import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { RoleType, UserType } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user/user-service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -30,9 +30,12 @@ export class UserForm implements OnInit {
   private roleService = inject(RoleService);
   private userService = inject(UserService);
 
+  private refresh$ = new BehaviorSubject<void>(undefined);
+
   // ── step 2: inputs & outputs ──────────────────────────────────
   editUser = input<UserType | null>(null);
   userCreated = output<void>();
+  openOtherRoles = output<void>();
 
   // ── step 3: state signals ─────────────────────────────────────
   selectedFile = signal<File | null>(null);
@@ -44,6 +47,9 @@ export class UserForm implements OnInit {
   // ── step 4: form group ────────────────────────────────────────
   userForm!: FormGroup;
 
+  triggerRefresh() {
+    this.refresh$.next();
+  }
   // ── step 5: getters ───────────────────────────────────────────
   get isEditMode(): boolean {
     return !!this.editUser();
@@ -125,13 +131,13 @@ export class UserForm implements OnInit {
 
   // ── step 8: load roles and patch if editing ───────────────────
   roleList = toSignal(
-    this.roleService.getRoles().pipe(
+    this.refresh$.pipe(
+      switchMap(() => this.roleService.getRoles()),
       tap((roles) => {
         this.roleArrays?.clear();
-        // add one control per role, default false
+
         roles.forEach(() => this.roleArrays.push(this.fb.control(false)));
 
-        // if editing, check the roles the user already has
         const user = this.editUser();
         if (user?.roles) {
           roles.forEach((role, i) => {
@@ -158,6 +164,9 @@ export class UserForm implements OnInit {
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
+  }
+  onOpenOtherRoles(): void {
+    this.openOtherRoles.emit();
   }
 
   // ── step 11: submit ───────────────────────────────────────────

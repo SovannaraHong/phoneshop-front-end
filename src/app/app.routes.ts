@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/user/user').then((m) => m.User),
   },
   {
+    path: 'user/role',
+    loadComponent: () => import('./pages/role/role').then((m) => m.Role),
+  },
+  {
     path: 'bakong',
     loadComponent: () =>
       import('./core/intergration/bakong-payment/bakong-payment').then((m) => m.BakongPayment),

@@ -180,7 +180,7 @@
           </svg>
           Appliances
         </a>
-        <a class="nav-link">
+        <a class="nav-link" routerLink="/role">
           <svg
             class="w-[18px] h-[18px] shrink-0"
             fill="none"
@@ -229,7 +229,7 @@
           Sale
         </a>
         <div class="p-4 border-b border-b-gray-300 border-border"></div>
-        <div>
+        <div class="flex flex-col gap-5 pl-[10px]">
           <div
             class="flex items-center pt-[20px] gap-2.5 rounded-sm bg-surface cursor-pointer hover:bg-border transition-colors"
           >
@@ -246,6 +246,14 @@
               <div class="text-[0.7rem] text-muted">{{ auth.getRole() }}</div>
             </div>
             <span class="text-muted text-[0.8rem]">⋯</span>
+          </div>
+          <div class="flex items-center justify-center gap-[10px]">
+            <button
+              (click)="funToggle()"
+              class="bg-[#eb166f] cursor-pointer font-medium rounded-[10px] py-[3px] grow-2 rounded-[3px] text-white"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </nav>
@@ -293,10 +301,7 @@
         </div>
 
         <div class="flex items-center gap-5 ml-1">
-          <button
-            class="text-gray-400 hover:text-indigo-600 transition-colors"
-            (click)="funToggle()"
-          >
+          <button class="text-gray-400 hover:text-indigo-600 transition-colors">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"

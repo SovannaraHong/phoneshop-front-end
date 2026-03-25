@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../core/services/user/user-service';
@@ -13,11 +14,13 @@ import { BehaviorSubject, switchMap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RoleType, UserType } from '../../core/models/user.model';
 import { UserForm } from '../../content/user-form/user-form';
+import { RoleForm } from '../../content/role-form/role-form'; // ✅ import RoleForm
 import { listAnimation, statAnimation, toastAnimation } from '../../shared/pipes/animation';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-user',
-  imports: [CommonModule, FormsModule, UserForm],
+  imports: [CommonModule, FormsModule, UserForm, RoleForm, RouterLink, RouterLinkActive], // ✅ add RoleForm here
   standalone: true,
   templateUrl: './user.html',
   styleUrl: './user.css',
@@ -25,6 +28,7 @@ import { listAnimation, statAnimation, toastAnimation } from '../../shared/pipes
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class User implements OnInit {
+  @ViewChild('userForm') userForm!: UserForm;
   // ── step 1: inject ────────────────────────────────────────────
   private userService = inject(UserService);
 
@@ -43,6 +47,7 @@ export class User implements OnInit {
   searchQuery = signal<string>('');
   selectedUser = signal<UserType | null>(null);
   isOpenForm = signal(false);
+  isOpenRoleForm = signal(false); // ✅ role modal signal
   showToast = signal(false);
   toastMessage = signal('');
 
@@ -54,13 +59,11 @@ export class User implements OnInit {
     const tab = this.selectedTab();
     const query = this.searchQuery().toLowerCase().trim();
 
-    // filter by tab
     let result = users;
     if (tab === 'Active') result = users.filter((u) => u.status === 'Active');
     if (tab === 'Inactive') result = users.filter((u) => u.status === 'Inactive');
     if (tab === 'Suspended') result = users.filter((u) => u.status === 'Suspended');
 
-    // filter by search
     if (!query) return result;
 
     return result.filter((u) => {
@@ -86,7 +89,7 @@ export class User implements OnInit {
   }
 
   // ── step 7: lifecycle ─────────────────────────────────────────
-  ngOnInit(): void {} // nothing needed — toSignal handles subscription
+  ngOnInit(): void {}
 
   // ── step 8: toast ─────────────────────────────────────────────
   private showSuccess(message: string): void {
@@ -95,7 +98,7 @@ export class User implements OnInit {
     setTimeout(() => this.showToast.set(false), 4000);
   }
 
-  // ── step 9: form open/close ───────────────────────────────────
+  // ── step 9: user form open/close ──────────────────────────────
   openFormCreate(): void {
     this.selectedUser.set(null);
     this.isOpenForm.set(true);
@@ -119,7 +122,7 @@ export class User implements OnInit {
     }
   }
 
-  // ── step 10: after form saves ─────────────────────────────────
+  // ── step 10: after user form saves ───────────────────────────
   onUserCreated(): void {
     const isEdit = !!this.selectedUser();
     this.refresh$.next();
@@ -127,10 +130,20 @@ export class User implements OnInit {
     this.showSuccess(isEdit ? 'User updated successfully!' : 'User created successfully!');
   }
 
+  // ── step 11: after role form saves ───────────────────────────
+
+  onRoleCreated(): void {
+    this.isOpenRoleForm.set(false);
+    this.userForm?.triggerRefresh();
+    this.showSuccess('Role created successfully!');
+  }
+
+  // ── step 12: delete ───────────────────────────────────────────
   confirmDelete(id: number) {
     this.deleteTargetId.set(id);
     this.isDelete.set(true);
   }
+
   onConfirmDelete() {
     const id = this.deleteTargetId();
     if (id === null) return;
@@ -147,12 +160,12 @@ export class User implements OnInit {
       },
     });
   }
+
   onCancelDelete() {
     this.isDelete.set(false);
     this.deleteTargetId.set(null);
   }
 
-  // ── step 11: delete ───────────────────────────────────────────
   deleteUser(id: number): void {
     if (this.isDelete()) {
       this.isDelete.set(false);
@@ -166,10 +179,10 @@ export class User implements OnInit {
     }
   }
 
-  // ── step 12: helpers ──────────────────────────────────────────
+  // ── step 13: helpers ──────────────────────────────────────────
   setTab(tab: string): void {
     this.selectedTab.set(tab);
-    this.searchQuery.set(''); // clear search when switching tab
+    this.searchQuery.set('');
   }
 
   getRolesLabels(roles: RoleType[]): string {
