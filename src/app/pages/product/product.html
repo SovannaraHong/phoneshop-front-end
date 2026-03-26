@@ -1,7 +1,349 @@
-@if (roleList$ | async; as roleList) {
-  <div>
-    @for (role of roleList; track $index) {
-      <h1>{{ role.name }}</h1>
-    }
+<!-- product.html -->
+<div class="flex-1 flex flex-col overflow-hidden">
+  <!-- PAGE HEADER -->
+  <div
+    class="bg-white border-b border-gray-100 px-7 py-4 flex items-center justify-between shrink-0"
+  >
+    <div>
+      <p class="text-xs text-gray-400 font-medium">PhoneShop System / Mobiles</p>
+      <h2 class="text-lg font-bold text-gray-800 mt-0.5">Product Management</h2>
+    </div>
+    <button
+      (click)="openCreateForm()"
+      class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-indigo-200"
+    >
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2.5"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Create Product
+    </button>
   </div>
-}
+
+  @if (isOpenForm()) {
+    <div
+      class="fixed inset-0 z-50 bg-black-900/40 backdrop-blur-sm flex justify-end"
+      (click)="toggleForm()"
+    >
+      <!-- Drawer -->
+      <div
+        class="relative w-full max-w-[1000px] h-full bg-white shadow-2xl animate-slideInRight"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Close Button -->
+        <button
+          (click)="toggleForm()"
+          class="absolute top-12 right-12 z-10 bg-blue-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-blue-500 transition-all"
+        >
+          ✕
+        </button>
+
+        <!-- Form -->
+        <div class="p-6 overflow-y-auto h-full">
+          <app-product-form></app-product-form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- STATS STRIP -->
+  <div class="flex-1 flex flex-col pt-[px]">
+    <!-- STATS STRIP -->
+    <div class="grid grid-cols-4 gap-4 px-7 py-4 bg-white border-b border-gray-100 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+          <svg
+            class="w-5 h-5 text-indigo-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Total Products</p>
+          <p class="text-lg font-bold text-gray-800">{{ totalProduct() }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+          <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Active</p>
+          <p class="text-lg font-bold text-gray-800">{{ activePro() }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+          <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Best Sellers</p>
+          <p class="text-lg font-bold text-gray-800">{{ bestSeller() }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+          <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Low Stock</p>
+          <p class="text-lg font-bold text-gray-800">
+            {{ lowStock() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="px-7 py-3 bg-[#edf0f4] flex items-center gap-3 shrink-0">
+      <div
+        class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
+      >
+        <svg
+          class="w-4 h-4 text-gray-400 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search products..."
+          class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
+        />
+      </div>
+      <select
+        class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+      >
+        <option value="">All Brands</option>
+
+        <option *ngFor="let p of brandList()">{{ p.name }}</option>
+      </select>
+      <select
+        class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+      >
+        <option value="">All Types</option>
+        <option *ngFor="let p of productList()">{{ p.typeSell }}</option>
+      </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="flex-1 overflow-y-auto px-7 py-4">
+      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Product
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Brand
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Color
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Price
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Units
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Type
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Action
+              </th>
+              <!-- <th class="px-5 py-3.5"></th> -->
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of productList(); track $index) {
+              <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-9 h-9 rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center shrink-0"
+                    >
+                      <img
+                        [src]="product.imagePath"
+                        class="w-full h-full object-cover"
+                        alt=""
+                        onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
+                      />
+                      <svg
+                        class="w-5 h-5 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
+                      <p class="text-[11px] text-gray-400">{{ product.modelName }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 text-gray-600 text-[13px]">getBrandName(product.brandId)</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-2">
+                    <!-- <span
+                      class="w-3.5 h-3.5 rounded-full border border-gray-200 shrink-0"
+                      [style.background]="getColorHex(product.colorName)"
+                    ></span> -->
+                    <span class="text-[13px] text-gray-600 capitalize">{{
+                      product.colorName
+                    }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                  ${{ product.salePrice | number: '1.2-2' }}
+                </td>
+                <td class="px-5 py-3.5">
+                  <span
+                    class="text-[13px]"
+                    [ngClass]="product.unit < 20 ? 'text-red-500 font-semibold' : 'text-gray-600'"
+                  >
+                    {{ product.unit }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                    [ngClass]="{
+                      'bg-indigo-50 text-indigo-600': product.typeSell === 'Best Seller',
+                      'bg-green-50 text-green-600': product.typeSell === 'New Arrival',
+                      'bg-amber-50 text-amber-600': product.typeSell === 'Flash Sale',
+                      'bg-purple-50 text-purple-600': product.typeSell === 'Limited Edition',
+                      'bg-gray-100 text-gray-500': product.typeSell === 'Clearance',
+                    }"
+                  >
+                    {{ product.typeSell }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span
+                    class="inline-flex items-center gap-1.5 text-[11px] font-semibold"
+                    [ngClass]="product.active ? 'text-green-600' : 'text-gray-400'"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full"
+                      [ngClass]="product.active ? 'bg-green-500' : 'bg-gray-300'"
+                    ></span>
+                    {{ product.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 flex gap-2">
+                  <button
+                    class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all cursor-pointer"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            }
+
+            <!-- Empty state -->
+            @if (productList().length === 0) {
+              <tr>
+                <td colspan="8" class="px-5 py-14 text-center">
+                  <div class="flex flex-col items-center gap-3">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
+                      <svg
+                        class="w-7 h-7 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-gray-400 text-sm font-medium">No products found</p>
+                    <button class="text-indigo-600 text-sm font-semibold hover:underline">
+                      + Add your first product
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

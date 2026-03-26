@@ -15,4 +15,7 @@ export class ProductService {
       .get<{ list: ProductType[]; pagination: any }>(`${this.api}/products`)
       .pipe(map((res) => res.list));
   }
+  createProduct(pro: ProductType): Observable<ProductType[]> {
+    return this.http.post<ProductType[]>(`${this.api}/products`, pro);
+  }
 }
