@@ -1,852 +1,197 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Product Lock</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<div class="w-full h-full bg-slate-100 p-6 overflow-y-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <p class="text-xs font-semibold tracking-widest text-indigo-500 uppercase mb-1">
+      Product Management
+    </p>
+    <h1 class="text-xl font-bold text-gray-800">Create New Product</h1>
+  </div>
 
-      :root {
-        --white: #ffffff;
-        --bg: #f5f6f8;
-        --border: #e4e6eb;
-        --border-focus: #1a1a2e;
-        --text-primary: #0f0f1a;
-        --text-secondary: #6b7280;
-        --text-muted: #9ca3af;
-        --accent: #1a1a2e;
-        --accent-soft: #f0f0f5;
-        --green: #16a34a;
-        --green-soft: #f0fdf4;
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-        --radius: 12px;
-        --radius-sm: 8px;
-      }
+  <!-- Form -->
+  <form #productForm="ngForm" class="space-y-5">
+    <!-- Product Name -->
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Product Name </label>
+      <input
+        type="text"
+        name="name"
+        required
+        placeholder="Samsung Galaxy S25 Ultra Gold"
+        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+      />
+    </div>
 
-      body {
-        font-family: 'DM Sans', sans-serif;
-        background: var(--bg);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
-      }
-
-      .card {
-        background: var(--white);
-        border-radius: 20px;
-        box-shadow: var(--shadow-md);
-        width: 100%;
-        max-width: 520px;
-        overflow: hidden;
-        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Header */
-      .card-header {
-        padding: 28px 32px 22px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .header-icon {
-        width: 42px;
-        height: 42px;
-        background: var(--accent);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-
-      .header-icon svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .header-text h1 {
-        font-size: 17px;
-        font-weight: 600;
-        color: var(--text-primary);
-        letter-spacing: -0.3px;
-      }
-
-      .header-text p {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-
-      /* Body */
-      .card-body {
-        padding: 28px 32px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      /* Field group */
-      .field-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      label {
-        font-size: 12.5px;
-        font-weight: 500;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-      }
-
-      .required {
-        color: #ef4444;
-        margin-left: 2px;
-      }
-
-      /* Input */
-      input[type='text'],
-      input[type='number'],
-      select,
-      textarea {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 14.5px;
-        color: var(--text-primary);
-        background: var(--white);
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 10px 14px;
-        width: 100%;
-        outline: none;
-        transition:
-          border-color 0.18s,
-          box-shadow 0.18s;
-        -webkit-appearance: none;
-      }
-
-      input[type='text']:focus,
-      input[type='number']:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--border-focus);
-        box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.08);
-      }
-
-      input::placeholder,
-      textarea::placeholder {
-        color: var(--text-muted);
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 88px;
-        line-height: 1.5;
-      }
-
-      /* Select arrow */
-      .select-wrap {
-        position: relative;
-      }
-      .select-wrap::after {
-        content: '';
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 0;
-        height: 0;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5.5px solid var(--text-muted);
-        pointer-events: none;
-      }
-      select {
-        cursor: pointer;
-        padding-right: 36px;
-      }
-
-      /* Row */
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-
-      /* Color picker */
-      .color-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 2px;
-      }
-
-      .color-opt {
-        position: relative;
-      }
-      .color-opt input[type='radio'] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .color-opt label {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 13px 7px 9px;
-        border: 1.5px solid var(--border);
-        border-radius: 100px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text-secondary);
-        text-transform: none;
-        letter-spacing: 0;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-        user-select: none;
-      }
-      .color-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-      }
-      .color-opt input:checked + label {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-        color: var(--text-primary);
-      }
-
-      /* Type Sell pills */
-      .pill-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 2px;
-      }
-      .pill-opt {
-        position: relative;
-      }
-      .pill-opt input[type='radio'] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .pill-opt label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border: 1.5px solid var(--border);
-        border-radius: 100px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text-secondary);
-        text-transform: none;
-        letter-spacing: 0;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-        user-select: none;
-      }
-      .pill-opt input:checked + label {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-        color: var(--text-primary);
-      }
-      .pill-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--accent);
-        opacity: 0;
-        transition: opacity 0.15s;
-      }
-      .pill-opt input:checked + label .pill-dot {
-        opacity: 1;
-      }
-
-      /* Toggle */
-      .toggle-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 16px;
-        background: var(--bg);
-        border-radius: var(--radius-sm);
-        border: 1.5px solid var(--border);
-      }
-
-      .toggle-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .toggle-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--text-primary);
-      }
-      .toggle-sub {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .toggle {
-        position: relative;
-        display: inline-block;
-        width: 44px;
-        height: 24px;
-      }
-      .toggle input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .toggle-track {
-        position: absolute;
-        inset: 0;
-        background: var(--border);
-        border-radius: 100px;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .toggle-track::after {
-        content: '';
-        position: absolute;
-        left: 3px;
-        top: 3px;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-      .toggle input:checked ~ .toggle-track {
-        background: var(--green);
-      }
-      .toggle input:checked ~ .toggle-track::after {
-        transform: translateX(20px);
-      }
-
-      /* Image Upload */
-      .upload-zone {
-        border: 1.5px dashed var(--border);
-        border-radius: var(--radius-sm);
-        background: var(--bg);
-        padding: 24px 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        transition:
-          border-color 0.18s,
-          background 0.18s;
-        position: relative;
-      }
-      .upload-zone:hover,
-      .upload-zone.drag-over {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-      }
-      .upload-zone input[type='file'] {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-        border: none;
-        padding: 0;
-      }
-      .upload-icon {
-        width: 36px;
-        height: 36px;
-        background: var(--white);
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-sm);
-      }
-      .upload-text {
-        font-size: 13px;
-        color: var(--text-secondary);
-        text-align: center;
-      }
-      .upload-text strong {
-        color: var(--text-primary);
-        font-weight: 600;
-      }
-      .upload-hint {
-        font-size: 11.5px;
-        color: var(--text-muted);
-      }
-
-      .img-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin-top: 2px;
-      }
-      .img-thumb {
-        position: relative;
-        aspect-ratio: 1;
-        border-radius: var(--radius-sm);
-        overflow: hidden;
-        border: 1.5px solid var(--border);
-        background: var(--bg);
-        animation: fadeIn 0.25s ease both;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.95);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-      .img-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .img-thumb .remove-btn {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        width: 20px;
-        height: 20px;
-        background: rgba(0, 0, 0, 0.55);
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.15s;
-      }
-      .img-thumb:hover .remove-btn {
-        opacity: 1;
-      }
-      .img-thumb .primary-badge {
-        position: absolute;
-        bottom: 4px;
-        left: 4px;
-        font-size: 9px;
-        font-weight: 600;
-        background: var(--accent);
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-      }
-
-      /* JSON preview */
-      .json-preview {
-        background: #fafafa;
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 14px 16px;
-        font-family: 'DM Mono', monospace;
-        font-size: 12.5px;
-        color: var(--text-secondary);
-        line-height: 1.7;
-        white-space: pre;
-        overflow-x: auto;
-      }
-      .json-key {
-        color: #0f62b5;
-      }
-      .json-str {
-        color: #16793a;
-      }
-      .json-num {
-        color: #b06000;
-      }
-      .json-bool {
-        color: #9333ea;
-      }
-
-      /* Divider */
-      .divider {
-        height: 1px;
-        background: var(--border);
-        margin: 4px 0;
-      }
-
-      /* Footer */
-      .card-footer {
-        padding: 20px 32px 28px;
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-      }
-
-      .btn {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 14px;
-        font-weight: 500;
-        border-radius: var(--radius-sm);
-        padding: 10px 22px;
-        cursor: pointer;
-        border: none;
-        transition: all 0.15s;
-        letter-spacing: -0.1px;
-      }
-      .btn-ghost {
-        background: transparent;
-        color: var(--text-secondary);
-        border: 1.5px solid var(--border);
-      }
-      .btn-ghost:hover {
-        background: var(--bg);
-        border-color: #c9ccd3;
-      }
-
-      .btn-primary {
-        background: var(--accent);
-        color: white;
-        box-shadow: 0 1px 4px rgba(26, 26, 46, 0.18);
-        display: flex;
-        align-items: center;
-        gap: 7px;
-      }
-      .btn-primary:hover {
-        background: #2e2e4a;
-        box-shadow: 0 4px 12px rgba(26, 26, 46, 0.22);
-      }
-      .btn-primary:active {
-        transform: scale(0.98);
-      }
-
-      .section-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: -6px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <!-- Header -->
-      <div class="card-header">
-        <div class="header-icon">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-        </div>
-        <div class="header-text">
-          <h1>Create Product Lock</h1>
-          <p>Define model, color and selling configuration</p>
-        </div>
+    <!-- Brand + Model -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Brand -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Brand </label>
+        <select
+          name="brandId"
+          required
+          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="" disabled>Select brand</option>
+          <option *ngFor="let b of brandList()" value="">{{ b.name }}</option>
+        </select>
       </div>
 
-      <!-- Body -->
-      <div class="card-body">
-        <div class="section-label">Identifiers</div>
-
-        <!-- Model ID + Color ID -->
-        <div class="row">
-          <div class="field-group">
-            <label>Model ID <span class="required">*</span></label>
-            <input type="number" id="modelId" value="6" min="1" placeholder="e.g. 6" />
-          </div>
-          <div class="field-group">
-            <label>Color ID <span class="required">*</span></label>
-            <input type="number" id="colorId" value="1" min="1" placeholder="e.g. 1" />
-          </div>
-        </div>
-
-        <!-- Color picker -->
-        <div class="field-group">
-          <label>Color</label>
-          <div class="color-row">
-            <div class="color-opt">
-              <input type="radio" name="color" id="c1" value="Sierra Blue" checked />
-              <label for="c1"
-                ><span class="color-dot" style="background: #6fa8c9"></span>Sierra Blue</label
-              >
-            </div>
-            <div class="color-opt">
-              <input type="radio" name="color" id="c2" value="Midnight" />
-              <label for="c2"
-                ><span class="color-dot" style="background: #1c1c1e"></span>Midnight</label
-              >
-            </div>
-            <div class="color-opt">
-              <input type="radio" name="color" id="c3" value="Starlight" />
-              <label for="c3"
-                ><span class="color-dot" style="background: #f5e6d3"></span>Starlight</label
-              >
-            </div>
-            <div class="color-opt">
-              <input type="radio" name="color" id="c4" value="Product Red" />
-              <label for="c4"
-                ><span class="color-dot" style="background: #e03232"></span>Product Red</label
-              >
-            </div>
-            <div class="color-opt">
-              <input type="radio" name="color" id="c5" value="Alpine Green" />
-              <label for="c5"
-                ><span class="color-dot" style="background: #4b6c56"></span>Alpine Green</label
-              >
-            </div>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-        <div class="section-label">Configuration</div>
-
-        <!-- Type Sell -->
-        <div class="field-group">
-          <label>Type Sell <span class="required">*</span></label>
-          <div class="pill-row">
-            <div class="pill-opt">
-              <input type="radio" name="typeSell" id="t1" value="Standard" />
-              <label for="t1"><span class="pill-dot"></span>Standard</label>
-            </div>
-            <div class="pill-opt">
-              <input type="radio" name="typeSell" id="t2" value="Premium" checked />
-              <label for="t2"><span class="pill-dot"></span>Premium</label>
-            </div>
-            <div class="pill-opt">
-              <input type="radio" name="typeSell" id="t3" value="Bundle" />
-              <label for="t3"><span class="pill-dot"></span>Bundle</label>
-            </div>
-            <div class="pill-opt">
-              <input type="radio" name="typeSell" id="t4" value="Refurbished" />
-              <label for="t4"><span class="pill-dot"></span>Refurbished</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div class="field-group">
-          <label>Description</label>
-          <textarea id="description" placeholder="Enter product description…">
-Apple iPhone13 pro Sieera Blue 128GB variant</textarea
-          >
-        </div>
-
-        <!-- Image Upload -->
-        <div class="field-group">
-          <label>Product Images</label>
-          <div class="upload-zone" id="uploadZone">
-            <input type="file" id="imgInput" accept="image/*" multiple />
-            <div class="upload-icon">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#6b7280"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-            </div>
-            <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
-            <div class="upload-hint">PNG, JPG, WEBP — up to 10 MB each</div>
-          </div>
-          <div class="img-grid" id="imgGrid"></div>
-        </div>
-
-        <!-- Active toggle -->
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <span class="toggle-title">Active</span>
-            <span class="toggle-sub">Enable this product lock immediately</span>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="activeToggle" checked />
-            <span class="toggle-track"></span>
-          </label>
-        </div>
-
-        <div class="divider"></div>
-        <div class="section-label">Payload Preview</div>
-
-        <!-- JSON preview -->
-        <div class="json-preview" id="jsonPreview"></div>
-      </div>
-
-      <!-- Footer -->
-      <div class="card-footer">
-        <button class="btn btn-ghost" type="button">Cancel</button>
-        <button class="btn btn-primary" type="button" id="submitBtn">
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          Create Lock
-        </button>
+      <!-- Model -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Model </label>
+        <select
+          name="modelName"
+          required
+          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="" disabled>Select model</option>
+          <option *ngFor="let m of modelList()">{{ m.name }}</option>
+        </select>
       </div>
     </div>
 
-    <script>
-      function getFormData() {
-        return {
-          modelId: parseInt(document.getElementById('modelId').value) || 0,
-          colorId: parseInt(document.getElementById('colorId').value) || 0,
-          typeSell: document.querySelector('input[name="typeSell"]:checked')?.value || '',
-          description: document.getElementById('description').value.trim(),
-          active: document.getElementById('activeToggle').checked,
-          images: images.map((img) => img.name),
-        };
-      }
+    <!-- Color -->
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-2"> Color </label>
+      <div class="flex flex-wrap gap-3">
+        <!-- <button
+          *ngFor="let color of colors"
+          type="button"
+          class="w-9 h-9 rounded-full border-2 transition"
+          [ngClass]="
+            product.colorName === color.name
+              ? 'border-indigo-500 scale-110'
+              : 'border-gray-200 hover:scale-105'
+          "
+        >
+          <span class="block w-full h-full rounded-full" [style.background]="color.hex"></span>
+        </button> -->
+        <button
+          *ngFor="let color of colors"
+          type="button"
+          class="w-9 h-9 rounded-full border-1 transition"
+          (click)="onSelectColor(color)"
+        >
+          <span class="block w-full h-full rounded-full" [style.background]="color.hex"></span>
+        </button>
+      </div>
 
-      function highlight(data) {
-        const s = JSON.stringify(data, null, 4);
-        return s
-          .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
-          .replace(/: "([^"]*)"/g, ': <span class="json-str">"$1"</span>')
-          .replace(/: (\d+)/g, ': <span class="json-num">$1</span>')
-          .replace(/: (true|false)/g, ': <span class="json-bool">$1</span>');
-      }
+      <p class="mt-2 text-xs text-gray-500">'No color selected'</p>
+    </div>
 
-      function updatePreview() {
-        document.getElementById('jsonPreview').innerHTML = highlight(getFormData());
-      }
+    <!-- Price + Unit -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Price ($) </label>
+        <input
+          type="number"
+          name="salePrice"
+          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
 
-      // Image upload
-      let images = [];
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Units </label>
+        <input
+          type="number"
+          name="unit"
+          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+    </div>
 
-      function renderImages() {
-        const grid = document.getElementById('imgGrid');
-        grid.innerHTML = '';
-        images.forEach((img, i) => {
-          const div = document.createElement('div');
-          div.className = 'img-thumb';
-          div.innerHTML = `
-        <img src="${img.url}" alt="product" />
-        ${i === 0 ? '<span class="primary-badge">Primary</span>' : ''}
-        <button class="remove-btn" data-i="${i}" title="Remove">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>`;
-          grid.appendChild(div);
-        });
-        grid.querySelectorAll('.remove-btn').forEach((btn) => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            images.splice(+btn.dataset.i, 1);
-            renderImages();
-            updatePreview();
-          });
-        });
-      }
+    <!-- Type -->
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Type Sell </label>
+      <select
+        name="typeSell"
+        class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+      >
+        <option value="" disabled>Select type</option>
+        <option>type</option>
+      </select>
+    </div>
 
-      document.getElementById('imgInput').addEventListener('change', (e) => {
-        [...e.target.files].forEach((file) =>
-          images.push({ name: file.name, url: URL.createObjectURL(file) }),
-        );
-        renderImages();
-        updatePreview();
-        e.target.value = '';
-      });
+    <!-- Image -->
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-2"> Upload Image </label>
 
-      const zone = document.getElementById('uploadZone');
-      zone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        zone.classList.add('drag-over');
-      });
-      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-      zone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        zone.classList.remove('drag-over');
-        [...e.dataTransfer.files]
-          .filter((f) => f.type.startsWith('image/'))
-          .forEach((file) => {
-            images.push({ name: file.name, url: URL.createObjectURL(file) });
-          });
-        renderImages();
-        updatePreview();
-      });
+      <div class="flex gap-6 items-start">
+        <!-- LEFT: Preview -->
+        <div
+          class="w-40 h-40 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50"
+        >
+          <img
+            src="https://www.apple.com/v/iphone/home/cj/images/overview/select/iphone_17__fb1277oq3eaa_large_2x.jpg"
+            class="w-full h-full object-cover"
+          />
 
-      // Events
-      document.querySelectorAll('input, textarea').forEach((el) => {
-        el.addEventListener('input', updatePreview);
-        el.addEventListener('change', updatePreview);
-      });
+          <!-- <span class="text-xs text-gray-400"> No Image </span> -->
+        </div>
 
-      document.getElementById('submitBtn').addEventListener('click', () => {
-        const data = getFormData();
-        const btn = document.getElementById('submitBtn');
-        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved!`;
-        btn.style.background = '#16a34a';
-        setTimeout(() => {
-          btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Create Lock`;
-          btn.style.background = '';
-        }, 2000);
-        console.log('Submitted:', JSON.stringify(data, null, 2));
-      });
+        <!-- RIGHT: Upload Box -->
+        <div
+          class="flex-1 border-2 border-dashed border-gray-300 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition"
+          (click)="fileInput.click()"
+        >
+          <input #fileInput type="file" accept="image/*" hidden />
 
-      updatePreview();
-    </script>
-  </body>
-</html>
+          <p class="text-sm text-gray-600 font-medium">Click to upload image</p>
+          <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+
+          <!-- File name -->
+          <p class="text-xs text-indigo-500 mt-3 truncate">product.imagePath</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Description </label>
+      <textarea
+        name="description"
+        rows="3"
+        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+      ></textarea>
+    </div>
+
+    <!-- Active -->
+    <div
+      class="flex items-center justify-between border border-gray-200 bg-white rounded-xl px-4 py-3"
+    >
+      <span class="text-sm font-medium text-gray-700">Active</span>
+      <button type="button" class="w-11 h-6 flex items-center rounded-full transition">
+        <span class="w-4 h-4 bg-white rounded-full transform transition"></span>
+      </button>
+      <!-- <button
+        type="button"
+        (click)="product.active = !product.active"
+        class="w-11 h-6 flex items-center rounded-full transition"
+        [ngClass]="product.active ? 'bg-indigo-500' : 'bg-gray-300'"
+      >
+        <span
+          class="w-4 h-4 bg-white rounded-full transform transition"
+          [ngClass]="product.active ? 'translate-x-6' : 'translate-x-1'"
+        ></span>
+      </button> -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex gap-3 pt-2">
+      <button
+        type="submit"
+        [disabled]="productForm.invalid"
+        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold"
+      >
+        Create Product
+      </button>
+
+      <button
+        type="button"
+        class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-100"
+      >
+        Reset
+      </button>
+    </div>
+  </form>
+</div>

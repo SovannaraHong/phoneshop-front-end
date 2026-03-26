@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/role/role').then((m) => m.Role),
   },
   {
+    path: 'productform',
+    loadComponent: () => import('./content/product-form/product-form').then((m) => m.ProductForm),
+  },
+  {
     path: 'bakong',
     loadComponent: () =>
       import('./core/intergration/bakong-payment/bakong-payment').then((m) => m.BakongPayment),

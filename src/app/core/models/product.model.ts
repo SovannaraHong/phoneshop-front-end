@@ -3,6 +3,7 @@ export interface ProductType {
   name: string;
   imagePath: string;
   unit: number;
+  imagePreview?: string;
   salePrice: number;
   modelName: string;
   colorName: string;

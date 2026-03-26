@@ -20,14 +20,19 @@
       }
     </div>
   } -->
-  <div *ngIf="brandList$ | async as brandList" class="flex flex-wrap gap-2 mb-5">
+  <div
+    *ngIf="brandList$ | async as brandList"
+    class="flex gap-2 mb-5 bg-slate-100 p-1 w-fit rounded-xl"
+  >
     <button
       (click)="showAll()"
       [ngClass]="{
-        'bg-blue-500 text-white': !selectedBrand,
-        'bg-white text-gray-700': selectedBrand,
+        'px-3.5 py-1.5 rounded-lg   cursor-pointer bg-white text-slate-800 shadow-sm ':
+          !selectedBrand,
+        'px-3.5 py-1.5 rounded-lg   cursor-pointer text-slate-500 hover:text-slate-700 ':
+          selectedBrand,
       }"
-      class="px-3 py-1 rounded"
+      class="px-3 py-1 rounded uppercase font-bold text-[14px] transition-all"
     >
       All
     </button>
@@ -35,10 +40,12 @@
       *ngFor="let brand of brandList"
       (click)="setActive(brand)"
       [ngClass]="{
-        'bg-blue-500 text-white': selectedBrand?.id === brand.id,
-        'bg-white text-gray-700': selectedBrand?.id !== brand.id,
+        'px-3.5 py-1.5 rounded-lg   cursor-pointer bg-white text-slate-800 shadow-sm ':
+          selectedBrand?.id === brand.id,
+        'px-3.5 py-1.5 rounded-lg   cursor-pointer text-slate-500 hover:text-slate-700 ':
+          selectedBrand?.id !== brand.id,
       }"
-      class="rounded-[10px] text-[15px] transition-colors cursor-pointer px-[10px] py-[4px]"
+      class="px-3 py-1 rounded uppercase font-bold text-[14px] transition-all"
     >
       {{ brand.name }}
     </button>
