@@ -166,19 +166,6 @@ export class User implements OnInit {
     this.deleteTargetId.set(null);
   }
 
-  deleteUser(id: number): void {
-    if (this.isDelete()) {
-      this.isDelete.set(false);
-      this.userService.deleteUser(id).subscribe({
-        next: () => {
-          this.refresh$.next();
-          this.showSuccess('User deleted successfully!');
-        },
-        error: (err) => console.error('Delete failed:', err),
-      });
-    }
-  }
-
   // ── step 13: helpers ──────────────────────────────────────────
   setTab(tab: string): void {
     this.selectedTab.set(tab);

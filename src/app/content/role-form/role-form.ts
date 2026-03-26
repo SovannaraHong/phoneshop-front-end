@@ -52,6 +52,7 @@ export class RoleForm {
   // ── step 2: inputs & outputs ──────────────────────────────────
   editRole = input<RoleType | null>(null);
   roleCreated = output<void>();
+  isClose = output();
 
   // ── step 3: state ─────────────────────────────────────────────
   isLoading = signal(false);
@@ -138,14 +139,14 @@ export class RoleForm {
     if (this.roleForm.invalid || this.selectedPermissions.length === 0) return;
     this.isLoading.set(true);
 
-    const payload = {
+    const payload: any = {
       name: this.roleForm.value.name,
       permissions: this.selectedPermissions,
     };
 
     if (this.isEditMode) {
       // 🛠️ Replace with updateRole() when available in RoleService
-      this.roleService.createRoles(payload as any).subscribe({
+      this.roleService.updateRole(this.editRole()!.id, payload).subscribe({
         next: () => this.finish(),
         error: (err) => {
           this.isLoading.set(false);
@@ -154,7 +155,9 @@ export class RoleForm {
       });
     } else {
       this.roleService.createRoles(payload as any).subscribe({
-        next: () => this.finish(),
+        next: () => {
+          this.finish();
+        },
         error: (err) => {
           this.isLoading.set(false);
           console.error('Create error:', err.error);
@@ -168,6 +171,7 @@ export class RoleForm {
     this.isLoading.set(false);
     this.onReset();
     this.roleCreated.emit(); // parent handles toast + close
+    this.isClose.emit();
   }
 
   // ── step 12: reset ────────────────────────────────────────────

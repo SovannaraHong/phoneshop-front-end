@@ -1,118 +1,205 @@
-<body class="bg-slate-100 min-h-screen flex flex-col font-sans">
-  <div class="flex flex-1 min-h-0">
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 p-7 overflow-auto">
-      <!-- Page header -->
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <p class="text-[10px] font-black tracking-[2.5px] uppercase text-violet-500 mb-1">
-            Access Control
-          </p>
-          <h1 class="syne text-[2rem] font-extrabold text-slate-900 tracking-tight leading-none">
-            Role Management
-          </h1>
+@if (isOpenForm()) {
+  <button
+    (click)="closeForm()"
+    class="absolute top-40 right-10 z-10 bg-red-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-red-500 transition-all cursor-pointer"
+  >
+    ✕
+  </button>
+  <app-role-form [editRole]="selectedRole()" (isClose)="closeForm()"></app-role-form>
+} @else {
+  <body class="bg-slate-100 min-h-screen flex flex-col font-sans">
+    <div class="flex flex-1 min-h-0">
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 p-7 overflow-auto">
+        <!-- Page header -->
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <p class="text-[10px] font-black tracking-[2.5px] uppercase text-violet-500 mb-1">
+              Access Control
+            </p>
+            <h1 class="syne text-[2rem] font-extrabold text-slate-900 tracking-tight leading-none">
+              Role Management
+            </h1>
+          </div>
+          <div class="flex gap-2">
+            <button
+              (click)="onOpenForm()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-0.5 transition-all duration-200"
+            >
+              <i class="fa-solid fa-plus text-xs"></i> New Role
+            </button>
+            <button
+              (click)="getRout()"
+              class="inline-flex cursor-pointer items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-pink-200 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-0.5 transition-all duration-200"
+            >
+              <i class="fa-solid fa-plus text-xs"></i> Back
+            </button>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <button
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <i class="fa-solid fa-plus text-xs"></i> New Role
-          </button>
-          <button
-            (click)="getRout()"
-            class="inline-flex cursor-pointer items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-pink-200 text-white text-[13px] font-bold rounded-xl shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <i class="fa-solid fa-plus text-xs"></i> Back
-          </button>
-        </div>
-      </div>
 
-      <!-- Table card -->
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div
-          class="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500"
-        ></div>
-        <table class="w-full text-sm border-collapse">
-          <thead class="bg-slate-50">
-            <tr class="border-b border-slate-100">
-              <th
-                class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-12"
-              >
-                #
-              </th>
-              <th
-                class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
-              >
-                Role Name
-              </th>
-              <th
-                class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
-              >
-                Permissions
-              </th>
-              <th
-                class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
-              >
-                Created
-              </th>
-              <th
-                class="text-right px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (role of roleList(); track $index) {
-              <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-6 py-4 font-bold text-slate-500">{{ role.id }}</td>
-                <td class="px-6 py-4 flex items-center gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold"
-                    [ngClass]="getColor(role.name)"
-                  >
-                    {{ role.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <span class="font-medium text-slate-900">{{ role.name }}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex gap-2 flex-wrap overflow-hidden max-w-[300px]">
-                    @for (perm of role.permissions; track perm.id; let i = $index) {
-                      @if (i < 4) {
-                        <span
-                          class="px-2 py-1 text-[10px] text-white rounded-full"
-                          [ngClass]="getPermissionColor(perm.name)"
-                        >
-                          {{ perm.name }}
+        <!-- Table card -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div
+            class="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-fuchsia-500"
+          ></div>
+          <table class="w-full text-sm border-collapse">
+            <thead class="bg-slate-50">
+              <tr class="border-b border-slate-100">
+                <th
+                  class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-12"
+                >
+                  #
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Role Name
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Permissions
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Created
+                </th>
+                <th
+                  class="text-right px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (role of roleList(); track $index) {
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="px-6 py-4 font-bold text-slate-500">{{ role.id }}</td>
+                  <td class="px-6 py-4 flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold"
+                      [ngClass]="getColor(role.name)"
+                    >
+                      {{ role.name.charAt(0).toUpperCase() }}
+                    </div>
+                    <span class="font-medium text-slate-900">{{ role.name }}</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2 flex-wrap overflow-hidden max-w-[300px]">
+                      @for (perm of role.permissions; track perm.id; let i = $index) {
+                        @if (i < 3) {
+                          <span
+                            class="px-2 py-1 text-[10px] text-white rounded-full"
+                            [ngClass]="getPermissionColor(perm.name)"
+                          >
+                            {{ perm.name }}
+                          </span>
+                        }
+                      }
+
+                      @if (role.permissions.length > 3) {
+                        <span class="px-2 py-1 text-[10px] bg-gray-100 text-gray-700 rounded-full">
+                          +{{ role.permissions.length - 3 }}
                         </span>
                       }
-                    }
-
-                    @if (role.permissions.length > 4) {
-                      <span class="px-2 py-1 text-[10px] bg-gray-100 text-gray-700 rounded-full">
-                        +{{ role.permissions.length - 4 }}
-                      </span>
-                    }
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-slate-400">2025-03-01</td>
-                <td class="px-6 py-4 text-right flex justify-end gap-2">
-                  <button
-                    class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-[12px] hover:bg-indigo-100"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="px-3 py-1 rounded-lg bg-red-50 text-red-600 font-semibold text-[12px] hover:bg-red-100"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-slate-400">2025-03-01</td>
+                  <td class="px-6 py-4 text-right flex justify-end gap-2">
+                    <button
+                      (click)="onOpenEditForm(role)"
+                      class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-[12px] hover:bg-indigo-100"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      (click)="confirmDelete(role.id)"
+                      class="px-3 py-1 rounded-lg bg-red-50 cursor-pointer text-red-600 font-semibold text-[12px] hover:bg-red-100"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </body>
+}
+@if (isDelete()) {
+  <div class="fixed inset-0 z-[70] flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
+    <div
+      class="relative bg-white rounded-2xl shadow-md w-[340px] p-6 flex flex-col items-center gap-4 z-10"
+    >
+      <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
+        <svg class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
       </div>
-    </main>
+      <div class="text-center">
+        <h3 class="text-[15px] font-bold text-gray-800">Delete User</h3>
+        <p class="text-[13px] text-gray-400 mt-1">
+          Are you sure you want to delete this user?<br />
+          <span class="text-red-400 font-medium">This action cannot be undone.</span>
+        </p>
+      </div>
+      <div class="flex gap-3 w-full mt-1">
+        <button
+          (click)="onCancelDelete()"
+          class="flex-1 py-2.5 rounded-xl border cursor-pointer border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="onConfirmDelete()"
+          class="flex-1 py-2.5 rounded-xl cursor-pointer bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
+        >
+          Yes, Delete
+        </button>
+      </div>
+    </div>
   </div>
-</body>
+}
+
+<!-- ── TOAST ───────────────────────────────────────────────────── -->
+@if (showToast()) {
+  <div
+    class="fixed top-5 right-5 z-[100] flex items-center gap-3 bg-white border border-slate-100 shadow-2xl shadow-slate-200/80 rounded-2xl px-5 py-4 animate-in slide-in-from-right-5"
+  >
+    <div
+      class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-200"
+    >
+      <svg
+        class="w-5 h-5 text-white"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        viewBox="0 0 24 24"
+      >
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </div>
+    <div>
+      <p class="text-[13px] font-bold text-slate-800">Success!</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">{{ toastMessage() }}</p>
+    </div>
+    <button
+      (click)="showToast.set(false)"
+      class="ml-3 w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all border border-slate-100 cursor-pointer"
+    >
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+}

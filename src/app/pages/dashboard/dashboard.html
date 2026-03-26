@@ -60,9 +60,9 @@
         </div>
         <div>
           <div class="brand-font text-[15px] font-bold text-gray-900 leading-none tracking-tight">
-            PHONESHOP SYSTEM
+            PHONESHOP
           </div>
-          <div class="text-[10px] text-gray-400 mt-0.5">Shopping made simple</div>
+          <div class="text-[10px] text-gray-400 mt-0.5">SYSTEM</div>
         </div>
       </div>
 
@@ -130,7 +130,7 @@
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          Fashion
+          User
         </a>
         <a class="nav-link" [routerLink]="['/dashboard', 'bakong']">
           <svg
@@ -240,7 +240,7 @@
               {{ auth.getUsername().slice(0, 2).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
-              <div class="text-[0.82rem] font-bold text-text truncate">
+              <div class="text-[0.82rem] font-bold uppercase text-text truncate">
                 {{ auth.getUsername() }}
               </div>
               <div class="text-[0.7rem] text-muted">{{ auth.getRole() }}</div>
