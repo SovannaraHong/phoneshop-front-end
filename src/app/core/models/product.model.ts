@@ -5,8 +5,8 @@ export interface ProductType {
   unit: number;
   imagePreview?: string;
   salePrice: number;
-  modelName: string;
-  colorName: string;
+  modelId: number;
+  colorId: number;
   description: string;
   typeSell: string;
   active: boolean;
@@ -17,4 +17,9 @@ export interface ProductResponse {
   total: number;
   skip: number;
   limit: number;
+}
+
+export interface type {
+  id: number;
+  name: string;
 }

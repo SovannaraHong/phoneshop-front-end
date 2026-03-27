@@ -1,194 +1,352 @@
 <div class="w-full h-full bg-slate-100 p-6 overflow-y-auto">
-  <!-- Header -->
-  <div class="mb-6">
-    <p class="text-xs font-semibold tracking-widest text-indigo-500 uppercase mb-1">
-      Product Management
-    </p>
-    <h1 class="text-xl font-bold text-gray-800">Create New Product</h1>
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <p class="text-xs font-semibold tracking-widest text-indigo-500 uppercase mb-1">
+        Product Management
+      </p>
+      <h1 class="text-xl font-bold text-gray-800">
+        {{ mode() === 'edit' ? 'Edit Product' : 'Create New Product' }}
+      </h1>
+    </div>
+
+    <!-- Delete button — only in edit mode -->
+    <button
+      *ngIf="mode() === 'edit'"
+      type="button"
+      (click)="onDeleteRequest()"
+      [disabled]="isLoading()"
+      class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+        />
+      </svg>
+      Delete
+    </button>
   </div>
 
-  <!-- Form -->
-  <form #productForm="ngForm" class="space-y-5">
-    <!-- Product Name -->
+  <!-- ── Delete confirmation dialog ─────────────────────────────────────── -->
+  <div
+    *ngIf="showDeleteConfirm()"
+    class="mb-4 flex items-center justify-between gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+  >
+    <p class="text-sm text-red-700 font-medium">Are you sure you want to delete this product?</p>
+    <div class="flex gap-2 shrink-0">
+      <button
+        type="button"
+        (click)="onDeleteConfirm()"
+        class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition-colors"
+      >
+        Yes, delete
+      </button>
+      <button
+        type="button"
+        (click)="onDeleteCancel()"
+        class="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Success banner ─────────────────────────────────────────────────── -->
+  <div
+    *ngIf="submitSuccess()"
+    class="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3"
+  >
+    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg>
+    {{ mode() === 'edit' ? 'Product updated successfully!' : 'Product created successfully!' }}
+  </div>
+
+  <!-- ── Error banner ───────────────────────────────────────────────────── -->
+  <div
+    *ngIf="submitError()"
+    class="mb-4 flex items-start gap-2 rounded-xl px-4 py-3 text-sm border"
+    [ngClass]="
+      submitError()!.includes('already exists')
+        ? 'bg-amber-50 border-amber-300 text-amber-800'
+        : 'bg-red-50 border-red-200 text-red-700'
+    "
+  >
+    <svg
+      *ngIf="submitError()!.includes('already exists')"
+      class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+      />
+    </svg>
+    <svg
+      *ngIf="!submitError()!.includes('already exists')"
+      class="w-4 h-4 shrink-0 mt-0.5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+    <span>{{ submitError() }}</span>
+  </div>
+
+  <!-- ── Form ───────────────────────────────────────────────────────────── -->
+  <form class="space-y-5" [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <!-- Product Name (auto-generated, read-only) -->
     <div>
-      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Product Name </label>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Product Name</label>
       <input
         type="text"
-        name="name"
-        required
-        placeholder="Samsung Galaxy S25 Ultra Gold"
-        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        disabled
+        [placeholder]="getProductName() || 'Auto generate…'"
+        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:opacity-60"
       />
     </div>
 
-    <!-- Brand + Model -->
+    <!-- Model + Color -->
     <div class="grid grid-cols-2 gap-4">
-      <!-- Brand -->
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Brand </label>
-        <select
-          name="brandId"
-          required
-          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="" disabled>Select brand</option>
-          <option *ngFor="let b of brandList()" value="">{{ b.name }}</option>
-        </select>
-      </div>
-
       <!-- Model -->
       <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Model </label>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Model</label>
         <select
-          name="modelName"
-          required
-          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="" disabled>Select model</option>
-          <option *ngFor="let m of modelList()">{{ m.name }}</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Color -->
-    <div>
-      <label class="block text-xs font-semibold text-gray-500 uppercase mb-2"> Color </label>
-      <div class="flex flex-wrap gap-3">
-        <!-- <button
-          *ngFor="let color of colors"
-          type="button"
-          class="w-9 h-9 rounded-full border-2 transition"
-          [ngClass]="
-            product.colorName === color.name
-              ? 'border-indigo-500 scale-110'
-              : 'border-gray-200 hover:scale-105'
+          formControlName="model"
+          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          [class.border-red-400]="
+            productForm.get('model')?.invalid && productForm.get('model')?.touched
           "
         >
-          <span class="block w-full h-full rounded-full" [style.background]="color.hex"></span>
-        </button> -->
-        <button
-          *ngFor="let color of colors"
-          type="button"
-          class="w-9 h-9 rounded-full border-1 transition"
-          (click)="onSelectColor(color)"
+          <option value="" disabled>Select model</option>
+          <option *ngFor="let m of modelList()" [value]="m.id">{{ m.name }}</option>
+        </select>
+        <p
+          *ngIf="productForm.get('model')?.invalid && productForm.get('model')?.touched"
+          class="mt-1 text-xs text-red-500"
         >
-          <span class="block w-full h-full rounded-full" [style.background]="color.hex"></span>
-        </button>
+          Model is required.
+        </p>
       </div>
 
-      <p class="mt-2 text-xs text-gray-500">'No color selected'</p>
+      <!-- Color swatches -->
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Color</label>
+        <div class="flex flex-wrap gap-2">
+          <button
+            *ngFor="let color of colorList()"
+            type="button"
+            (click)="onSelectColor(color)"
+            [title]="color.name"
+            class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110"
+            [class.border-indigo-500]="productForm.value.color === color.name"
+            [class.scale-110]="productForm.value.color === color.name"
+            [class.border-gray-200]="productForm.value.color !== color.name"
+          >
+            <span
+              class="block w-full h-full rounded-full"
+              [style.background]="getColorHex(color.name)"
+            ></span>
+          </button>
+        </div>
+        <p class="mt-2 text-xs text-gray-500">
+          {{
+            productForm.value.color ? 'Selected: ' + productForm.value.color : 'No color selected'
+          }}
+        </p>
+        <p
+          *ngIf="productForm.get('color')?.invalid && productForm.get('color')?.touched"
+          class="mt-1 text-xs text-red-500"
+        >
+          Color is required.
+        </p>
+      </div>
     </div>
 
-    <!-- Price + Unit -->
+    <!-- Price + Units -->
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Price ($) </label>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Price ($)</label>
         <input
+          formControlName="price"
           type="number"
-          name="salePrice"
-          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+          min="0"
+          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          [class.border-red-400]="
+            productForm.get('price')?.invalid && productForm.get('price')?.touched
+          "
         />
+        <p
+          *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched"
+          class="mt-1 text-xs text-red-500"
+        >
+          A valid price is required.
+        </p>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Units </label>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Units</label>
         <input
+          formControlName="unit"
           type="number"
-          name="unit"
-          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+          min="1"
+          class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          [class.border-red-400]="
+            productForm.get('unit')?.invalid && productForm.get('unit')?.touched
+          "
         />
+        <p
+          *ngIf="productForm.get('unit')?.invalid && productForm.get('unit')?.touched"
+          class="mt-1 text-xs text-red-500"
+        >
+          At least 1 unit is required.
+        </p>
       </div>
     </div>
 
     <!-- Type -->
     <div>
-      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Type Sell </label>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type Sell</label>
       <select
-        name="typeSell"
-        class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+        formControlName="type"
+        class="w-full border bg-white border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        [class.border-red-400]="
+          productForm.get('type')?.invalid && productForm.get('type')?.touched
+        "
       >
         <option value="" disabled>Select type</option>
-        <option>type</option>
+        <option *ngFor="let t of types" [value]="t.name">{{ getSelectType(t.name) }}</option>
       </select>
+      <p
+        *ngIf="productForm.get('type')?.invalid && productForm.get('type')?.touched"
+        class="mt-1 text-xs text-red-500"
+      >
+        Type is required.
+      </p>
     </div>
 
-    <!-- Image -->
+    <!-- Image upload -->
     <div>
-      <label class="block text-xs font-semibold text-gray-500 uppercase mb-2"> Upload Image </label>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">
+        Upload Image
+        <span *ngIf="mode() === 'edit'" class="normal-case font-normal text-gray-400 ml-1"
+          >(leave empty to keep current)</span
+        >
+      </label>
 
       <div class="flex gap-6 items-start">
-        <!-- LEFT: Preview -->
+        <!-- Preview panel -->
         <div
-          class="w-40 h-40 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50"
+          class="w-40 h-40 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0"
         >
           <img
-            src="https://www.apple.com/v/iphone/home/cj/images/overview/select/iphone_17__fb1277oq3eaa_large_2x.jpg"
+            *ngIf="previewUrl(); else noImage"
+            [src]="previewUrl()"
             class="w-full h-full object-cover"
+            alt="Product preview"
           />
-
-          <!-- <span class="text-xs text-gray-400"> No Image </span> -->
+          <ng-template #noImage>
+            <span class="text-xs text-gray-400">No image</span>
+          </ng-template>
         </div>
 
-        <!-- RIGHT: Upload Box -->
+        <!-- Drop / click zone -->
         <div
           class="flex-1 border-2 border-dashed border-gray-300 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition"
           (click)="fileInput.click()"
         >
-          <input #fileInput type="file" accept="image/*" hidden />
-
+          <input #fileInput type="file" accept="image/*" hidden (change)="onSelectFile($event)" />
+          <svg
+            class="mx-auto mb-2 w-8 h-8 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M4 16l4-4a3 3 0 014.24 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M8 11h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
           <p class="text-sm text-gray-600 font-medium">Click to upload image</p>
-          <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-
-          <!-- File name -->
-          <p class="text-xs text-indigo-500 mt-3 truncate">product.imagePath</p>
+          <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 5 MB</p>
+          <p class="text-xs text-indigo-500 mt-3 truncate">
+            {{ selectedFile()?.name || 'No file chosen' }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Description -->
     <div>
-      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1"> Description </label>
+      <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description</label>
       <textarea
-        name="description"
+        formControlName="des"
         rows="3"
-        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500"
+        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
       ></textarea>
     </div>
 
-    <!-- Active -->
+    <!-- Active toggle -->
     <div
       class="flex items-center justify-between border border-gray-200 bg-white rounded-xl px-4 py-3"
     >
       <span class="text-sm font-medium text-gray-700">Active</span>
-      <button type="button" class="w-11 h-6 flex items-center rounded-full transition">
-        <span class="w-4 h-4 bg-white rounded-full transform transition"></span>
-      </button>
-      <!-- <button
+      <button
         type="button"
-        (click)="product.active = !product.active"
-        class="w-11 h-6 flex items-center rounded-full transition"
-        [ngClass]="product.active ? 'bg-indigo-500' : 'bg-gray-300'"
+        (click)="toggleStatus()"
+        class="w-11 h-6 flex items-center rounded-full transition-colors duration-200"
+        [class.bg-indigo-500]="productForm.value.status"
+        [class.bg-gray-300]="!productForm.value.status"
       >
         <span
-          class="w-4 h-4 bg-white rounded-full transform transition"
-          [ngClass]="product.active ? 'translate-x-6' : 'translate-x-1'"
+          class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200"
+          [class.translate-x-6]="productForm.value.status"
+          [class.translate-x-1]="!productForm.value.status"
         ></span>
-      </button> -->
+      </button>
     </div>
 
-    <!-- Buttons -->
+    <!-- Action buttons -->
     <div class="flex gap-3 pt-2">
       <button
         type="submit"
-        [disabled]="productForm.invalid"
-        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold"
+        [disabled]="productForm.invalid || isLoading()"
+        class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
       >
-        Create Product
+        <svg *ngIf="isLoading()" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        {{ isLoading() ? 'Saving…' : mode() === 'edit' ? 'Save Changes' : 'Create Product' }}
       </button>
 
       <button
         type="button"
-        class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-100"
+        (click)="onReset()"
+        [disabled]="isLoading()"
+        class="px-5 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Reset
       </button>
