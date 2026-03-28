@@ -18,6 +18,7 @@ import { ProductType } from '../../core/models/product.model';
 import { BrandService } from '../../core/services/brand/brand-service';
 import { BrandType } from '../../core/models/brand.model';
 import { ProductForm } from '../../content/product-form/product-form';
+import { ColorService } from '../../core/services/color/color-service';
 
 // ─── Models ────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ export class Product implements OnInit {
   // inject
   private productService = inject(ProductService);
   private brandService = inject(BrandService);
+  private colorService = inject(ColorService);
 
   isOpenForm = signal(false);
   isSelectedProduct = signal<ProductType | null>(null);
@@ -76,6 +78,9 @@ export class Product implements OnInit {
   brandList = toSignal(this.refresh$.pipe(switchMap(() => this.brandService.getBrands())), {
     initialValue: [] as BrandType[],
   });
+  colorList = toSignal(this.refresh$.pipe(switchMap(() => this.colorService.getColor())), {
+    initialValue: [] as ColorType[],
+  });
 
   openCreateForm() {
     this.isOpenForm.set(true);
@@ -89,6 +94,14 @@ export class Product implements OnInit {
   }
 
   //get
+  getColorHex(colorName: string) {
+    const colorHex = this.colorList().find((b) => b.name === colorName);
+    return colorHex ? colorHex.name : ' #000';
+  }
+  getBrand(brandId: number) {
+    const brand = this.brandList().find((b) => b.id === brandId);
+    return brand ? brand.name : 'Unknown';
+  }
 
   ngOnInit(): void {}
 }
