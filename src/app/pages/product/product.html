@@ -245,7 +245,7 @@
                     </div>
                     <div>
                       <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
-                      <p class="text-[11px] text-gray-400">{{ product.modelName }}</p>
+                      <p class="text-[11px] text-gray-400">product.modelName</p>
                     </div>
                   </div>
                 </td>
@@ -260,13 +260,12 @@
                     ></span> -->
                     <span
                       class="w-4 h-4 rounded-full border border-gray-200 inline-block relative group cursor-pointer"
-                      [style.background]="getColorHex(product.colorName)"
                     >
                       <!-- Tooltip on hover -->
                       <span
                         class="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
                       >
-                        {{ product.colorName }}
+                        product.colorName
                       </span>
                     </span>
                   </div>
