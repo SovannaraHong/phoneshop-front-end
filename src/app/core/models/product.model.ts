@@ -14,6 +14,9 @@ export interface ProductType {
 }
 export interface ProductResponse {
   products: ProductType[];
+  colorName: string;
+  brandName: string;
+  modelName: string;
   total: number;
   skip: number;
   limit: number;
