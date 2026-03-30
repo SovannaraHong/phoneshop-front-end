@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  EventEmitter,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -42,6 +51,9 @@ export class ProductForm implements OnInit {
   /** Pass a product to switch the form into edit mode */
   @Input() editProduct: ProductType | null = null;
 
+  /** Emits when a create/update/delete completes successfully */
+  @Output() saved = new EventEmitter<void>();
+
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
   private modelService = inject(ModelService);
@@ -50,9 +62,8 @@ export class ProductForm implements OnInit {
 
   productForm!: FormGroup;
 
-  // ── Signals ────────────────────────────────────────────────────────────────
+  // ── UI signals ─────────────────────────────────────────────────────────────
   mode = signal<FormMode>('create');
-  selectedColor = signal<string | null>(null);
   selectedFile = signal<File | null>(null);
   previewUrl = signal<string | null>(null);
   isLoading = signal(false);
@@ -60,8 +71,8 @@ export class ProductForm implements OnInit {
   submitError = signal<string | null>(null);
   showDeleteConfirm = signal(false);
 
-  // ── Static data ────────────────────────────────────────────────────────────
-  types: type[] = [
+  // ── Static options ─────────────────────────────────────────────────────────
+  readonly types: type[] = [
     { id: 1, name: 'Best Seller' },
     { id: 2, name: 'Top Rated' },
     { id: 3, name: 'Trending' },
@@ -69,7 +80,7 @@ export class ProductForm implements OnInit {
     { id: 5, name: 'Premium' },
   ];
 
-  // ── Reactive lists ─────────────────────────────────────────────────────────
+  // ── Remote data ────────────────────────────────────────────────────────────
   private refresh$ = new BehaviorSubject<void>(undefined);
 
   brandList = toSignal(this.refresh$.pipe(switchMap(() => this.brandService.getBrands())), {
@@ -102,7 +113,6 @@ export class ProductForm implements OnInit {
 
   // ── Populate form for edit ─────────────────────────────────────────────────
   private populateForm(product: ProductType): void {
-    // Find the color name by colorId so the swatch highlights correctly
     const color = this.colorList().find((c) => c.id === product.colorId);
     this.productForm.patchValue({
       model: product.modelId,
@@ -113,34 +123,30 @@ export class ProductForm implements OnInit {
       des: product.description,
       status: product.active,
     });
-    if (color) this.selectedColor.set(color.hex);
     if (product.imagePreview) this.previewUrl.set(product.imagePreview);
   }
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // ── Submit dispatcher ──────────────────────────────────────────────────────
   onSubmit(): void {
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
       return;
     }
-
     if (this.mode() === 'create' && !this.selectedFile()) {
       this.submitError.set('Please upload a product image before submitting.');
       return;
     }
-
     this.mode() === 'create' ? this.handleCreate() : this.handleUpdate();
   }
 
-  // ── Create — 4 API calls chained ──────────────────────────────────────────
+  // ── Create ─────────────────────────────────────────────────────────────────
   private handleCreate(): void {
     this.isLoading.set(true);
     this.submitError.set(null);
     this.submitSuccess.set(false);
 
     const form = this.productForm.value;
-
-    const productPayload: Partial<ProductType> = {
+    const payload: Partial<ProductType> = {
       modelId: Number(form.model),
       colorId: this.getColorId(form.color) ?? undefined,
       salePrice: Number(form.price),
@@ -150,30 +156,21 @@ export class ProductForm implements OnInit {
       active: form.status,
     };
 
-    // 1️⃣ createProduct → returns created product with its new id
     this.productService
-      .createProduct(productPayload)
+      .createProduct(payload)
       .pipe(
         switchMap((created: any) => {
           const id: number = created?.id ?? created?.[0]?.id;
-
-          // 2️⃣ setPrice — plain-text response
           return this.productService.createSell(id, Number(form.price)).pipe(
             switchMap(() =>
-              // 3️⃣ importProduct — { productId, importUnit, pricePerUnit, importDate }
               this.productService
                 .importProduct({
                   productId: id,
                   importUnit: Number(form.unit),
                   pricePerUnit: Number(form.price),
-                  importDate: toImportDateString(), // ← fixes the 400 error
+                  importDate: toImportDateString(),
                 })
-                .pipe(
-                  switchMap(() =>
-                    // 4️⃣ importImage — multipart/form-data
-                    this.productService.importImage(id, this.selectedFile()!),
-                  ),
-                ),
+                .pipe(switchMap(() => this.productService.importImage(id, this.selectedFile()!))),
             ),
           );
         }),
@@ -182,7 +179,8 @@ export class ProductForm implements OnInit {
       .subscribe({
         next: () => {
           this.submitSuccess.set(true);
-          this.finish();
+          this.onReset();
+          this.saved.emit();
         },
         error: (err) => {
           console.error('Product creation failed:', err);
@@ -191,7 +189,7 @@ export class ProductForm implements OnInit {
       });
   }
 
-  // ── Update ────────────────────────────────────────────────────────────────
+  // ── Update ─────────────────────────────────────────────────────────────────
   private handleUpdate(): void {
     if (!this.editProduct) return;
 
@@ -201,8 +199,7 @@ export class ProductForm implements OnInit {
 
     const form = this.productForm.value;
     const id = this.editProduct.id;
-
-    const productPayload: Partial<ProductType> = {
+    const payload: Partial<ProductType> = {
       modelId: Number(form.model),
       colorId: this.getColorId(form.color) ?? undefined,
       salePrice: Number(form.price),
@@ -212,28 +209,26 @@ export class ProductForm implements OnInit {
       active: form.status,
     };
 
-    // Update product details, then optionally update price & image
     this.productService
-      .updateProduct(id, productPayload)
+      .updateProduct(id, payload)
       .pipe(
         switchMap(() =>
-          // Always update price on edit
-          this.productService.createSell(id, Number(form.price)).pipe(
-            switchMap(() => {
-              // Only upload new image if a new file was selected
-              if (this.selectedFile()) {
-                return this.productService.importImage(id, this.selectedFile()!);
-              }
-              return of(null);
-            }),
-          ),
+          this.productService
+            .createSell(id, Number(form.price))
+            .pipe(
+              switchMap(() =>
+                this.selectedFile()
+                  ? this.productService.importImage(id, this.selectedFile()!)
+                  : of(null),
+              ),
+            ),
         ),
         finalize(() => this.isLoading.set(false)),
       )
       .subscribe({
         next: () => {
           this.submitSuccess.set(true);
-          // In edit mode, don't reset — just show success banner
+          this.saved.emit();
         },
         error: (err) => {
           console.error('Product update failed:', err);
@@ -242,11 +237,10 @@ export class ProductForm implements OnInit {
       });
   }
 
-  // ── Delete ────────────────────────────────────────────────────────────────
+  // ── Delete ─────────────────────────────────────────────────────────────────
   onDeleteRequest(): void {
     this.showDeleteConfirm.set(true);
   }
-
   onDeleteCancel(): void {
     this.showDeleteConfirm.set(false);
   }
@@ -264,7 +258,7 @@ export class ProductForm implements OnInit {
       .subscribe({
         next: () => {
           this.submitSuccess.set(true);
-          // Emit event or navigate away — hook up to parent as needed
+          this.saved.emit();
         },
         error: (err) => {
           console.error('Product delete failed:', err);
@@ -274,13 +268,10 @@ export class ProductForm implements OnInit {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-
   private extractErrorMessage(err: any): string {
-    // 409 Conflict = duplicate product
     if (err?.status === 409) {
       return 'This product already exists. A product with this model & color is already in the system.';
     }
-    // Plain-text body hinting at duplicate
     const bodyText: string =
       typeof err?.error === 'string' ? err.error : (err?.error?.message ?? err?.message ?? '');
     const lower = bodyText.toLowerCase();
@@ -292,7 +283,6 @@ export class ProductForm implements OnInit {
     ) {
       return 'This product already exists. A product with this model & color is already in the system.';
     }
-    // Structured validation errors like { importDate: "cannot be null" }
     if (err?.error && typeof err.error === 'object') {
       const messages = Object.values(err.error).join(' | ');
       if (messages) return messages;
@@ -309,7 +299,6 @@ export class ProductForm implements OnInit {
   }
 
   onSelectColor(color: ColorType): void {
-    this.selectedColor.set(color.hex);
     this.productForm.patchValue({ color: color.name });
   }
 
@@ -319,10 +308,6 @@ export class ProductForm implements OnInit {
 
   getColorId(name: string): number | null {
     return this.colorList().find((c) => c.name === name)?.id ?? null;
-  }
-
-  getSelectType(name: string): string {
-    return this.types.find((t) => t.name === name)?.name ?? 'Unknown';
   }
 
   onSelectFile(event: Event): void {
@@ -339,21 +324,12 @@ export class ProductForm implements OnInit {
     this.productForm.patchValue({ status: !this.productForm.value.status });
   }
 
-  reloadLists(): void {
-    this.refresh$.next();
-  }
-
   onReset(): void {
     this.productForm.reset({ status: true });
     this.selectedFile.set(null);
     this.previewUrl.set(null);
-    this.selectedColor.set(null);
     this.submitError.set(null);
     this.submitSuccess.set(false);
     this.showDeleteConfirm.set(false);
-  }
-
-  private finish(): void {
-    this.onReset();
   }
 }

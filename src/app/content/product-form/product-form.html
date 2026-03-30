@@ -11,104 +11,104 @@
     </div>
 
     <!-- Delete button — only in edit mode -->
-    <button
-      *ngIf="mode() === 'edit'"
-      type="button"
-      (click)="onDeleteRequest()"
-      [disabled]="isLoading()"
-      class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-        />
-      </svg>
-      Delete
-    </button>
+    @if (mode() === 'edit') {
+      <button
+        type="button"
+        (click)="onDeleteRequest()"
+        [disabled]="isLoading()"
+        class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
+        Delete
+      </button>
+    }
   </div>
 
-  <!-- ── Delete confirmation dialog ─────────────────────────────────────── -->
-  <div
-    *ngIf="showDeleteConfirm()"
-    class="mb-4 flex items-center justify-between gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
-  >
-    <p class="text-sm text-red-700 font-medium">Are you sure you want to delete this product?</p>
-    <div class="flex gap-2 shrink-0">
-      <button
-        type="button"
-        (click)="onDeleteConfirm()"
-        class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition-colors"
-      >
-        Yes, delete
-      </button>
-      <button
-        type="button"
-        (click)="onDeleteCancel()"
-        class="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-      >
-        Cancel
-      </button>
+  <!-- ── Delete confirmation ─────────────────────────────────────────────── -->
+  @if (showDeleteConfirm()) {
+    <div
+      class="mb-4 flex items-center justify-between gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+    >
+      <p class="text-sm text-red-700 font-medium">Are you sure you want to delete this product?</p>
+      <div class="flex gap-2 shrink-0">
+        <button
+          type="button"
+          (click)="onDeleteConfirm()"
+          class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Yes, delete
+        </button>
+        <button
+          type="button"
+          (click)="onDeleteCancel()"
+          class="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- ── Success banner ─────────────────────────────────────────────────── -->
-  <div
-    *ngIf="submitSuccess()"
-    class="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3"
-  >
-    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-    </svg>
-    {{ mode() === 'edit' ? 'Product updated successfully!' : 'Product created successfully!' }}
-  </div>
+  @if (submitSuccess()) {
+    <div
+      class="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3"
+    >
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      {{ mode() === 'edit' ? 'Product updated successfully!' : 'Product created successfully!' }}
+    </div>
+  }
 
   <!-- ── Error banner ───────────────────────────────────────────────────── -->
-  <div
-    *ngIf="submitError()"
-    class="mb-4 flex items-start gap-2 rounded-xl px-4 py-3 text-sm border"
-    [ngClass]="
-      submitError()!.includes('already exists')
-        ? 'bg-amber-50 border-amber-300 text-amber-800'
-        : 'bg-red-50 border-red-200 text-red-700'
-    "
-  >
-    <svg
-      *ngIf="submitError()!.includes('already exists')"
-      class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
+  @if (submitError()) {
+    <div
+      class="mb-4 flex items-start gap-2 rounded-xl px-4 py-3 text-sm border"
+      [ngClass]="
+        submitError()!.includes('already exists')
+          ? 'bg-amber-50 border-amber-300 text-amber-800'
+          : 'bg-red-50 border-red-200 text-red-700'
+      "
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-      />
-    </svg>
-    <svg
-      *ngIf="!submitError()!.includes('already exists')"
-      class="w-4 h-4 shrink-0 mt-0.5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-    <span>{{ submitError() }}</span>
-  </div>
+      @if (submitError()!.includes('already exists')) {
+        <svg
+          class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+          />
+        </svg>
+      } @else {
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      }
+      <span>{{ submitError() }}</span>
+    </div>
+  }
 
   <!-- ── Form ───────────────────────────────────────────────────────────── -->
   <form class="space-y-5" [formGroup]="productForm" (ngSubmit)="onSubmit()">
-    <!-- Product Name (auto-generated, read-only) -->
+    <!-- Product Name (read-only, auto-generated) -->
     <div>
       <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Product Name</label>
       <input
@@ -134,12 +134,9 @@
           <option value="" disabled>Select model</option>
           <option *ngFor="let m of modelList()" [value]="m.id">{{ m.name }}</option>
         </select>
-        <p
-          *ngIf="productForm.get('model')?.invalid && productForm.get('model')?.touched"
-          class="mt-1 text-xs text-red-500"
-        >
-          Model is required.
-        </p>
+        @if (productForm.get('model')?.invalid && productForm.get('model')?.touched) {
+          <p class="mt-1 text-xs text-red-500">Model is required.</p>
+        }
       </div>
 
       <!-- Color swatches -->
@@ -167,12 +164,9 @@
             productForm.value.color ? 'Selected: ' + productForm.value.color : 'No color selected'
           }}
         </p>
-        <p
-          *ngIf="productForm.get('color')?.invalid && productForm.get('color')?.touched"
-          class="mt-1 text-xs text-red-500"
-        >
-          Color is required.
-        </p>
+        @if (productForm.get('color')?.invalid && productForm.get('color')?.touched) {
+          <p class="mt-1 text-xs text-red-500">Color is required.</p>
+        }
       </div>
     </div>
 
@@ -189,12 +183,9 @@
             productForm.get('price')?.invalid && productForm.get('price')?.touched
           "
         />
-        <p
-          *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched"
-          class="mt-1 text-xs text-red-500"
-        >
-          A valid price is required.
-        </p>
+        @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
+          <p class="mt-1 text-xs text-red-500">A valid price is required.</p>
+        }
       </div>
 
       <div>
@@ -208,16 +199,13 @@
             productForm.get('unit')?.invalid && productForm.get('unit')?.touched
           "
         />
-        <p
-          *ngIf="productForm.get('unit')?.invalid && productForm.get('unit')?.touched"
-          class="mt-1 text-xs text-red-500"
-        >
-          At least 1 unit is required.
-        </p>
+        @if (productForm.get('unit')?.invalid && productForm.get('unit')?.touched) {
+          <p class="mt-1 text-xs text-red-500">At least 1 unit is required.</p>
+        }
       </div>
     </div>
 
-    <!-- Type -->
+    <!-- Type Sell -->
     <div>
       <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type Sell</label>
       <select
@@ -228,42 +216,36 @@
         "
       >
         <option value="" disabled>Select type</option>
-        <option *ngFor="let t of types" [value]="t.name">{{ getSelectType(t.name) }}</option>
+        <option *ngFor="let t of types" [value]="t.name">{{ t.name }}</option>
       </select>
-      <p
-        *ngIf="productForm.get('type')?.invalid && productForm.get('type')?.touched"
-        class="mt-1 text-xs text-red-500"
-      >
-        Type is required.
-      </p>
+      @if (productForm.get('type')?.invalid && productForm.get('type')?.touched) {
+        <p class="mt-1 text-xs text-red-500">Type is required.</p>
+      }
     </div>
 
     <!-- Image upload -->
     <div>
       <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">
         Upload Image
-        <span *ngIf="mode() === 'edit'" class="normal-case font-normal text-gray-400 ml-1"
-          >(leave empty to keep current)</span
-        >
+        @if (mode() === 'edit') {
+          <span class="normal-case font-normal text-gray-400 ml-1"
+            >(leave empty to keep current)</span
+          >
+        }
       </label>
-
       <div class="flex gap-6 items-start">
-        <!-- Preview panel -->
+        <!-- Preview -->
         <div
           class="w-40 h-40 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0"
         >
-          <img
-            *ngIf="previewUrl(); else noImage"
-            [src]="previewUrl()"
-            class="w-full h-full object-cover"
-            alt="Product preview"
-          />
-          <ng-template #noImage>
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" class="w-full h-full object-cover" alt="Product preview" />
+          } @else {
             <span class="text-xs text-gray-400">No image</span>
-          </ng-template>
+          }
         </div>
 
-        <!-- Drop / click zone -->
+        <!-- Drop zone -->
         <div
           class="flex-1 border-2 border-dashed border-gray-300 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition"
           (click)="fileInput.click()"
@@ -328,17 +310,19 @@
         [disabled]="productForm.invalid || isLoading()"
         class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
       >
-        <svg *ngIf="isLoading()" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-        </svg>
+        @if (isLoading()) {
+          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        }
         {{ isLoading() ? 'Saving…' : mode() === 'edit' ? 'Save Changes' : 'Create Product' }}
       </button>
 

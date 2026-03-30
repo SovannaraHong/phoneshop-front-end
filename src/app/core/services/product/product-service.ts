@@ -34,12 +34,10 @@ export class ProductService {
     return this.http.delete(`${this.api}/products/${id}`, { responseType: 'text' });
   }
 
-  // Backend expects { "price": <BigDecimal> } — NOT "salePrice"
-  // Returns plain text "Price updated successfully"
   createSell(id: number, price: number): Observable<string> {
     return this.http.post(
       `${this.api}/products/${id}/setPrice`,
-      { price: price }, // ← was "salePrice", backend field is "price"
+      { price: price },
       { responseType: 'text' },
     );
   }
