@@ -248,7 +248,7 @@
                     <div>
                       <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
                       <p class="font-semibold text-gray-800 text-[13px]">
-                        {{ getModelName(product.modelId) }}
+                        {{ product.modelName }}
                       </p>
                     </div>
                   </div>
@@ -264,11 +264,9 @@
                   <div class="flex items-center gap-2">
                     <span
                       class="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0"
-                      [style.background]="getColorHex(product.colorId)"
+                      [style.background]="getColorHex(product.colorName)"
+                      [title]="product.colorName"
                     ></span>
-                    <span class="text-[13px] text-gray-600">{{
-                      getColorName(product.colorId)
-                    }}</span>
                   </div>
                 </td>
 

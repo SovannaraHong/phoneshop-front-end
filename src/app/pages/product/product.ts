@@ -25,6 +25,17 @@ export class Product {
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
 
+  color: ColorType[] = [
+    { id: 1, name: 'Red', hex: '#FF0000' },
+    { id: 2, name: 'Green', hex: '#00FF00' },
+    { id: 3, name: 'Blue', hex: '#0000FF' },
+    { id: 4, name: 'Yellow', hex: '#FFFF00' },
+    { id: 5, name: 'Cyan', hex: '#00FFFF' },
+    { id: 6, name: 'Magenta', hex: '#FF00FF' },
+    { id: 7, name: 'Black', hex: '#000000' },
+    { id: 8, name: 'White', hex: '#FFFFFF' },
+    { id: 9, name: 'gold', hex: '#FFD700' },
+  ];
   // ── UI state ──────────────────────────────────────────────────────────────
   isOpenForm = signal(false);
   selectedProduct = signal<ProductType | null>(null);
@@ -100,12 +111,12 @@ export class Product {
   getBrandName(brandId: number): string {
     return this.brandList().find((b) => b.id === brandId)?.name ?? 'Unknown';
   }
-  getModelName(modelId: number): string {
-    return this.brandList().find((b) => b.id === modelId)?.name ?? 'Unknown';
+  getModelName(modelName: string): string {
+    return this.brandList().find((b) => b.name === modelName)?.name ?? 'Unknown';
   }
 
-  getColorHex(colorId: number): string {
-    return this.colorList().find((c) => c.id === colorId)?.hex ?? '#000';
+  getColorHex(colorName: string): string {
+    return this.color.find((c) => c.name.toLowerCase() === colorName.toLowerCase())?.hex ?? '#000';
   }
 
   getColorName(colorId: number): string {
