@@ -52,7 +52,7 @@ export class ProductForm implements OnInit {
   @Input() editProduct: ProductType | null = null;
 
   /** Emits when a create/update/delete completes successfully */
-  @Output() saved = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();      
 
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
