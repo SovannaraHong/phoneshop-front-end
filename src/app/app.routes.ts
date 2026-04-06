@@ -30,6 +30,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./core/intergration/bakong-payment/bakong-payment').then((m) => m.BakongPayment),
   },
+  {
+    path: 'report',
+    loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
+  },
   // ✅ redirect unknown paths to home
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
