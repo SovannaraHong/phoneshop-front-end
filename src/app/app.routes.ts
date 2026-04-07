@@ -34,6 +34,6 @@ export const routes: Routes = [
     path: 'report',
     loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
   },
-  // ✅ redirect unknown paths to home
+
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
