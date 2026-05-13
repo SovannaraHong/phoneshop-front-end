@@ -437,30 +437,44 @@
           </table>
         </div>
 
+        <!-- NEW - dynamic pagination -->
         <div
           class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
         >
-          <span class="text-xs text-slate-400"
-            >Showing {{ filteredUsers().length }} of {{ totalUsers() }} users</span
-          >
+          <span class="text-xs text-slate-400">
+            Showing {{ filteredUsers().length }} of {{ totalElements() }} users (Page
+            {{ currentPage() }} of {{ totalPages() }})
+          </span>
+
           <div class="flex gap-1">
+            <!-- Prev -->
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
+              (click)="prevPage()"
+              [disabled]="currentPage() === 1"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ‹
             </button>
+
+            <!-- Dynamic page buttons -->
+            @for (page of pageNumbers(); track page) {
+              <button
+                (click)="goToPage(page)"
+                [class]="
+                  currentPage() === page
+                    ? 'w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold'
+                    : 'w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all'
+                "
+              >
+                {{ page }}
+              </button>
+            }
+
+            <!-- Next -->
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold"
-            >
-              1
-            </button>
-            <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
-            >
-              2
-            </button>
-            <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
+              (click)="nextPage()"
+              [disabled]="currentPage() >= totalPages()"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ›
             </button>

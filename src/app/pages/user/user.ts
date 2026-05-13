@@ -12,15 +12,15 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '../../core/services/user/user-service';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RoleType, UserType } from '../../core/models/user.model';
+import { RoleType, UserType, PageDTO } from '../../core/models/user.model';
 import { UserForm } from '../../content/user-form/user-form';
-import { RoleForm } from '../../content/role-form/role-form'; // ✅ import RoleForm
+import { RoleForm } from '../../content/role-form/role-form';
 import { listAnimation, statAnimation, toastAnimation } from '../../shared/pipes/animation';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-user',
-  imports: [CommonModule, FormsModule, UserForm, RoleForm, RouterLink, RouterLinkActive], // ✅ add RoleForm here
+  imports: [CommonModule, FormsModule, UserForm, RoleForm, RouterLink, RouterLinkActive],
   standalone: true,
   templateUrl: './user.html',
   styleUrl: './user.css',
@@ -29,31 +29,60 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class User implements OnInit {
   @ViewChild('userForm') userForm!: UserForm;
-  // ── step 1: inject ────────────────────────────────────────────
+
   private userService = inject(UserService);
 
-  // ── step 2: refresh trigger ───────────────────────────────────
-  private refresh$ = new BehaviorSubject<void>(undefined);
+  // ── pagination state ──────────────────────────────────────────
+  currentPage = signal<number>(1);
+  pageSize = signal<number>(10);
+
+  // ── refresh trigger ───────────────────────────────────────────
+  private refresh$ = new BehaviorSubject<{ page: number; size: number }>({
+    page: 1,
+    size: 10,
+  });
+
   isDelete = signal(false);
   deleteTargetId = signal<number | null>(null);
 
-  // ── step 3: HTTP → Signal ─────────────────────────────────────
-  userList = toSignal(this.refresh$.pipe(switchMap(() => this.userService.getUser())), {
-    initialValue: [] as UserType[],
-  });
+  // ── HTTP → Signal ─────────────────────────────────────────────
+  private pageData = toSignal(
+    this.refresh$.pipe(switchMap(({ page, size }) => this.userService.getUser(page, size))),
+    {
+      initialValue: {
+        list: [],
+        paginationDTO: {
+          empty: true,
+          first: true,
+          last: true,
+          numberOfElements: 0,
+          pageNumber: 1,
+          pageSize: 10,
+          totalElements: 0,
+          totalPage: 0,
+        },
+      } as PageDTO<UserType>,
+    },
+  );
 
-  // ── step 4: UI state signals ──────────────────────────────────
+  // ── derive list + pagination meta ─────────────────────────────
+  userList = computed(() => this.pageData().list ?? []);
+  totalElements = computed(() => this.pageData().paginationDTO?.totalElements ?? 0);
+  totalPages = computed(() => this.pageData().paginationDTO?.totalPage ?? 0);
+  pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
+
+  // ── UI state signals ──────────────────────────────────────────
   selectedTab = signal<string>('All');
   searchQuery = signal<string>('');
   selectedUser = signal<UserType | null>(null);
   isOpenForm = signal(false);
-  isOpenRoleForm = signal(false); // ✅ role modal signal
+  isOpenRoleForm = signal(false);
   showToast = signal(false);
   toastMessage = signal('');
 
   readonly tabs = ['All', 'Active', 'Inactive', 'Suspended'];
 
-  // ── step 5: computed — filter by tab + search ─────────────────
+  // ── filter by tab + search ────────────────────────────────────
   filteredUsers = computed(() => {
     const users = this.userList();
     const tab = this.selectedTab();
@@ -74,31 +103,53 @@ export class User implements OnInit {
     });
   });
 
-  // ── step 6: computed stats ────────────────────────────────────
-  totalUsers = computed(() => this.userList().length);
+  // ── stats ─────────────────────────────────────────────────────
+  totalUsers = computed(() => this.totalElements());
   activeUsers = computed(() => this.userList().filter((u) => u.status === 'Active').length);
   inactiveUsers = computed(() => this.userList().filter((u) => u.status === 'Inactive').length);
   suspendedUsers = computed(() => this.userList().filter((u) => u.status === 'Suspended').length);
 
   getPercent(count: number) {
-    if (this.totalUsers() === 0) return;
-    return ((count / this.totalUsers()) * 100).toFixed(1) + '%';
+    if (this.totalElements() === 0) return '0%';
+    return ((count / this.totalElements()) * 100).toFixed(1) + '%';
   }
+
   inUp(count: number): boolean {
     return count > 0;
   }
 
-  // ── step 7: lifecycle ─────────────────────────────────────────
   ngOnInit(): void {}
 
-  // ── step 8: toast ─────────────────────────────────────────────
+  // ── refresh helper ────────────────────────────────────────────
+  private triggerRefresh(): void {
+    this.refresh$.next({
+      page: this.currentPage(),
+      size: this.pageSize(),
+    });
+  }
+
+  // ── pagination actions ────────────────────────────────────────
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.triggerRefresh();
+  }
+
+  prevPage(): void {
+    this.goToPage(this.currentPage() - 1);
+  }
+  nextPage(): void {
+    this.goToPage(this.currentPage() + 1);
+  }
+
+  // ── toast ─────────────────────────────────────────────────────
   private showSuccess(message: string): void {
     this.toastMessage.set(message);
     this.showToast.set(true);
     setTimeout(() => this.showToast.set(false), 4000);
   }
 
-  // ── step 9: user form open/close ──────────────────────────────
+  // ── form open/close ───────────────────────────────────────────
   openFormCreate(): void {
     this.selectedUser.set(null);
     this.isOpenForm.set(true);
@@ -111,26 +162,20 @@ export class User implements OnInit {
 
   toggleForm(): void {
     this.isOpenForm.set(!this.isOpenForm());
-    if (!this.isOpenForm()) {
-      this.selectedUser.set(null);
-    }
+    if (!this.isOpenForm()) this.selectedUser.set(null);
   }
 
   onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.toggleForm();
-    }
+    if (event.target === event.currentTarget) this.toggleForm();
   }
 
-  // ── step 10: after user form saves ───────────────────────────
+  // ── after saves ───────────────────────────────────────────────
   onUserCreated(): void {
     const isEdit = !!this.selectedUser();
-    this.refresh$.next();
+    this.triggerRefresh();
     this.toggleForm();
     this.showSuccess(isEdit ? 'User updated successfully!' : 'User created successfully!');
   }
-
-  // ── step 11: after role form saves ───────────────────────────
 
   onRoleCreated(): void {
     this.isOpenRoleForm.set(false);
@@ -138,18 +183,18 @@ export class User implements OnInit {
     this.showSuccess('Role created successfully!');
   }
 
-  // ── step 12: delete ───────────────────────────────────────────
-  confirmDelete(id: number) {
+  // ── delete ────────────────────────────────────────────────────
+  confirmDelete(id: number): void {
     this.deleteTargetId.set(id);
     this.isDelete.set(true);
   }
 
-  onConfirmDelete() {
+  onConfirmDelete(): void {
     const id = this.deleteTargetId();
     if (id === null) return;
     this.userService.deleteUser(id).subscribe({
       next: () => {
-        this.refresh$.next();
+        this.triggerRefresh();
         this.showSuccess('User deleted successfully!');
         this.isDelete.set(false);
         this.deleteTargetId.set(null);
@@ -161,12 +206,12 @@ export class User implements OnInit {
     });
   }
 
-  onCancelDelete() {
+  onCancelDelete(): void {
     this.isDelete.set(false);
     this.deleteTargetId.set(null);
   }
 
-  // ── step 13: helpers ──────────────────────────────────────────
+  // ── helpers ───────────────────────────────────────────────────
   setTab(tab: string): void {
     this.selectedTab.set(tab);
     this.searchQuery.set('');

@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { UserType } from '../../models/user.model';
+import { PageDTO, UserType } from '../../models/user.model';
 import { environment } from '../../../environments/environments';
 
 @Injectable({
@@ -12,10 +12,23 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getUser(): Observable<UserType[]> {
-    return this.http.get<UserType[]>(`${this.api}/auth`);
-  }
+  // getUser(): Observable<UserType[]> {
+  //   return this.http.get<UserType[]>(`${this.api}/auth`);
+  // }
+  getUser(
+    page: number = 1,
+    limit: number = 10,
+    sortBy: string = 'id',
+    direction: 'asc' | 'desc' = 'asc',
+  ): Observable<PageDTO<UserType>> {
+    const params = new HttpParams()
+      .set('_page', page.toString()) // ✅ underscore — matches your backend
+      .set('_limit', limit.toString()) // ✅ underscore — matches your backend
+      .set('sortBy', sortBy)
+      .set('direction', direction);
 
+    return this.http.get<PageDTO<UserType>>(`${this.api}/auth`, { params });
+  }
   createUser(userData: UserType): Observable<UserType> {
     return this.http.post<UserType>(`${this.api}/auth/register`, userData);
   }
