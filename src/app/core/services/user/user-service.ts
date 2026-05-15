@@ -43,4 +43,7 @@ export class UserService {
   updateUser(id: number, user: UserType): Observable<UserType> {
     return this.http.put<UserType>(`${this.api}/auth/${id}`, user);
   }
+  suspendUser(id: number): Observable<any> {
+    return this.http.patch(`${this.api}/auth/${id}/status`, { status: 'Suspended' });
+  }
 }

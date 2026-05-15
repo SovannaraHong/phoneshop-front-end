@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { LoginService } from '../../core/services/login/login-service';
 import { LoginType } from '../../core/models/user.model';
 import { Auth } from '../../core/services/auth/auth';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,8 @@ export class Login implements OnInit {
   private loginService = inject(LoginService);
   private cdr = inject(ChangeDetectorRef);
   private auth = inject(Auth);
-
+  private route = inject(ActivatedRoute);
+  expiredMessage = '';
   @Input() onLoginSuccess!: () => void;
   loginForm!: FormGroup;
 
@@ -29,7 +31,11 @@ export class Login implements OnInit {
       username: [''],
       password: [''],
     });
-
+    this.route.queryParams.subscribe((params) => {
+      if (params['reason'] === 'expired') {
+        this.expiredMessage = 'Your session has expired. Please sign in again.';
+      }
+    });
     // Clear username error only when username field changes
     this.loginForm.get('username')?.valueChanges.subscribe(() => {
       this.errorUsername = '';

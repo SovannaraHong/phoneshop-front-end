@@ -323,12 +323,19 @@
                 <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
                   <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
+                      <!-- <img
+                        class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
+                        [src]="user.imagePath"
+                        (error)="onImageError($event, user)"
+                        alt=""
+                      /> -->
                       <img
                         class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
                         [src]="user.imagePath"
                         onerror="
+                          this.onerror = null;
                           this.src =
-                            'https://imgs.search.brave.com/lLASPdCMXLG7hjtQIeU4hfNZ3H_KmBYnVGo6c0_00M0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0aWMudmVjdGVlenkuY29tL3N5c3RlbS9yZXNvdXJjZXMvdGh1bWJuYWlscy8wMDkvNzM0LzU2NC9zbWFsbC9kZWZhdWx0LWF2YXRhci1wcm9maWxlLWljb24tb2Ytc29jaWFsLW1lZGlhLXVzZXItdmVjdG9yLmpwZw'
+                            'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=64&bold=true';
                         "
                         alt=""
                       />

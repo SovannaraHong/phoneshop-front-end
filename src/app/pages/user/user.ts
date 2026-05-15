@@ -221,4 +221,9 @@ export class User implements OnInit {
     if (!roles || roles.length === 0) return 'No Role';
     return roles.map((r) => r.name).join(', ');
   }
+  onImageError(event: Event, user: UserType): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=6366f1&color=fff&size=64&bold=true`;
+  }
 }

@@ -47,4 +47,10 @@ export class Auth {
     localStorage.removeItem(this.USER_KEY);
     this.currentUser.set(null);
   }
+  handleTokenExpired() {
+    this.logout();
+  }
+  getUserId(): number | null {
+    return this.currentUser()?.data.userId ?? null;
+  }
 }
