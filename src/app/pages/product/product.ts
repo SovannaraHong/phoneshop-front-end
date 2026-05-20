@@ -116,9 +116,9 @@ export class Product {
   }
 
   getColorHex(colorName: string): string {
+    if (!colorName) return '#000';
     return this.color.find((c) => c.name.toLowerCase() === colorName.toLowerCase())?.hex ?? '#000';
   }
-
   getColorName(colorId: number): string {
     return this.colorList().find((c) => c.id === colorId)?.name ?? '—';
   }
