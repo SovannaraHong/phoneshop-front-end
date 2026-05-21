@@ -7,6 +7,7 @@ import {
   Output,
   EventEmitter,
   signal,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -17,7 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, switchMap, finalize, of } from 'rxjs';
+import { BehaviorSubject, switchMap, finalize, of, combineLatest, take } from 'rxjs';
 
 import { ColorType } from '../../core/models/color.model';
 import { BrandType } from '../../core/models/brand.model';
@@ -52,13 +53,14 @@ export class ProductForm implements OnInit {
   @Input() editProduct: ProductType | null = null;
 
   /** Emits when a create/update/delete completes successfully */
-  @Output() saved = new EventEmitter<void>();      
+  @Output() saved = new EventEmitter<void>();
 
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
   private modelService = inject(ModelService);
   private productService = inject(ProductService);
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
 
   productForm!: FormGroup;
 
@@ -82,6 +84,7 @@ export class ProductForm implements OnInit {
     { id: 8, name: 'White', hex: '#FFFFFF' },
     { id: 9, name: 'gold', hex: '#FFD700' },
   ];
+
   // ── Static options ─────────────────────────────────────────────────────────
   readonly types: type[] = [
     { id: 1, name: 'Best Seller' },
@@ -118,15 +121,25 @@ export class ProductForm implements OnInit {
 
     if (this.editProduct) {
       this.mode.set('edit');
-      this.populateForm(this.editProduct);
+
+      combineLatest([this.colorService.getColor(), this.modelService.getModel()])
+        .pipe(take(1))
+        .subscribe(([colors, models]) => {
+          this.populateForm(this.editProduct!, colors, models);
+          this.cdr.markForCheck();
+        });
     }
   }
 
   // ── Populate form for edit ─────────────────────────────────────────────────
-  private populateForm(product: ProductType): void {
-    const color = this.colorList().find((c) => c.id === product.colorId);
+  private populateForm(product: ProductType, colors: ColorType[], models: ModelType[]): void {
+    // Use modelName since backend doesn't return modelId
+    const model = models.find((m) => m.name === product.modelName);
+    // Use colorName since backend doesn't return colorId
+    const color = colors.find((c) => c.name.toLowerCase() === product.colorName?.toLowerCase());
+
     this.productForm.patchValue({
-      model: product.modelId,
+      model: model ? String(model.id) : '',
       color: color?.name ?? '',
       price: product.salePrice,
       unit: product.unit,
@@ -134,7 +147,10 @@ export class ProductForm implements OnInit {
       des: product.description,
       status: product.active,
     });
-    if (product.imagePreview) this.previewUrl.set(product.imagePreview);
+
+    if (product.imagePath) {
+      this.previewUrl.set(product.imagePath);
+    }
   }
 
   // ── Submit dispatcher ──────────────────────────────────────────────────────
@@ -210,6 +226,7 @@ export class ProductForm implements OnInit {
 
     const form = this.productForm.value;
     const id = this.editProduct.id;
+
     const payload: Partial<ProductType> = {
       modelId: Number(form.model),
       colorId: this.getColorId(form.color) ?? undefined,
@@ -220,19 +237,19 @@ export class ProductForm implements OnInit {
       active: form.status,
     };
 
+    const priceChanged = Number(form.price) !== Number(this.editProduct.salePrice);
+    const hasNewImage = !!this.selectedFile();
+
     this.productService
       .updateProduct(id, payload)
       .pipe(
+        // Only call setPrice if price actually changed
         switchMap(() =>
-          this.productService
-            .createSell(id, Number(form.price))
-            .pipe(
-              switchMap(() =>
-                this.selectedFile()
-                  ? this.productService.importImage(id, this.selectedFile()!)
-                  : of(null),
-              ),
-            ),
+          priceChanged ? this.productService.createSell(id, Number(form.price)) : of(null),
+        ),
+        // Only upload image if user picked a new file
+        switchMap(() =>
+          hasNewImage ? this.productService.importImage(id, this.selectedFile()!) : of(null),
         ),
         finalize(() => this.isLoading.set(false)),
       )
@@ -314,7 +331,8 @@ export class ProductForm implements OnInit {
   }
 
   getColorHex(colorName: string): string {
-    return this.color.find((c) => c.name.toLowerCase() === colorName?.toLowerCase())?.hex ?? '#000';
+    if (!colorName) return '#000';
+    return this.color.find((c) => c.name.toLowerCase() === colorName.toLowerCase())?.hex ?? '#000';
   }
 
   getColorId(name: string): number | null {

@@ -34,6 +34,13 @@ export const routes: Routes = [
     path: 'report',
     loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
   },
+  {
+    path: 'history-import',
+    loadComponent: () =>
+      import('./pages/product-history-import/product-history-import').then(
+        (m) => m.ProductHistoryImport,
+      ),
+  },
 
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
