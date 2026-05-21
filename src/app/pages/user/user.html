@@ -323,12 +323,19 @@
                 <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
                   <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
+                      <!-- <img
+                        class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
+                        [src]="user.imagePath"
+                        (error)="onImageError($event, user)"
+                        alt=""
+                      /> -->
                       <img
                         class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
                         [src]="user.imagePath"
                         onerror="
+                          this.onerror = null;
                           this.src =
-                            'https://imgs.search.brave.com/lLASPdCMXLG7hjtQIeU4hfNZ3H_KmBYnVGo6c0_00M0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0aWMudmVjdGVlenkuY29tL3N5c3RlbS9yZXNvdXJjZXMvdGh1bWJuYWlscy8wMDkvNzM0LzU2NC9zbWFsbC9kZWZhdWx0LWF2YXRhci1wcm9maWxlLWljb24tb2Ytc29jaWFsLW1lZGlhLXVzZXItdmVjdG9yLmpwZw'
+                            'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=64&bold=https://imgs.search.brave.com/7SgL8SmcEChejndOWu-cqTZfO1NmwOJZBPuWVgmbITQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9zaWxo/b3VldHRlLXZlY3Rv/ci1tYWxlLWF2YXRh/ci1mZWF0dXJpbmct/d2F2eS1oYWlyLWRl/c2lnbmVkLWJsYWNr/LW91dGxpbmUtbWlu/aW1hbGlzdGljLXN0/eWxlLXNlcnZlcy1h/cy0zNTY1NzA5NTMu/anBn';
                         "
                         alt=""
                       />
@@ -437,30 +444,44 @@
           </table>
         </div>
 
+        <!-- NEW - dynamic pagination -->
         <div
           class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
         >
-          <span class="text-xs text-slate-400"
-            >Showing {{ filteredUsers().length }} of {{ totalUsers() }} users</span
-          >
+          <span class="text-xs text-slate-400">
+            Showing {{ filteredUsers().length }} of {{ totalElements() }} users (Page
+            {{ currentPage() }} of {{ totalPages() }})
+          </span>
+
           <div class="flex gap-1">
+            <!-- Prev -->
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
+              (click)="prevPage()"
+              [disabled]="currentPage() === 1"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ‹
             </button>
+
+            <!-- Dynamic page buttons -->
+            @for (page of pageNumbers(); track page) {
+              <button
+                (click)="goToPage(page)"
+                [class]="
+                  currentPage() === page
+                    ? 'w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold'
+                    : 'w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all'
+                "
+              >
+                {{ page }}
+              </button>
+            }
+
+            <!-- Next -->
             <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold"
-            >
-              1
-            </button>
-            <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
-            >
-              2
-            </button>
-            <button
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all"
+              (click)="nextPage()"
+              [disabled]="currentPage() >= totalPages()"
+              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ›
             </button>

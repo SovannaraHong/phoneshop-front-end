@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environments';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { ProductType } from '../../models/product.model';
+import { ImportHistoryType } from '../../models/productHistoryImport.model';
 
 @Injectable({
   providedIn: 'root',
@@ -42,13 +43,11 @@ export class ProductService {
     );
   }
 
-  // importProduct expects: { productId, importUnit, pricePerUnit, importDate }
-  // Backend returns plain text "Import Product Sucesss" — use responseType: 'text'
   importProduct(payload: {
     productId: number;
     importUnit: number;
     pricePerUnit: number;
-    importDate: string; // format: "YYYY-MM-DD HH:mm:ss"
+    importDate: string;
   }): Observable<string> {
     return this.http.post(`${this.api}/products/importProduct`, payload, { responseType: 'text' });
   }
@@ -57,5 +56,22 @@ export class ProductService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.put(`${this.api}/products/${id}/image`, formData);
+  }
+
+  // ── Upload products from Excel ─────────────────────────────────────────────
+  uploadProduct(
+    file: File,
+  ): Observable<{ success: boolean; message: string; errors?: Record<number, string> }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; message: string; errors?: Record<number, string> }>(
+      `${this.api}/products/uploadProduct`,
+      formData,
+    );
+  }
+  getImportHistory(): Observable<ImportHistoryType[]> {
+    return this.http
+      .get<{ list: ImportHistoryType[]; pagination: any }>(`${this.api}/import`)
+      .pipe(map((res) => res.list));
   }
 }

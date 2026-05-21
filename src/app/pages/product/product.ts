@@ -25,6 +25,8 @@ export class Product {
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
 
+  objectEntries = Object.entries;
+
   color: ColorType[] = [
     { id: 1, name: 'Red', hex: '#FF0000' },
     { id: 2, name: 'Green', hex: '#00FF00' },
@@ -36,19 +38,30 @@ export class Product {
     { id: 8, name: 'White', hex: '#FFFFFF' },
     { id: 9, name: 'gold', hex: '#FFD700' },
   ];
-  // ── UI state ──────────────────────────────────────────────────────────────
+
+  // ── UI state ───────────────────────────────────────────────────────────────
   isOpenForm = signal(false);
   selectedProduct = signal<ProductType | null>(null);
 
-  // ── Search / filter state ─────────────────────────────────────────────────
+  // ── Search / filter state ──────────────────────────────────────────────────
   searchQuery = signal('');
   selectedBrandId = signal<number | ''>('');
   selectedTypeSell = signal('');
 
-  // ── Data refresh trigger ──────────────────────────────────────────────────
+  // ── Delete state ───────────────────────────────────────────────────────────
+  isDelete = signal(false);
+  deleteTargetId = signal<number | null>(null);
+  errorMessage = signal<string | null>(null);
+
+  // ── Import state ───────────────────────────────────────────────────────────
+  isImporting = signal(false);
+  importErrors = signal<Record<number, string> | null>(null);
+  importSuccess = signal<string | null>(null);
+
+  // ── Data refresh trigger ───────────────────────────────────────────────────
   private refresh$ = new BehaviorSubject<void>(undefined);
 
-  // ── Remote data ───────────────────────────────────────────────────────────
+  // ── Remote data ────────────────────────────────────────────────────────────
   productList = toSignal(this.refresh$.pipe(switchMap(() => this.productService.getProducts())), {
     initialValue: [] as ProductType[],
   });
@@ -61,7 +74,7 @@ export class Product {
     initialValue: [] as ColorType[],
   });
 
-  // ── Computed stats ────────────────────────────────────────────────────────
+  // ── Computed stats ─────────────────────────────────────────────────────────
   totalProduct = computed(() => this.productList().length);
   activePro = computed(() => this.productList().filter((p) => p.active).length);
   bestSeller = computed(
@@ -69,7 +82,7 @@ export class Product {
   );
   lowStock = computed(() => this.productList().filter((p) => p.unit < 10 && p.active).length);
 
-  // ── Filtered list (search + brand + type) ────────────────────────────────
+  // ── Filtered list ──────────────────────────────────────────────────────────
   filteredProducts = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const brandId = this.selectedBrandId();
@@ -83,10 +96,9 @@ export class Product {
     });
   });
 
-  // ── Unique type-sell values for the filter dropdown ───────────────────────
   typeSellOptions = computed(() => [...new Set(this.productList().map((p) => p.typeSell))].sort());
 
-  // ── Drawer helpers ────────────────────────────────────────────────────────
+  // ── Drawer helpers ─────────────────────────────────────────────────────────
   openCreateForm(): void {
     this.selectedProduct.set(null);
     this.isOpenForm.set(true);
@@ -103,23 +115,105 @@ export class Product {
   }
 
   onFormSaved(): void {
-    this.refresh$.next(); // re-fetch the list
+    this.refresh$.next();
     this.closeForm();
   }
 
-  // ── Lookup helpers ────────────────────────────────────────────────────────
+  // ── Import from Excel ──────────────────────────────────────────────────────
+  triggerImport(): void {
+    this.importErrors.set(null);
+    this.importSuccess.set(null);
+    const input = document.getElementById('excelFileInput') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+      input.click();
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    const validExtension = /\.(xlsx|xls)$/i.test(file.name);
+    if (!validExtension) {
+      this.importErrors.set({ 0: 'Invalid file. Please upload an .xlsx or .xls file.' });
+      return;
+    }
+
+    this.isImporting.set(true);
+    this.importErrors.set(null);
+    this.importSuccess.set(null);
+
+    this.productService.uploadProduct(file).subscribe({
+      next: (res) => {
+        this.isImporting.set(false);
+        if (res.success) {
+          this.importSuccess.set(res.message);
+          this.refresh$.next();
+        } else {
+          this.importErrors.set(res.errors ?? null);
+        }
+      },
+      error: (err) => {
+        this.isImporting.set(false);
+        this.importErrors.set({
+          0: err.error?.message ?? 'Import failed. Please try again.',
+        });
+      },
+    });
+  }
+
+  closeImportResult(): void {
+    this.importErrors.set(null);
+    this.importSuccess.set(null);
+  }
+
+  // ── Lookup helpers ─────────────────────────────────────────────────────────
   getBrandName(brandId: number): string {
     return this.brandList().find((b) => b.id === brandId)?.name ?? 'Unknown';
   }
+
   getModelName(modelName: string): string {
     return this.brandList().find((b) => b.name === modelName)?.name ?? 'Unknown';
   }
 
   getColorHex(colorName: string): string {
+    if (!colorName) return '#000';
     return this.color.find((c) => c.name.toLowerCase() === colorName.toLowerCase())?.hex ?? '#000';
   }
 
   getColorName(colorId: number): string {
     return this.colorList().find((c) => c.id === colorId)?.name ?? '—';
+  }
+
+  // ── Delete helpers ─────────────────────────────────────────────────────────
+  confirmDelete(id: number): void {
+    this.deleteTargetId.set(id);
+    this.isDelete.set(true);
+  }
+
+  onCancelDelete(): void {
+    this.isDelete.set(false);
+    this.deleteTargetId.set(null);
+    this.errorMessage.set(null);
+  }
+
+  onConfirmDelete(): void {
+    const id = this.deleteTargetId();
+    if (id === null) return;
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        this.refresh$.next();
+        this.isDelete.set(false);
+        this.deleteTargetId.set(null);
+        this.errorMessage.set(null);
+      },
+      error: (err) => {
+        this.errorMessage.set(
+          err.error?.message || 'Delete failed. The Product could not be deleted.',
+        );
+      },
+    });
   }
 }

@@ -17,7 +17,7 @@ export class Dashboard implements OnInit {
   public auth = inject(Auth);
   showProfile = false;
   ngOnInit(): void {
-    this.userList$ = this.authService.getUser();
+    // this.userList$ = this.authService.getUser();
   }
   userList$!: Observable<UserType[]>;
 

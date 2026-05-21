@@ -3,7 +3,21 @@ export interface RoleType {
   name: string;
   permissions: { id: number; name: string }[];
 }
+export interface PaginationDTO {
+  empty: boolean;
+  first: boolean;
+  last: boolean;
+  numberOfElements: number;
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPage: number;
+}
 
+export interface PageDTO<T> {
+  list: T[];
+  paginationDTO: PaginationDTO;
+}
 export interface UserType {
   id: number;
   firstName: string;
