@@ -1,0 +1,566 @@
+<div class="flex-1 flex flex-col overflow-hidden">
+  <!-- SUCCESS MODAL — must be here at the top level -->
+  @if (showSuccess()) {
+    <div
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-400/90 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full mx-4 text-center"
+      >
+        <div
+          class="w-24 h-24 rounded-full bg-green-600 flex items-center justify-center shadow-lg"
+          style="box-shadow: 0 12px 40px rgba(91, 255, 126, 0.45)"
+        >
+          <i class="fa-solid fa-check text-white text-4xl"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Order Placed!</h2>
+          <p class="text-[13px] text-gray-400 mt-2 leading-relaxed">
+            Your order has been confirmed.<br />Thank you for shopping with PhoneShop.
+          </p>
+        </div>
+        <div
+          class="w-full bg-indigo-50 border border-indigo-100 rounded-2xl px-5 py-4 flex flex-col gap-2"
+        >
+          <div
+            class="flex items-center justify-center gap-2 text-indigo-600 text-[13px] font-semibold"
+          >
+            <i class="fa-solid fa-truck-fast"></i>
+            Your order is being processed
+          </div>
+          <p class="text-[11px] text-gray-400">
+            You will receive a notification once your order is shipped.
+          </p>
+        </div>
+        <div class="flex gap-3 w-full">
+          <button
+            (click)="goShopping()"
+            class="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            Shop More
+          </button>
+          <button
+            (click)="router.navigate(['/home'])"
+            class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- checkout.html -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- PAGE HEADER -->
+    <div
+      class="bg-white border-b border-gray-100 px-7 py-4 flex items-center justify-between shrink-0"
+    >
+      <div>
+        <p class="text-xs text-gray-400 font-medium">PhoneShop System / Orders</p>
+        <h2 class="text-lg font-bold text-gray-800 mt-0.5">Checkout</h2>
+      </div>
+      <!-- Step indicator -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-green-500">
+          <div
+            class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px]"
+          >
+            ✓
+          </div>
+          Cart
+        </div>
+        <div class="w-7 h-px bg-gray-200"></div>
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-indigo-600">
+          <div
+            class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold"
+          >
+            2
+          </div>
+          Checkout
+        </div>
+        <div class="w-7 h-px bg-gray-200"></div>
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+          <div
+            class="w-5 h-5 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-[10px] font-bold"
+          >
+            3
+          </div>
+          Confirmation
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="flex-1 overflow-y-auto px-7 py-5 bg-[#edf0f4]">
+      <div class="grid grid-cols-[1fr_360px] gap-5">
+        <!-- LEFT COLUMN -->
+        <div class="flex flex-col gap-4">
+          <!-- Delivery Address -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+              <h3 class="text-[13px] font-bold text-gray-800">Delivery Address</h3>
+              <button class="text-[11px] font-semibold text-indigo-600 hover:underline">
+                + Add new
+              </button>
+            </div>
+            <div class="p-5">
+              <!-- Saved addresses -->
+              <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <div
+                  class="border-2 border-indigo-500 bg-indigo-50/50 rounded-xl p-3 cursor-pointer"
+                >
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[12px] font-bold text-indigo-600">Home</span>
+                    <div
+                      class="w-3.5 h-3.5 rounded-full border-2 border-indigo-500 bg-indigo-500 shadow-[inset_0_0_0_2px_white]"
+                    ></div>
+                  </div>
+                  <p class="text-[11px] text-gray-400 leading-relaxed">
+                    12 Monivong Blvd,<br />Phnom Penh 12201
+                  </p>
+                </div>
+                <div
+                  class="border border-gray-200 rounded-xl p-3 cursor-pointer hover:border-indigo-300 transition-colors"
+                >
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[12px] font-bold text-gray-700">Office</span>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></div>
+                  </div>
+                  <p class="text-[11px] text-gray-400 leading-relaxed">
+                    78 Norodom Blvd,<br />Chamkarmon, PP
+                  </p>
+                </div>
+                <div
+                  class="border border-gray-200 rounded-xl p-3 cursor-pointer hover:border-indigo-300 transition-colors"
+                >
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[12px] font-bold text-gray-700">Other</span>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300"></div>
+                  </div>
+                  <p class="text-[11px] text-gray-400 leading-relaxed">
+                    Fill in a new<br />delivery address
+                  </p>
+                </div>
+              </div>
+              <!-- Form -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >First Name</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="Sophea"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Last Name</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="Chan"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="col-span-2 flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Address Line 1</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="Street address"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >City</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="Phnom Penh"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Phone</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="+855 ..."
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Method -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50">
+              <h3 class="text-[13px] font-bold text-gray-800">Shipping Method</h3>
+            </div>
+            <div class="p-5 flex flex-col gap-2.5">
+              <div
+                class="border-2 border-indigo-500 bg-indigo-50/40 rounded-xl p-3.5 flex items-center gap-3.5 cursor-pointer"
+              >
+                <div
+                  class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0"
+                >
+                  <svg
+                    class="w-4.5 h-4.5 text-indigo-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.8"
+                      d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414A1 1 0 0121 11.414V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                    />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-[13px] font-bold text-indigo-600">Standard Delivery</p>
+                  <p class="text-[11px] text-gray-400 mt-0.5">2–4 business days</p>
+                </div>
+                <span class="text-[13px] font-bold text-gray-800">$3.99</span>
+                <div
+                  class="w-3.5 h-3.5 rounded-full border-2 border-indigo-500 bg-indigo-500 shadow-[inset_0_0_0_2px_white] shrink-0"
+                ></div>
+              </div>
+              <div
+                class="border border-gray-200 rounded-xl p-3.5 flex items-center gap-3.5 cursor-pointer hover:border-indigo-300 transition-colors"
+              >
+                <div
+                  class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0"
+                >
+                  <svg
+                    class="w-4.5 h-4.5 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.8"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-[13px] font-bold text-gray-700">Express Delivery</p>
+                  <p class="text-[11px] text-gray-400 mt-0.5">Next business day</p>
+                </div>
+                <span class="text-[13px] font-bold text-gray-800">$9.99</span>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300 shrink-0"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50">
+              <h3 class="text-[13px] font-bold text-gray-800">Payment Method</h3>
+            </div>
+            <div class="p-5">
+              <!-- Method tabs -->
+              <div class="grid grid-cols-4 gap-2.5 mb-4">
+                <div
+                  class="border-2 border-indigo-500 bg-indigo-50/40 rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer"
+                >
+                  <span class="text-xl">💳</span>
+                  <span class="text-[11px] font-semibold text-indigo-600">Credit Card</span>
+                </div>
+                <div
+                  class="border border-gray-200 rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer hover:border-indigo-300 transition-colors"
+                >
+                  <span class="text-xl">📱</span>
+                  <span class="text-[11px] font-semibold text-gray-500">ABA / KHQR</span>
+                </div>
+                <div
+                  class="border border-gray-200 rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer hover:border-indigo-300 transition-colors"
+                >
+                  <span class="text-xl">🏦</span>
+                  <span class="text-[11px] font-semibold text-gray-500">Bank Transfer</span>
+                </div>
+                <div
+                  class="border border-gray-200 rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer hover:border-indigo-300 transition-colors"
+                >
+                  <span class="text-xl">💵</span>
+                  <span class="text-[11px] font-semibold text-gray-500">Cash on Delivery</span>
+                </div>
+              </div>
+              <!-- Card brand logos -->
+              <div class="flex items-center gap-2 mb-4">
+                <span
+                  class="text-[10px] font-bold text-blue-800 border border-gray-200 bg-gray-50 rounded px-2 py-1"
+                  >VISA</span
+                >
+                <span
+                  class="text-[10px] font-bold text-red-600 border border-gray-200 bg-gray-50 rounded px-2 py-1"
+                  >MC</span
+                >
+                <span
+                  class="text-[10px] font-bold text-green-700 border border-gray-200 bg-gray-50 rounded px-2 py-1"
+                  >JCB</span
+                >
+                <span
+                  class="text-[10px] font-bold text-blue-700 border border-gray-200 bg-gray-50 rounded px-2 py-1"
+                  >PayPal</span
+                >
+              </div>
+              <!-- Card form -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2 flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Card Number</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="1234  5678  9012  3456"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Expiry Date</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="MM / YY"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >CVV</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="•••"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+                <div class="col-span-2 flex flex-col gap-1.5">
+                  <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
+                    >Cardholder Name</label
+                  >
+                  <input
+                    type="text"
+                    placeholder="Name on card"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  />
+                </div>
+              </div>
+              <!-- Secure badge -->
+              <div class="flex items-center gap-1.5 mt-3">
+                <svg
+                  class="w-3 h-3 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                <span class="text-[11px] text-gray-400">Secured by 256-bit SSL encryption</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END LEFT COLUMN -->
+
+        <!-- RIGHT COLUMN: Order Summary -->
+        <div class="flex flex-col gap-4">
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+              <h3 class="text-[13px] font-bold text-gray-800">Order Summary</h3>
+              <span class="text-[11px] font-semibold text-indigo-600"
+                >{{ cart.count() }} items</span
+              >
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+              <!-- Items -->
+              <div class="flex flex-col gap-3.5">
+                @for (item of cart.cartItems(); track item.product.id) {
+                  <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                      <img
+                        [src]="item.product.imagePath"
+                        class="w-full h-full object-cover"
+                        onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
+                      />
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[13px] font-semibold text-gray-800">{{ item.product.name }}</p>
+                      <p class="text-[11px] text-gray-400 mt-0.5">{{ item.product.modelName }}</p>
+                      <p
+                        [ngClass]="item.product.unit < 1 ? 'text-red-500' : 'text-gray-800'"
+                        class="text-[11px] mt-0.5"
+                      >
+                        Quantity: {{ item.product.unit }}
+                      </p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5">
+                      <span class="text-[13px] font-bold text-gray-800">
+                        ${{ item.product.salePrice * item.quantity | number: '1.2-2' }}
+                      </span>
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          (click)="cart.decrement(item.product.id)"
+                          class="w-5 h-5 border border-gray-200 rounded-md bg-gray-50 text-[13px] flex items-center justify-center hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                        >
+                          −
+                        </button>
+                        <span
+                          class="text-[12px] font-semibold text-gray-800 min-w-[14px] text-center"
+                        >
+                          {{ item.quantity }}
+                        </span>
+                        <button
+                          (click)="cart.increment(item.product.id)"
+                          class="w-5 h-5 border border-gray-200 rounded-md bg-gray-50 text-[13px] flex items-center justify-center hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                        >
+                          +
+                        </button>
+                        <!-- Remove button -->
+                        <button
+                          (click)="cart.remove(item.product.id)"
+                          class="w-5 h-5 border border-red-200 rounded-md bg-red-50 text-[11px] text-red-400 flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition-all ml-1"
+                        >
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+                @if (cart.cartItems().length === 0) {
+                  <p class="text-center text-gray-400 text-sm py-4">Your cart is empty</p>
+                }
+
+                @if (errorMsg()) {
+                  <div
+                    class="bg-red-50 border border-red-200 rounded-2xl px-4 py-4 flex items-start gap-3"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5"
+                    >
+                      <i class="fa-solid fa-circle-exclamation text-red-500 text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[13px] font-bold text-red-600">Order Failed</p>
+                      <p class="text-[12px] text-red-400 mt-0.5 leading-relaxed">
+                        {{ errorMsg() }}
+                      </p>
+                    </div>
+                    <button
+                      (click)="errorMsg.set('')"
+                      class="text-red-300 hover:text-red-500 transition-colors shrink-0"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                }
+
+                <!-- Summary rows -->
+                <div>
+                  <div class="flex items-center justify-between text-[13px] text-gray-500">
+                    <span>Subtotal</span>
+                    <span>${{ cart.subtotal() | number: '1.2-2' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[13px] text-gray-500">
+                    <span>Shipping</span>
+                    <span>${{ shipping | number: '1.2-2' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[13px] text-gray-500">
+                    <span>Tax (10%)</span>
+                    <span>${{ tax() | number: '1.2-2' }}</span>
+                  </div>
+                  <div
+                    class="flex items-center justify-between text-[15px] font-bold text-gray-800"
+                  >
+                    <span>Total</span>
+                    <span>${{ total() | number: '1.2-2' }}</span>
+                  </div>
+                </div>
+                <!-- Place Order button -->
+                <button
+                  (click)="placeOrder()"
+                  [disabled]="isPlacing() || cart.cartItems().length === 0"
+                  class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold py-3.5 rounded-2xl transition-colors shadow-lg shadow-indigo-200"
+                >
+                  <i class="fa-solid fa-shield-halved"></i>
+                  {{ isPlacing() ? 'Placing Order...' : 'Place Order' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="flex items-center justify-center gap-4">
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400">
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                  />
+                </svg>
+                Secure Payment
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400">
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Free Returns
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400">
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+                Warranty
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END RIGHT COLUMN -->
+    </div>
+  </div>
+</div>

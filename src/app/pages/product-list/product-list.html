@@ -178,6 +178,7 @@
 
         <!-- Button -->
         <button
+          (click)="cart.addToCart(pro)"
           onclick="
             this.textContent = 'Added to cart ✓';
             this.classList.remove('bg-white', 'text-[#111]');

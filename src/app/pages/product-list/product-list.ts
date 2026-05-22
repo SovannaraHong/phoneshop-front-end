@@ -1,10 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { BrandService } from '../../core/services/brand/brand-service';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { BrandType } from '../../core/models/brand.model';
 import { CommonModule } from '@angular/common';
 import { ProductType } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product/product-service';
+import { RouterLink } from '@angular/router';
+import { CartService } from '../../core/services/cart/cart-service';
 
 @Component({
   selector: 'app-product-list',
@@ -19,6 +27,7 @@ export class ProductList implements OnInit {
   productList$!: Observable<ProductType[]>;
   filteredProducts$!: Observable<ProductType[]>;
   private selectedBrand$ = new BehaviorSubject<BrandType | null>(null);
+  public cart = inject(CartService);
 
   selectedBrand?: BrandType;
 
