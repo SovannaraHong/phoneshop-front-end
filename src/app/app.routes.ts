@@ -2,6 +2,11 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login').then((m) => m.Login),
+  },
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home').then((m) => m.Home),
@@ -15,7 +20,7 @@ export const routes: Routes = [
   {
     path: 'product',
     loadComponent: () => import('./pages/product/product').then((m) => m.Product),
-    canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Cashier', 'Seller', 'Staff'])],
+    canActivate: [authGuard(['Admin', 'Manager', 'Stock'])],
   },
   {
     path: 'user',
@@ -41,7 +46,7 @@ export const routes: Routes = [
   {
     path: 'report',
     loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
-    canActivate: [authGuard(['Admin', 'Manager', 'Staff'])],
+    canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Staff', 'Seller'])],
   },
   {
     path: 'history-import',
@@ -54,7 +59,7 @@ export const routes: Routes = [
   {
     path: 'checkout',
     loadComponent: () => import('./pages/checkout/checkout').then((m) => m.Checkout),
-    canActivate: [authGuard(['Admin', 'Manager', 'Cashier', 'Seller'])],
+    canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Cashier', 'Seller'])],
   },
   {
     path: 'confirmation',

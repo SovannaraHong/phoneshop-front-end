@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { LoginService } from '../../core/services/login/login-service';
 import { LoginType } from '../../core/models/user.model';
 import { Auth } from '../../core/services/auth/auth';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +18,7 @@ export class Login implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private auth = inject(Auth);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   expiredMessage = '';
   @Input() onLoginSuccess!: () => void;
   loginForm!: FormGroup;
@@ -62,6 +63,7 @@ export class Login implements OnInit {
         this.auth.setToken(res.data.accessToken);
         this.auth.setUser(res);
         this.onLoginSuccess?.();
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         this.isLoading = false;

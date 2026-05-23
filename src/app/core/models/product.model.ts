@@ -1,3 +1,5 @@
+import { BrandType } from './brand.model';
+
 export interface ProductType {
   id: number;
   name: string;
@@ -15,6 +17,7 @@ export interface ProductType {
   typeSell: string;
   active: boolean;
   brandId: number;
+  brand: BrandType;
 }
 export interface ProductResponse {
   products: ProductType[];

@@ -13,7 +13,7 @@ import { ProductService } from '../../core/services/product/product-service';
 export class Checkout {
   cart = inject(CartService);
   private productService = inject(ProductService);
-  public router = inject(Router); // ← change private to public
+  public router = inject(Router);
 
   shipping = 3.99;
   taxRate = 0.1;
@@ -23,7 +23,7 @@ export class Checkout {
 
   isPlacing = signal(false);
   errorMsg = signal('');
-  showSuccess = signal(false); // ← add this
+  showSuccess = signal(false);
 
   placeOrder() {
     if (this.cart.cartItems().length === 0) return;
