@@ -5,37 +5,6 @@
     <span class="text-sm text-gray-400">{{ filteredProducts().length }} products</span>
   </div>
 
-  <!-- BRAND FILTER TABS -->
-  @if (brandList().length) {
-    <div class="flex gap-2 mb-5 bg-slate-100 p-1 w-fit rounded-xl">
-      <button
-        (click)="showAll()"
-        class="px-3 py-1 rounded uppercase font-bold text-[14px] transition-all"
-        [ngClass]="
-          !selectedBrand()
-            ? 'bg-white text-slate-800 shadow-sm'
-            : 'text-slate-500 hover:text-slate-700'
-        "
-      >
-        All
-      </button>
-
-      @for (brand of brandList(); track brand.id) {
-        <button
-          (click)="setActive(brand)"
-          class="px-3 py-1 rounded uppercase font-bold text-[14px] transition-all"
-          [ngClass]="
-            selectedBrand()?.id === brand.id
-              ? 'bg-white text-slate-800 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
-          "
-        >
-          {{ brand.name }}
-        </button>
-      }
-    </div>
-  }
-
   <!-- TYPE-SELL TABS + SORT BAR -->
   <div class="flex items-center justify-between border-b gap-3 pb-2 border-gray-200 mb-6">
     <div
@@ -55,18 +24,23 @@
         />
       </svg>
       <input
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
         type="text"
         placeholder="Search products..."
         class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
       />
     </div>
 
-    <!-- Brand filter -->
     <select
+      [ngModel]="selectedBrandId()"
+      (ngModelChange)="selectedBrandId.set($event === '' ? '' : +$event)"
       class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
     >
       <option value="">All Brands</option>
-      <option *ngFor="let b of brandList()" [value]="b.id">{{ b.name }}</option>
+      @for (brand of brandListData(); track brand.id) {
+        <option [value]="brand.id">{{ brand.name }}</option>
+      }
     </select>
 
     <!-- Type filter -->
@@ -75,6 +49,8 @@
       (ngModelChange)="selectedType.set($event)"
       class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
     >
+      <option value="">All Type</option>
+
       @for (type of typeSellOption(); track $index) {
         <option>{{ type }}</option>
       }

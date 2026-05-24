@@ -29,9 +29,12 @@ import { FormsModule } from '@angular/forms';
 export class ProductList {
   readonly productService = inject(ProductService);
   readonly cart = inject(CartService);
+  readonly brandService = inject(BrandService);
 
   //variables data
   selectedTypeSell = signal('');
+  selectedBrandId = signal<number | ''>('');
+  searchQuery = signal('');
   // ── Refresh trigger ────────────────────────────────────────────────────────
   private readonly refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -40,20 +43,10 @@ export class ProductList {
     this.refresh$.pipe(switchMap(() => this.productService.getProducts())),
     { initialValue: [] as ProductType[] },
   );
-
-  // ── Brand filter ───────────────────────────────────────────────────────────
-  selectedBrand = signal<BrandType | null>(null);
-
-  readonly brandList = computed(() => {
-    const seen = new Map<number, BrandType>();
-    for (const p of this.productList()) {
-      // ✅ guard: skip if brand is missing (e.g. API inconsistency)
-      if (p.brand && !seen.has(p.brand.id)) {
-        seen.set(p.brand.id, p.brand);
-      }
-    }
-    return [...seen.values()];
-  });
+  readonly brandListData = toSignal(
+    this.refresh$.pipe(switchMap(() => this.brandService.getBrands())),
+    { initialValue: [] as BrandType[] },
+  );
 
   selectedType = signal<string | null>(null);
   readonly typeSellOption = computed(() =>
@@ -61,26 +54,18 @@ export class ProductList {
   );
 
   readonly filteredProducts = computed(() => {
-    const brand = this.selectedBrand();
     const type = this.selectedType();
-    if (!type || type === 'All') return this.productList();
+    const brandId = this.selectedBrandId();
+    const query = this.searchQuery().toLowerCase().trim();
+
     return this.productList().filter((p) => {
-      const matchBrand = !brand || p.brand?.id === brand.id;
-      const matchType = !type || p.typeSell === type;
-      return matchBrand && matchType;
+      if (!p.active) return false;
+      const matchQuery = !query || p.name.toLowerCase().includes(query);
+      const matchType = !type || type === 'All' || p.typeSell === type;
+      const matchBrandId = !brandId || p.brandId === brandId;
+      return matchType && matchBrandId && matchQuery;
     });
   });
-
-  // ── Actions ────────────────────────────────────────────────────────────────
-  setActive(brand: BrandType) {
-    this.selectedBrand.set(brand);
-  }
-
-  showAll() {
-    this.selectedBrand.set(null);
-    this.selectedType.set(null); // ✅ reset type too when "All" is clicked
-  }
-
   refresh() {
     this.refresh$.next();
   }

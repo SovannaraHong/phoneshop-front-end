@@ -18,6 +18,7 @@ export interface ProductType {
   active: boolean;
   brandId: number;
   brand: BrandType;
+  totalAmount: number;
 }
 export interface ProductResponse {
   products: ProductType[];
