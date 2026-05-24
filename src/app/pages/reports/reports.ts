@@ -1,6 +1,21 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-export interface Product {
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environments';
+import { finalize } from 'rxjs/operators';
+import { ProductType } from '../../core/models/product.model';
+import { ProductService } from '../../core/services/product/product-service';
+
+export interface ReportProduct {
   productId: number;
   productName: string;
   productUnit: number;
@@ -9,46 +24,47 @@ export interface Product {
 
 @Component({
   selector: 'app-reports',
-  imports: [CommonModule, DecimalPipe],
+  imports: [CommonModule, DecimalPipe, FormsModule],
   templateUrl: './reports.html',
   styleUrl: './reports.css',
+  standalone: true,
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Reports implements OnInit {
-  products: Product[] = [
-    { productId: 38, productName: 'Huawei Pura 80 red', productUnit: 40, totalAmount: 52000.0 },
-    // Replace with your API data
-  ];
+  private http = inject(HttpClient);
+  private productService = inject(ProductService);
+  private api = environment.baseUrl;
 
-  reportDate: string = '';
-  totalUnits: number = 0;
-  grandTotal: number = 0;
-  maxUnits: number = 1;
-  maxAmount: number = 1;
+  products = signal<ReportProduct[]>([]);
+  private allProducts = signal<ProductType[]>([]);
 
-  private colorMap: Record<string, string> = {
-    red: '#ef4444',
-    blue: '#3b82f6',
-    green: '#22c55e',
-    black: '#374151',
-    white: '#e5e7eb',
-    gold: '#eab308',
-    silver: '#94a3b8',
-    purple: '#a855f7',
-    pink: '#ec4899',
-    orange: '#f97316',
-    yellow: '#facc15',
-    gray: '#9ca3af',
-  };
+  isLoading = signal(false);
+  errorMsg = signal('');
+  startDate = signal('');
+  endDate = signal('');
 
-  // Rotating accent bars for cards
-  private accentColors = [
-    'bg-gradient-to-r from-indigo-400 to-violet-400',
-    'bg-gradient-to-r from-violet-400 to-purple-400',
-    'bg-gradient-to-r from-sky-400 to-indigo-400',
-    'bg-gradient-to-r from-emerald-400 to-teal-400',
-    'bg-gradient-to-r from-amber-400 to-orange-400',
-    'bg-gradient-to-r from-rose-400 to-pink-400',
-  ];
+  searchQuery = signal('');
+  selectedProduct = signal('');
+
+  uniqueProducts = computed(() => [...new Set(this.products().map((p) => p.productName))].sort());
+
+  filteredProducts = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const product = this.selectedProduct().toLowerCase();
+    return this.products().filter((p) => {
+      const matchSearch = !query || p.productName.toLowerCase().includes(query);
+      const matchProduct = !product || p.productName.toLowerCase().includes(product);
+      return matchSearch && matchProduct;
+    });
+  });
+
+  totalUnits = computed(() => this.products().reduce((sum, p) => sum + p.productUnit, 0));
+  grandTotal = computed(() => this.products().reduce((sum, p) => sum + p.totalAmount, 0));
+  maxAmount = computed(() => Math.max(...this.products().map((p) => p.totalAmount), 1));
+
+  reportDate = '';
+  private initialized = false;
 
   private barColors = [
     'bg-gradient-to-r from-indigo-400 to-violet-400',
@@ -60,29 +76,75 @@ export class Reports implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.reportDate = new Date().toLocaleDateString('en-US', {
+    this.productService.getProducts().subscribe((data) => {
+      this.allProducts.set(data);
+    });
+
+    const now = new Date();
+    this.startDate.set(this.toDateInput(now));
+    this.endDate.set(this.toDateInput(now));
+    this.reportDate = now.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
-
-    this.totalUnits = this.products.reduce((sum, p) => sum + p.productUnit, 0);
-    this.grandTotal = this.products.reduce((sum, p) => sum + p.totalAmount, 0);
-    this.maxUnits = Math.max(...this.products.map((p) => p.productUnit), 1);
-    this.maxAmount = Math.max(...this.products.map((p) => p.totalAmount), 1);
+    this.initialized = true;
+    this.fetchReport();
   }
 
-  getColor(name: string): string | null {
-    const lower = name.toLowerCase();
-    for (const [key, value] of Object.entries(this.colorMap)) {
-      if (lower.includes(key)) return value;
+  onStartDateChange(value: string): void {
+    this.startDate.set(value);
+    if (this.initialized && this.startDate() && this.endDate()) this.fetchReport();
+  }
+
+  onEndDateChange(value: string): void {
+    this.endDate.set(value);
+    if (this.initialized && this.startDate() && this.endDate()) this.fetchReport();
+  }
+
+  private toDateInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  fetchReport(): void {
+    if (!this.startDate() || !this.endDate()) return;
+    this.isLoading.set(true);
+    this.errorMsg.set('');
+    this.searchQuery.set('');
+    this.selectedProduct.set('');
+
+    const start = `${this.startDate()} 00:00:00`.replace(' ', '%20');
+    const end = `${this.endDate()} 23:59:59`.replace(' ', '%20');
+
+    this.http
+      .get<ReportProduct[]>(`${this.api}/reports/${start}/${end}`)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (data) => this.products.set(data),
+        error: (err) => this.errorMsg.set(err?.error?.message ?? 'Failed to load report.'),
+      });
+  }
+
+  setQuick(range: 'today' | 'week' | 'month' | 'year'): void {
+    const now = new Date();
+    this.endDate.set(this.toDateInput(now));
+    if (range === 'today') {
+      this.startDate.set(this.toDateInput(now));
+    } else if (range === 'week') {
+      const first = new Date(now);
+      first.setDate(now.getDate() - now.getDay());
+      this.startDate.set(this.toDateInput(first));
+    } else if (range === 'month') {
+      this.startDate.set(this.toDateInput(new Date(now.getFullYear(), now.getMonth(), 1)));
+    } else if (range === 'year') {
+      this.startDate.set(this.toDateInput(new Date(now.getFullYear(), 0, 1)));
     }
-    return null;
+    this.fetchReport();
   }
 
-  getAccentColor(index: number): string {
-    return this.accentColors[index % this.accentColors.length];
+  getImage(productId: number): string {
+    return this.allProducts().find((p) => p.id === productId)?.imagePath ?? '';
   }
 
   getBarColor(index: number): string {

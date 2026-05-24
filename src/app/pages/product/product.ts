@@ -11,10 +11,12 @@ import { ProductType } from '../../core/models/product.model';
 import { BrandType } from '../../core/models/brand.model';
 import { ColorType } from '../../core/models/color.model';
 import { ProductForm } from '../../content/product-form/product-form';
+import { CartService } from '../../core/services/cart/cart-service';
+import { ImportProductForm } from '../../content/import-product-form/import-product-form';
 
 @Component({
   selector: 'app-product',
-  standalone: true,
+
   imports: [CommonModule, FormsModule, ProductForm],
   templateUrl: './product.html',
   styleUrls: ['./product.css'],
@@ -83,19 +85,33 @@ export class Product {
   lowStock = computed(() => this.productList().filter((p) => p.unit < 10 && p.active).length);
 
   // ── Filtered list ──────────────────────────────────────────────────────────
+  // filteredProducts = computed(() => {
+  //   const query = this.searchQuery().toLowerCase().trim();
+  //   const brandId = this.selectedBrandId();
+  //   const type = this.selectedTypeSell();
+
+  //   return this.productList().filter((p) => {
+  //     const matchesSearch = !query || p.name.toLowerCase().includes(query);
+  //     const matchesBrand = !brandId || p.brandId === Number(brandId);
+  //     const matchesType = !type || p.typeSell === type;
+  //     return matchesSearch && matchesBrand && matchesType;
+  //   });
+  // });
   filteredProducts = computed(() => {
+    const list = this.productList(); // explicitly read the list first
     const query = this.searchQuery().toLowerCase().trim();
     const brandId = this.selectedBrandId();
     const type = this.selectedTypeSell();
 
-    return this.productList().filter((p) => {
-      const matchesSearch = !query || p.name.toLowerCase().includes(query);
-      const matchesBrand = !brandId || p.brandId === Number(brandId);
+    console.log('List length:', list.length, '| brandId:', brandId, '| type:', type);
+
+    return list.filter((p) => {
+      const matchesSearch = !query || p.name?.toLowerCase().includes(query);
+      const matchesBrand = brandId === '' || p.brandId === Number(brandId);
       const matchesType = !type || p.typeSell === type;
       return matchesSearch && matchesBrand && matchesType;
     });
   });
-
   typeSellOptions = computed(() => [...new Set(this.productList().map((p) => p.typeSell))].sort());
 
   // ── Drawer helpers ─────────────────────────────────────────────────────────

@@ -77,4 +77,10 @@ export class Auth {
   handleTokenExpired(): void {
     this.logout();
   }
+  hasRole(requiredRoles: string[]): boolean {
+    const roles = this.currentUser()?.data?.roles ?? [];
+    // roles in JWT look like ['ROLE_Admin', 'ROLE_Manager']
+    const normalizedRoles = new Set(roles.map((r) => r.replace('ROLE_', '')));
+    return requiredRoles.some((role) => normalizedRoles.has(role));
+  }
 }

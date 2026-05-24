@@ -74,4 +74,9 @@ export class ProductService {
       .get<{ list: ImportHistoryType[]; pagination: any }>(`${this.api}/import`)
       .pipe(map((res) => res.list));
   }
+
+  // product.service.ts — add this method
+  createSale(saleDTO: { product: { productId: number; quantity: number }[] }): Observable<string> {
+    return this.http.post(`${this.api}/sales`, saleDTO, { responseType: 'text' });
+  }
 }
