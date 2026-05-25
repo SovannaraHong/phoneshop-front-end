@@ -138,3 +138,151 @@ body {
 .product-card:nth-child(8) {
   animation-delay: 0.4s;
 }
+@keyframes slideLeft {
+  0% {
+    transform: translateX(-300px);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-300px);
+    opacity: 0;
+  }
+}
+/* Button base */
+.cart-btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background 0.4s ease,
+    color 0.4s ease,
+    transform 0.15s ease;
+}
+
+.cart-btn:active {
+  transform: scale(0.97);
+}
+
+/* Inner text flip container */
+.btn-inner {
+  display: grid;
+  grid-template-rows: 1fr;
+  position: relative;
+  height: 1.2em;
+  overflow: hidden;
+}
+
+.btn-text-add,
+.btn-text-sold {
+  display: block;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.btn-text-sold {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+/* Sold state */
+.btn-sold .btn-text-add {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.btn-sold .btn-text-sold {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.btn-add {
+  background: white;
+  color: #111;
+}
+
+.btn-sold {
+  background: #16a34a; /* green-600 */
+  color: white;
+  border-color: #16a34a !important;
+}
+
+/* ── Toast ── */
+.toast-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  pointer-events: none;
+  transform: translateX(calc(100% + 2rem));
+  opacity: 0;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+}
+
+.toast-container.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #079215;
+  color: #fff;
+  padding: 0.85rem 1.25rem;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  min-width: 220px;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+}
+
+.toast-msg {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Progress bar that drains over 5s */
+.toast-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: #4ade80; /* green-400 */
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.toast-container.show .toast-bar {
+  animation: drain 5s linear forwards;
+}
+
+@keyframes drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

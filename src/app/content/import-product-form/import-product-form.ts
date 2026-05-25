@@ -1,4 +1,14 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  HostListener,
+  inject,
+  input,
+  Output,
+  output,
+  signal,
+} from '@angular/core';
 import { ProductType } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product/product-service';
 import { CommonModule } from '@angular/common';
@@ -16,6 +26,7 @@ export class ImportProductForm {
   // ── Inputs / Outputs ───────────────────────────────────────────────────────
   /** Pass the full product list in — or let the component fetch it itself */
   products = input<ProductType[]>([]);
+  @Output() saveData = new EventEmitter<void>();
 
   saved = output<void>();
   cancelled = output<void>();
@@ -86,18 +97,11 @@ export class ImportProductForm {
         error: () => {}, // silently fail — parent should handle
       });
     }
-
-    // Close dropdown on outside click
-    document.addEventListener('click', this.onDocClick);
   }
-
-  ngOnDestroy(): void {
-    document.removeEventListener('click', this.onDocClick);
+  closeDropdown(): void {
+    // Small delay so click on a list item fires before dropdown disappears
+    setTimeout(() => this.showDropdown.set(false), 150);
   }
-
-  private onDocClick = () => {
-    this.showDropdown.set(false);
-  };
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   getColorHex(colorName: string): string {
@@ -156,6 +160,7 @@ export class ImportProductForm {
     this.productService.importProduct(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
+        this.saveData.emit();
         this.successMessage.set(
           `Successfully imported ${this.importUnit()} units of "${product.name}".`,
         );

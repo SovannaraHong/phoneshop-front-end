@@ -127,11 +127,14 @@
 
           <!-- Add to Cart -->
           <button
-            (click)="cart.addToCart(pro)"
-            #cartBtn
-            class="w-full py-3 rounded-xl border-[1.5px] border-[#111] bg-white text-[#111] text-[13.5px] font-medium tracking-wide cursor-pointer transition-all duration-200 hover:bg-[#111] hover:text-white"
+            (click)="activeAdd(pro)"
+            [ngClass]="triggerAdd().includes(pro.id) ? 'btn-sold' : 'btn-add'"
+            class="cart-btn w-full py-3 rounded-xl border-[1.5px] border-[#111] text-[13.5px] font-medium tracking-wide cursor-pointer"
           >
-            Add to Cart
+            <span class="btn-inner">
+              <span class="btn-text-add">Add to Cart</span>
+              <span class="btn-text-sold">✓ Sold</span>
+            </span>
           </button>
         </div>
       </div>
@@ -157,5 +160,12 @@
         <button class="mt-3 text-xs text-indigo-500 hover:underline">Clear filters</button>
       </div>
     }
+    <div class="toast-container" [class.show]="showMessage()">
+      <div class="toast">
+        <span class="toast-icon">🛒</span>
+        <span class="toast-msg">Item added to cart!</span>
+        <div class="toast-bar"></div>
+      </div>
+    </div>
   </div>
 </main>

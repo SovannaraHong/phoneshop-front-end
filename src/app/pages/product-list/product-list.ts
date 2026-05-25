@@ -35,6 +35,8 @@ export class ProductList {
   selectedTypeSell = signal('');
   selectedBrandId = signal<number | ''>('');
   searchQuery = signal('');
+  triggerAdd = signal<number[]>([]);
+  showMessage = signal(false);
   // ── Refresh trigger ────────────────────────────────────────────────────────
   private readonly refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -68,5 +70,17 @@ export class ProductList {
   });
   refresh() {
     this.refresh$.next();
+  }
+  activeAdd(pro: ProductType) {
+    this.cart.addToCart(pro);
+
+    this.triggerAdd.update((ids) => [...ids, pro.id]);
+    this.showMessage.set(true);
+
+    setTimeout(() => {
+      this.showMessage.set(false);
+
+      this.triggerAdd.update((ids) => ids.filter((id) => id !== pro.id));
+    }, 3000);
   }
 }

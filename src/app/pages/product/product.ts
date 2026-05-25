@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  EventEmitter,
+  inject,
+  Output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, switchMap } from 'rxjs';
@@ -13,11 +22,13 @@ import { ColorType } from '../../core/models/color.model';
 import { ProductForm } from '../../content/product-form/product-form';
 import { CartService } from '../../core/services/cart/cart-service';
 import { ImportProductForm } from '../../content/import-product-form/import-product-form';
+import { sign } from 'chart.js/helpers';
+import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
 
 @Component({
   selector: 'app-product',
 
-  imports: [CommonModule, FormsModule, ProductForm],
+  imports: [CommonModule, FormsModule, ProductForm, ImportProductForm],
   templateUrl: './product.html',
   styleUrls: ['./product.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +37,7 @@ export class Product {
   private productService = inject(ProductService);
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
+  private statsService = inject(ProductStatsService);
 
   objectEntries = Object.entries;
 
@@ -44,6 +56,7 @@ export class Product {
   // ── UI state ───────────────────────────────────────────────────────────────
   isOpenForm = signal(false);
   selectedProduct = signal<ProductType | null>(null);
+  isOpenFormImport = signal(false);
 
   // ── Search / filter state ──────────────────────────────────────────────────
   searchQuery = signal('');
@@ -83,6 +96,7 @@ export class Product {
     () => this.productList().filter((p) => p.typeSell === 'Best Seller').length,
   );
   lowStock = computed(() => this.productList().filter((p) => p.unit < 10 && p.active).length);
+  outOfStock = computed(() => this.productList().filter((p) => p.unit < 1 && p.active).length);
 
   // ── Filtered list ──────────────────────────────────────────────────────────
   // filteredProducts = computed(() => {
@@ -97,6 +111,11 @@ export class Product {
   //     return matchesSearch && matchesBrand && matchesType;
   //   });
   // });
+  constructor() {
+    effect(() => {
+      this.statsService.setProducts(this.productList());
+    });
+  }
   filteredProducts = computed(() => {
     const list = this.productList(); // explicitly read the list first
     const query = this.searchQuery().toLowerCase().trim();
@@ -133,6 +152,17 @@ export class Product {
   onFormSaved(): void {
     this.refresh$.next();
     this.closeForm();
+  }
+
+  onImportSave() {
+    this.refresh$.next();
+    this.closeFormImport();
+  }
+  closeFormImport(): void {
+    this.isOpenFormImport.set(false);
+  }
+  openImportForm(): void {
+    this.isOpenFormImport.set(true);
   }
 
   // ── Import from Excel ──────────────────────────────────────────────────────

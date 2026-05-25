@@ -53,10 +53,11 @@
       </div>
     </div>
   }
+  @if (isOpenFormImport()) {}
 
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- ── STATS STRIP ──────────────────────────────────────────────────────── -->
-    <div class="grid grid-cols-4 gap-4 px-7 py-4 bg-white border-b border-gray-100 shrink-0">
+    <div class="grid grid-cols-5 gap-4 px-7 py-4 bg-white border-b border-gray-100 shrink-0">
       <!-- Total -->
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
@@ -118,6 +119,15 @@
 
       <!-- Low Stock -->
       <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+          <i class="fa-solid fa-chart-gantt"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Low Stock</p>
+          <p class="text-lg font-bold text-gray-800">{{ lowStock() }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
           <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -129,8 +139,8 @@
           </svg>
         </div>
         <div>
-          <p class="text-xs text-gray-400">Low Stock</p>
-          <p class="text-lg font-bold text-gray-800">{{ lowStock() }}</p>
+          <p class="text-xs text-gray-400">Out Of Stock</p>
+          <p class="text-lg font-bold text-gray-800">{{ outOfStock() }}</p>
         </div>
       </div>
     </div>
@@ -200,12 +210,37 @@
           {{ isImporting() ? '⏳ Importing...' : '📂 Import Excels' }}
         </button>
         <button
+          (click)="openImportForm()"
           class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
         >
           Import
         </button>
       </div>
+      <!-- ── SLIDE-IN DRAWER ──────────────────────────────────────────────────── -->
+      @if (isOpenFormImport()) {
+        <div
+          class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end"
+          (click)="closeForm()"
+        >
+          <div
+            class="relative w-full max-w-[1000px] h-full bg-white shadow-2xl animate-slideInRight"
+            (click)="$event.stopPropagation()"
+          >
+            <!-- Close button -->
+            <button
+              (click)="closeFormImport()"
+              class="absolute top-12 right-12 z-10 bg-blue-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-blue-500 transition-all"
+            >
+              ✕
+            </button>
 
+            <!-- Form -->
+            <div class="p-6 overflow-y-auto h-full">
+              <app-import-product-form (saveData)="onImportSave()"></app-import-product-form>
+            </div>
+          </div>
+        </div>
+      }
       @if (importSuccess() || importErrors()) {
         <!-- Backdrop -->
         <div
@@ -323,7 +358,10 @@
           </thead>
           <tbody>
             @for (product of filteredProducts(); track product.id) {
-              <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
+              <tr
+                class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors"
+                [ngClass]="product.unit < 1 ? 'bg-red-50' : product.unit < 10 ? 'bg-orange-50' : ''"
+              >
                 <!-- Product -->
                 <td class="px-5 py-3.5">
                   <div class="flex items-center gap-3">

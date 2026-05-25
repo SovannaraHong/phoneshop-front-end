@@ -2,7 +2,9 @@
   <!-- Page Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-800 tracking-tight">Product Report</h1>
+      <h1 class="text-xl font-bold text-gray-800 tracking-tight">
+        {{ activeTab() === 'sales' ? 'Sales Report' : 'Expense Report' }}
+      </h1>
       <p class="text-xs text-gray-400 mt-0.5">{{ reportDate }}</p>
     </div>
     <button
@@ -10,6 +12,36 @@
     >
       <i class="fa-solid fa-download"></i>
       Export
+    </button>
+  </div>
+
+  <!-- Tab Toggle -->
+  <div
+    class="flex items-center gap-2 mb-6 bg-white border border-gray-100 rounded-2xl p-1.5 w-fit shadow-sm"
+  >
+    <button
+      (click)="activeTab.set('sales')"
+      [ngClass]="
+        activeTab() === 'sales'
+          ? 'bg-indigo-600 text-white shadow-sm'
+          : 'text-gray-500 hover:text-indigo-600'
+      "
+      class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+    >
+      <i class="fa-solid fa-chart-line text-[13px]"></i>
+      Sales Report
+    </button>
+    <button
+      (click)="activeTab.set('expense')"
+      [ngClass]="
+        activeTab() === 'expense'
+          ? 'bg-rose-500 text-white shadow-sm'
+          : 'text-gray-500 hover:text-rose-500'
+      "
+      class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+    >
+      <i class="fa-solid fa-receipt text-[13px]"></i>
+      Expense Report
     </button>
   </div>
 
@@ -41,30 +73,14 @@
       </div>
       <div class="flex items-center gap-2 mt-4 ml-1 flex-wrap">
         <span class="text-[11px] text-gray-400 shrink-0">Quick:</span>
-        <button
-          (click)="setQuick('today')"
-          class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-        >
-          Today
-        </button>
-        <button
-          (click)="setQuick('week')"
-          class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-        >
-          This Week
-        </button>
-        <button
-          (click)="setQuick('month')"
-          class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-        >
-          This Month
-        </button>
-        <button
-          (click)="setQuick('year')"
-          class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-        >
-          This Year
-        </button>
+        @for (q of quickRanges; track q.value) {
+          <button
+            (click)="setQuick(q.value)"
+            class="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+          >
+            {{ q.label }}
+          </button>
+        }
       </div>
     </div>
   </div>
@@ -89,7 +105,8 @@
     </div>
   }
 
-  @if (!isLoading()) {
+  <!-- ═══════════════ SALES REPORT ═══════════════ -->
+  @if (!isLoading() && activeTab() === 'sales') {
     @if (products().length > 0) {
       <!-- Summary Cards -->
       <div class="grid grid-cols-3 gap-4 mb-6">
@@ -131,7 +148,7 @@
         </div>
       </div>
 
-      <!-- Search & Filter Bar -->
+      <!-- Search & Filter -->
       <div class="flex items-center gap-3 mb-4">
         <div
           class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
@@ -169,7 +186,7 @@
         </select>
       </div>
 
-      <!-- Product Table -->
+      <!-- Sales Table -->
       <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
         <table class="w-full text-sm">
           <thead>
@@ -207,6 +224,11 @@
               <th
                 class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
               >
+                Date/Time
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
                 Progress
               </th>
             </tr>
@@ -214,10 +236,7 @@
           <tbody>
             @for (product of filteredProducts(); track product.productId; let i = $index) {
               <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
-                <!-- # -->
                 <td class="px-5 py-3.5 text-gray-400 text-[13px]">{{ i + 1 }}</td>
-
-                <!-- Product -->
                 <td class="px-5 py-3.5">
                   <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-gray-100 overflow-hidden shrink-0">
@@ -234,14 +253,11 @@
                       </p>
                       <span
                         class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg"
+                        >#{{ product.productId }}</span
                       >
-                        #{{ product.productId }}
-                      </span>
                     </div>
                   </div>
                 </td>
-
-                <!-- Status -->
                 <td class="px-5 py-3.5">
                   <span
                     class="text-[10px] font-semibold px-2.5 py-1 rounded-full"
@@ -254,26 +270,22 @@
                     {{ product.productUnit < 20 ? '● Top Rate' : '● Best Seller' }}
                   </span>
                 </td>
-
-                <!-- Units Sold -->
                 <td class="px-5 py-3.5">
                   <span class="text-[13px] font-semibold text-gray-800">{{
                     product.productUnit
                   }}</span>
                   <span class="text-[11px] text-gray-400 ml-1">pcs</span>
                 </td>
-
-                <!-- Avg Unit Price -->
                 <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
                   ${{ product.totalAmount / product.productUnit | number: '1.2-2' }}
                 </td>
 
-                <!-- Revenue -->
                 <td class="px-5 py-3.5 font-semibold text-indigo-600 text-[13px]">
                   ${{ product.totalAmount | number: '1.0-0' }}
                 </td>
-
-                <!-- Progress -->
+                <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                  {{ product.soldDate | date: 'EE, MMM d y, h:mm a' }}
+                </td>
                 <td class="px-5 py-3.5 w-36">
                   <div class="flex flex-col gap-1">
                     <div class="h-1.5 bg-indigo-50 rounded-full overflow-hidden w-32">
@@ -290,8 +302,6 @@
                 </td>
               </tr>
             }
-
-            <!-- Empty state inside table -->
             @if (filteredProducts().length === 0) {
               <tr>
                 <td colspan="7" class="px-5 py-14 text-center">
@@ -308,20 +318,248 @@
         </table>
       </div>
 
-      <!-- Footer -->
       <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
         <span>Showing {{ filteredProducts().length }} of {{ products().length }} product(s)</span>
         <span>Report Engine v1.0</span>
       </div>
     }
 
-    <!-- Empty state (no data from API) -->
     @if (products().length === 0) {
       <div class="flex flex-col items-center justify-center py-20 gap-3">
         <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center">
           <i class="fa-solid fa-calendar-days text-indigo-400 text-2xl"></i>
         </div>
         <p class="text-gray-500 text-sm font-semibold">No sales found for this period</p>
+        <p class="text-gray-300 text-xs">Try selecting a different date range</p>
+      </div>
+    }
+  }
+
+  <!-- ═══════════════ EXPENSE REPORT ═══════════════ -->
+  @if (!isLoading() && activeTab() === 'expense') {
+    @if (expenses().length > 0) {
+      <!-- Expense Summary Cards -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div
+          class="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4 shadow-sm"
+        >
+          <div class="w-11 h-11 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-mobile-screen text-rose-500"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium">Total Products</p>
+            <p class="text-2xl font-bold text-gray-800">{{ expenses().length }}</p>
+            <p class="text-[10px] text-rose-500 font-medium mt-0.5">SKUs tracked</p>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4 shadow-sm"
+        >
+          <div class="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-boxes-stacked text-orange-500"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium">Total Units Purchased</p>
+            <p class="text-2xl font-bold text-gray-800">{{ totalExpenseUnits() | number }}</p>
+            <p class="text-[10px] text-orange-500 font-medium mt-0.5">units purchased</p>
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4 shadow-sm"
+        >
+          <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-file-invoice-dollar text-red-500"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium">Total Expense</p>
+            <p class="text-2xl font-bold text-gray-800">${{ grandExpense() | number: '1.0-0' }}</p>
+            <p class="text-[10px] text-red-500 font-medium mt-0.5">total cost</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Search & Filter -->
+      <div class="flex items-center gap-3 mb-4">
+        <div
+          class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
+        >
+          <svg
+            class="w-4 h-4 text-gray-400 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by product name..."
+            [ngModel]="expenseSearchQuery()"
+            (ngModelChange)="expenseSearchQuery.set($event)"
+            class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
+          />
+        </div>
+        <select
+          [ngModel]="selectedExpenseProduct()"
+          (ngModelChange)="selectedExpenseProduct.set($event)"
+          class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+        >
+          <option value="">All Products</option>
+          @for (p of uniqueExpenseProducts(); track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Expense Table -->
+      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12"
+              >
+                #
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Product
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Units Purchased
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Avg Unit Cost
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Total Cost
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Date/Time
+              </th>
+              <th
+                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              >
+                Progress
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (expense of filteredExpenses(); track expense.productId; let i = $index) {
+              <tr class="border-b border-gray-50 hover:bg-rose-50/30 transition-colors">
+                <td class="px-5 py-3.5 text-gray-400 text-[13px]">{{ i + 1 }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                      <img
+                        [src]="getImage(expense.productId)"
+                        class="w-full h-full object-cover"
+                        [alt]="expense.productName"
+                        onerror="this.src = 'https://placehold.co/160x160/ffe4e6/e11d48?text=📦'"
+                      />
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800 text-[13px]">
+                        {{ expense.productName }}
+                      </p>
+                      <span
+                        class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg"
+                        >#{{ expense.productId }}</span
+                      >
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span
+                    class="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                    [ngClass]="
+                      expense.expenseUnit > 100
+                        ? 'bg-rose-50 text-rose-600'
+                        : 'bg-orange-50 text-orange-500'
+                    "
+                  >
+                    {{ expense.expenseUnit > 100 ? '● High Volume' : '● Standard' }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="text-[13px] font-semibold text-gray-800">{{
+                    expense.expenseUnit
+                  }}</span>
+                  <span class="text-[11px] text-gray-400 ml-1">pcs</span>
+                </td>
+                <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                  ${{ expense.totalAmount / expense.expenseUnit | number: '1.2-2' }}
+                </td>
+                <td class="px-5 py-3.5 font-semibold text-rose-500 text-[13px]">
+                  ${{ expense.totalAmount | number: '1.0-0' }}
+                </td>
+                <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                  {{ expense.expenseDate | date: 'EE, MMM d y, h:mm a' }}
+                </td>
+                <td class="px-5 py-3.5 w-36">
+                  <div class="flex flex-col gap-1">
+                    <div class="h-1.5 bg-rose-50 rounded-full overflow-hidden w-32">
+                      <div
+                        class="h-full rounded-full transition-all duration-500"
+                        [ngClass]="getExpenseBarColor(i)"
+                        [style.width.%]="(expense.totalAmount / maxExpenseAmount()) * 100"
+                      ></div>
+                    </div>
+                    <span class="text-[10px] text-gray-400">
+                      {{ (expense.totalAmount / maxExpenseAmount()) * 100 | number: '1.0-0' }}% of
+                      top
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (filteredExpenses().length === 0) {
+              <tr>
+                <td colspan="7" class="px-5 py-14 text-center">
+                  <div class="flex flex-col items-center gap-3">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
+                      <i class="fa-solid fa-magnifying-glass text-gray-300 text-xl"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm font-medium">No expenses match your search</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+        <span>Showing {{ filteredExpenses().length }} of {{ expenses().length }} product(s)</span>
+        <span>Report Engine v1.0</span>
+      </div>
+    }
+
+    @if (expenses().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 gap-3">
+        <div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+          <i class="fa-solid fa-receipt text-rose-400 text-2xl"></i>
+        </div>
+        <p class="text-gray-500 text-sm font-semibold">No expenses found for this period</p>
         <p class="text-gray-300 text-xs">Try selecting a different date range</p>
       </div>
     }

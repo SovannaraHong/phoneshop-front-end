@@ -7,6 +7,7 @@ import { ProductType } from '../../models/product.model';
 })
 export class CartService {
   private items = signal<CartItem[]>(this.loadFromStorage());
+  selectAddId = signal<number | ''>('');
 
   cartItems = this.items.asReadonly();
   count = computed(() => this.items().reduce((sum, i) => sum + i.quantity, 0));
