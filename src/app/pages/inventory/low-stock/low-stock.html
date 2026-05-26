@@ -1,0 +1,275 @@
+<div class="flex-1 flex flex-col overflow-hidden bg-[#edf0f4]">
+  <div class="flex items-center px-7 gap-2">
+    <div
+      class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
+    >
+      <svg
+        class="w-4 h-4 text-gray-400 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        [ngModel]="Query()"
+        (ngModelChange)="Query.set($event)"
+        type="text"
+        placeholder="Search products..."
+        class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
+      />
+    </div>
+
+    <select
+      [ngModel]="selectBrandId()"
+      (ngModelChange)="selectBrandId.set($event)"
+      class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+    >
+      <option value="">All Brands</option>
+      @for (brand of brandList(); track $index) {
+        <option [value]="brand.id">{{ brand.name }}</option>
+      }
+    </select>
+
+    <select
+      [ngModel]="selectType()"
+      (ngModelChange)="selectType.set($event)"
+      class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+    >
+      <option value="">All Types</option>
+      @for (t of typeSellOption(); track $index) {
+        <option>{{ t }}</option>
+      }
+    </select>
+
+    <input id="excelFileInput" type="file" accept=".xlsx,.xls" class="hidden" />
+  </div>
+
+  <!-- Warning Banner -->
+  <div
+    class="mx-7 mt-4 mb-3 px-4 py-3 rounded-xl bg-orange-50 border border-orange-200 flex items-center gap-3 shrink-0"
+  >
+    <svg
+      class="w-4 h-4 text-orange-500 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M13 10V3L4 14h7v7l9-11h-7z"
+      />
+    </svg>
+    <p class="text-sm text-orange-700 font-medium">
+      {{ products().length }} product(s) running low on stock (less than 10 units).
+    </p>
+  </div>
+
+  <!-- Table -->
+  <div class="flex-1 overflow-y-auto px-7 pb-4">
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-orange-50 border-b border-orange-100">
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Product
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Brand
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Color
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Price
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Units Left
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Type
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              class="text-left px-5 py-3.5 text-xs font-semibold text-orange-400 uppercase tracking-wider"
+            >
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of filteredProductLowStock(); track product.id) {
+            <tr
+              class="border-b border-gray-50 hover:bg-orange-50/60 transition-colors bg-orange-50/20"
+            >
+              <!-- Product -->
+              <td class="px-5 py-3.5">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-orange-100 overflow-hidden shrink-0">
+                    <img
+                      [src]="product.imagePath"
+                      class="w-full h-full object-cover"
+                      alt="{{ product.name }}"
+                      onerror="this.src = 'https://placehold.co/160x160/fff3e0/f97316?text=📱'"
+                    />
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
+                    <p class="text-[12px] text-gray-400">{{ product.modelName }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Brand -->
+              <td class="px-5 py-3.5 text-gray-600 text-[13px]">{{ product.brandId }}</td>
+
+              <!-- Color -->
+              <td class="px-5 py-3.5">
+                <span
+                  class="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0"
+                  [title]="product.colorName"
+                  [style.background]="product.colorName"
+                ></span>
+              </td>
+
+              <!-- Price -->
+              <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                ${{ product.salePrice | number: '1.2-2' }}
+              </td>
+
+              <!-- Units -->
+              <td class="px-5 py-3.5">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-600"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span>
+                  {{ product.unit }} left
+                </span>
+              </td>
+
+              <!-- Type -->
+              <td class="px-5 py-3.5">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                  [ngClass]="{
+                    'bg-indigo-50 text-indigo-600': product.typeSell === 'Best Seller',
+                    'bg-green-50 text-green-600': product.typeSell === 'Top Rated',
+                    'bg-amber-50 text-amber-600': product.typeSell === 'Premium',
+                    'bg-purple-50 text-purple-600': product.typeSell === 'Trending',
+                    'bg-gray-100 text-gray-500': product.typeSell === 'Clearance',
+                  }"
+                  >{{ product.typeSell }}</span
+                >
+              </td>
+
+              <!-- Status -->
+              <td class="px-5 py-3.5">
+                <span
+                  class="inline-flex items-center gap-1.5 text-[11px] font-semibold"
+                  [ngClass]="product.active ? 'text-green-600' : 'text-gray-400'"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    [ngClass]="product.active ? 'bg-green-500' : 'bg-gray-300'"
+                  ></span>
+                  {{ product.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <!-- Action -->
+              <td class="px-5 py-3.5">
+                <div class="flex gap-2">
+                  <button
+                    class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="px-3 py-1.5 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-all"
+                  >
+                    Restock
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          <!-- Empty State -->
+          @if (filteredProductLowStock().length === 0) {
+            <tr>
+              <td colspan="8" class="px-5 py-14 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center">
+                    <svg
+                      class="w-7 h-7 text-orange-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <p class="text-gray-400 text-sm font-medium">No products found</p>
+                  <p class="text-gray-300 text-xs">Try adjusting your search or filter</p>
+                </div>
+              </td>
+            </tr>
+          }
+          <!-- Empty State -->
+          @if (products().length === 0) {
+            <tr>
+              <td colspan="8" class="px-5 py-14 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center">
+                    <svg
+                      class="w-7 h-7 text-orange-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  </div>
+                  <p class="text-gray-400 text-sm font-medium">No low stock products</p>
+                  <p class="text-gray-300 text-xs">All products have sufficient stock levels</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

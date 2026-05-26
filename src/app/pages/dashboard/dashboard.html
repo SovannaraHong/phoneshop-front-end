@@ -119,7 +119,7 @@
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            Product
+            Inventory
           </a>
         }
         @if (auth.hasRole(['Admin', 'Manager', 'Stock', 'Cashier', 'Seller', 'Staff'])) {
@@ -187,7 +187,13 @@
               class="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[0.72rem] font-extrabold text-white flex-shrink-0"
               style="background: linear-gradient(135deg, #2563eb, #7c3aed)"
             >
-              {{ auth.getUsername().slice(0, 2).toUpperCase() }}
+              <!-- {{ auth.getUsername().slice(0, 2).toUpperCase() }} -->
+              <img
+                [src]="auth.getImage()"
+                alt=""
+                class="w-full h-full object-cover rounded-full"
+                onerror="this.style.display = 'none'"
+              />
             </div>
             <div class="flex-1 min-w-0">
               <div class="text-[0.82rem] font-bold uppercase text-text truncate">
@@ -272,23 +278,48 @@
             </button>
           }
           <button
+            routerLink="/product/lowStock"
+            routerLinkActive="active"
             class="flex items-center gap-2.5 bg-white border border-gray-200 rounded-full px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
           >
-            <div
-              class="relative w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center"
-            >
-              <i class="fa-solid fa-bell text-orange-500 text-sm"></i>
-
+            <div class="relative w-7 h-7 flex items-center justify-center">
+              <!-- Ping animation rings -->
               <span
-                class="absolute -top-1 -right-1 bg-indigo-500 text-white text-[9px] font-medium w-[15px] h-[15px] rounded-full flex items-center justify-center border-[1.5px] border-white"
+                class="absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-20 animate-ping"
+              ></span>
+              <span
+                class="absolute inline-flex h-5 w-5 rounded-full bg-orange-100 opacity-60 animate-pulse"
+              ></span>
+
+              <!-- Icon -->
+              <div
+                class="relative w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center z-10"
               >
-                {{ statsService.lowStock() }}
-              </span>
+                <svg
+                  class="w-3.5 h-3.5 text-orange-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+
+                <!-- Badge -->
+                <span
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-[15px] h-[15px] rounded-full flex items-center justify-center border-[1.5px] border-white animate-bounce"
+                >
+                  {{ statsService.getLowStock().length }}
+                </span>
+              </div>
             </div>
 
             <div class="text-left leading-tight">
               <div class="text-[10px] text-gray-400">Product</div>
-
               <div class="text-[13px] font-medium text-gray-800">Notification</div>
             </div>
           </button>

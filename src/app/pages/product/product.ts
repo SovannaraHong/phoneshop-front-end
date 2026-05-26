@@ -3,14 +3,13 @@ import {
   Component,
   computed,
   effect,
-  EventEmitter,
   inject,
-  Output,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { BehaviorSubject, filter, switchMap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ProductService } from '../../core/services/product/product-service';
@@ -20,15 +19,12 @@ import { ProductType } from '../../core/models/product.model';
 import { BrandType } from '../../core/models/brand.model';
 import { ColorType } from '../../core/models/color.model';
 import { ProductForm } from '../../content/product-form/product-form';
-import { CartService } from '../../core/services/cart/cart-service';
 import { ImportProductForm } from '../../content/import-product-form/import-product-form';
-import { sign } from 'chart.js/helpers';
 import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
 
 @Component({
   selector: 'app-product',
-
-  imports: [CommonModule, FormsModule, ProductForm, ImportProductForm],
+  imports: [CommonModule, FormsModule, ProductForm, ImportProductForm, RouterOutlet],
   templateUrl: './product.html',
   styleUrls: ['./product.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,7 +33,8 @@ export class Product {
   private productService = inject(ProductService);
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
-  private statsService = inject(ProductStatsService);
+  readonly statsService = inject(ProductStatsService);
+  private router = inject(Router);
 
   objectEntries = Object.entries;
 
@@ -53,30 +50,31 @@ export class Product {
     { id: 9, name: 'gold', hex: '#FFD700' },
   ];
 
-  // ── UI state ───────────────────────────────────────────────────────────────
-  isOpenForm = signal(false);
-  selectedProduct = signal<ProductType | null>(null);
-  isOpenFormImport = signal(false);
+  activeTab = signal<'products' | 'lowStock' | 'outOfStock'>('products');
 
-  // ── Search / filter state ──────────────────────────────────────────────────
+  isOpenForm = signal(false);
+  isOpenFormImport = signal(false);
+  selectedProduct = signal<ProductType | null>(null);
+
+  // ── Filter state ─────────────────────────────────────────────────────────────
   searchQuery = signal('');
   selectedBrandId = signal<number | ''>('');
   selectedTypeSell = signal('');
 
-  // ── Delete state ───────────────────────────────────────────────────────────
+  // ── Delete state ─────────────────────────────────────────────────────────────
   isDelete = signal(false);
   deleteTargetId = signal<number | null>(null);
   errorMessage = signal<string | null>(null);
 
-  // ── Import state ───────────────────────────────────────────────────────────
+  // ── Import state ─────────────────────────────────────────────────────────────
   isImporting = signal(false);
   importErrors = signal<Record<number, string> | null>(null);
   importSuccess = signal<string | null>(null);
 
-  // ── Data refresh trigger ───────────────────────────────────────────────────
+  // ── Refresh trigger ───────────────────────────────────────────────────────────
   private refresh$ = new BehaviorSubject<void>(undefined);
 
-  // ── Remote data ────────────────────────────────────────────────────────────
+  // ── Remote data ───────────────────────────────────────────────────────────────
   productList = toSignal(this.refresh$.pipe(switchMap(() => this.productService.getProducts())), {
     initialValue: [] as ProductType[],
   });
@@ -89,40 +87,23 @@ export class Product {
     initialValue: [] as ColorType[],
   });
 
-  // ── Computed stats ─────────────────────────────────────────────────────────
+  // ── Computed stats ────────────────────────────────────────────────────────────
   totalProduct = computed(() => this.productList().length);
   activePro = computed(() => this.productList().filter((p) => p.active).length);
   bestSeller = computed(
     () => this.productList().filter((p) => p.typeSell === 'Best Seller').length,
   );
-  lowStock = computed(() => this.productList().filter((p) => p.unit < 10 && p.active).length);
+  lowStock = computed(
+    () => this.productList().filter((p) => p.unit > 0 && p.unit < 10 && p.active).length,
+  );
   outOfStock = computed(() => this.productList().filter((p) => p.unit < 1 && p.active).length);
 
-  // ── Filtered list ──────────────────────────────────────────────────────────
-  // filteredProducts = computed(() => {
-  //   const query = this.searchQuery().toLowerCase().trim();
-  //   const brandId = this.selectedBrandId();
-  //   const type = this.selectedTypeSell();
-
-  //   return this.productList().filter((p) => {
-  //     const matchesSearch = !query || p.name.toLowerCase().includes(query);
-  //     const matchesBrand = !brandId || p.brandId === Number(brandId);
-  //     const matchesType = !type || p.typeSell === type;
-  //     return matchesSearch && matchesBrand && matchesType;
-  //   });
-  // });
-  constructor() {
-    effect(() => {
-      this.statsService.setProducts(this.productList());
-    });
-  }
+  // ── Filtered list ─────────────────────────────────────────────────────────────
   filteredProducts = computed(() => {
-    const list = this.productList(); // explicitly read the list first
+    const list = this.productList();
     const query = this.searchQuery().toLowerCase().trim();
     const brandId = this.selectedBrandId();
     const type = this.selectedTypeSell();
-
-    console.log('List length:', list.length, '| brandId:', brandId, '| type:', type);
 
     return list.filter((p) => {
       const matchesSearch = !query || p.name?.toLowerCase().includes(query);
@@ -131,9 +112,60 @@ export class Product {
       return matchesSearch && matchesBrand && matchesType;
     });
   });
+
   typeSellOptions = computed(() => [...new Set(this.productList().map((p) => p.typeSell))].sort());
 
-  // ── Drawer helpers ─────────────────────────────────────────────────────────
+  constructor() {
+    effect(() => {
+      this.statsService.setProducts(this.productList());
+    });
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
+      const url: string = e.urlAfterRedirects;
+      if (url.includes('lowStock')) {
+        this.activeTab.set('lowStock');
+      } else if (url.includes('OutOfStock') || url.includes('outOfStock')) {
+        this.activeTab.set('outOfStock');
+      } else {
+        this.activeTab.set('products');
+      }
+    });
+
+    // ✅ Also set on first load (in case user lands directly on child route)
+    const url = this.router.url;
+    if (url.includes('lowStock')) {
+      this.activeTab.set('lowStock');
+    } else if (url.includes('OutOfStock') || url.includes('outOfStock')) {
+      this.activeTab.set('outOfStock');
+    } else {
+      this.activeTab.set('products');
+    }
+  }
+
+  // ── Tab navigation ────────────────────────────────────────────────────────────
+  navigateTo(tab: 'products' | 'lowStock' | 'outOfStock'): void {
+    this.activeTab.set(tab);
+    if (tab === 'lowStock') {
+      this.router.navigate(['product', 'lowStock']);
+    } else if (tab === 'outOfStock') {
+      this.router.navigate(['product', 'outOfStock']);
+    } else {
+      this.router.navigate(['product']);
+    }
+  }
+
+  // ── Export report ─────────────────────────────────────────────────────────────
+  exportReport(): void {
+    const tab = this.activeTab();
+    const list =
+      tab === 'lowStock'
+        ? this.productList().filter((p) => p.unit > 0 && p.unit < 10 && p.active)
+        : this.productList().filter((p) => p.unit < 1 && p.active);
+
+    console.log(`Exporting ${tab} report`, list);
+    // hook up your real export/download logic here
+  }
+
+  // ── Drawer helpers ────────────────────────────────────────────────────────────
   openCreateForm(): void {
     this.selectedProduct.set(null);
     this.isOpenForm.set(true);
@@ -154,18 +186,21 @@ export class Product {
     this.closeForm();
   }
 
-  onImportSave() {
-    this.refresh$.next();
-    this.closeFormImport();
-  }
-  closeFormImport(): void {
-    this.isOpenFormImport.set(false);
-  }
+  // ── Import form helpers ───────────────────────────────────────────────────────
   openImportForm(): void {
     this.isOpenFormImport.set(true);
   }
 
-  // ── Import from Excel ──────────────────────────────────────────────────────
+  closeFormImport(): void {
+    this.isOpenFormImport.set(false);
+  }
+
+  onImportSave(): void {
+    this.refresh$.next();
+    this.closeFormImport();
+  }
+
+  // ── Import from Excel ─────────────────────────────────────────────────────────
   triggerImport(): void {
     this.importErrors.set(null);
     this.importSuccess.set(null);
@@ -181,8 +216,7 @@ export class Product {
     if (!input.files?.length) return;
 
     const file = input.files[0];
-    const validExtension = /\.(xlsx|xls)$/i.test(file.name);
-    if (!validExtension) {
+    if (!/\.(xlsx|xls)$/i.test(file.name)) {
       this.importErrors.set({ 0: 'Invalid file. Please upload an .xlsx or .xls file.' });
       return;
     }
@@ -203,9 +237,7 @@ export class Product {
       },
       error: (err) => {
         this.isImporting.set(false);
-        this.importErrors.set({
-          0: err.error?.message ?? 'Import failed. Please try again.',
-        });
+        this.importErrors.set({ 0: err.error?.message ?? 'Import failed. Please try again.' });
       },
     });
   }
@@ -215,13 +247,9 @@ export class Product {
     this.importSuccess.set(null);
   }
 
-  // ── Lookup helpers ─────────────────────────────────────────────────────────
+  // ── Lookup helpers ────────────────────────────────────────────────────────────
   getBrandName(brandId: number): string {
     return this.brandList().find((b) => b.id === brandId)?.name ?? 'Unknown';
-  }
-
-  getModelName(modelName: string): string {
-    return this.brandList().find((b) => b.name === modelName)?.name ?? 'Unknown';
   }
 
   getColorHex(colorName: string): string {
@@ -233,7 +261,11 @@ export class Product {
     return this.colorList().find((c) => c.id === colorId)?.name ?? '—';
   }
 
-  // ── Delete helpers ─────────────────────────────────────────────────────────
+  getModelName(modelName: string): string {
+    return this.brandList().find((b) => b.name === modelName)?.name ?? 'Unknown';
+  }
+
+  // ── Delete helpers ────────────────────────────────────────────────────────────
   confirmDelete(id: number): void {
     this.deleteTargetId.set(id);
     this.isDelete.set(true);
@@ -248,6 +280,7 @@ export class Product {
   onConfirmDelete(): void {
     const id = this.deleteTargetId();
     if (id === null) return;
+
     this.productService.deleteProduct(id).subscribe({
       next: () => {
         this.refresh$.next();
@@ -257,7 +290,7 @@ export class Product {
       },
       error: (err) => {
         this.errorMessage.set(
-          err.error?.message || 'Delete failed. The Product could not be deleted.',
+          err.error?.message ?? 'Delete failed. The product could not be deleted.',
         );
       },
     });

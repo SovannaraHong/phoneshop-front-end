@@ -99,10 +99,8 @@ export class ImportProductForm {
     }
   }
   closeDropdown(): void {
-    // Small delay so click on a list item fires before dropdown disappears
-    setTimeout(() => this.showDropdown.set(false), 150);
+    setTimeout(() => this.showDropdown.set(false), 300);
   }
-
   // ── Helpers ────────────────────────────────────────────────────────────────
   getColorHex(colorName: string): string {
     if (!colorName) return '#000';

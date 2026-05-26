@@ -6,9 +6,20 @@ import {
   inject,
   OnInit,
   signal,
+  ViewEncapsulation,
 } from '@angular/core';
 import { BrandService } from '../../core/services/brand/brand-service';
-import { BehaviorSubject, combineLatest, map, Observable, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  finalize,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { BrandType } from '../../core/models/brand.model';
 import { CommonModule } from '@angular/common';
 import { ProductType } from '../../core/models/product.model';
@@ -24,12 +35,19 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   templateUrl: './product-list.html',
   styleUrl: './product-list.css',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductList {
   readonly productService = inject(ProductService);
   readonly cart = inject(CartService);
   readonly brandService = inject(BrandService);
+
+  readonly showSkeleton = computed(() => this.isLoading() || this.hasFetchFailed());
+
+  readonly hasFetchFailed = signal(false);
+  readonly isLoading = signal(false);
+  readonly errorMsg = signal('');
 
   //variables data
   selectedTypeSell = signal('');
@@ -41,9 +59,29 @@ export class ProductList {
   private readonly refresh$ = new BehaviorSubject<void>(undefined);
 
   // ── Raw product list ───────────────────────────────────────────────────────
+
   readonly productList = toSignal(
-    this.refresh$.pipe(switchMap(() => this.productService.getProducts())),
-    { initialValue: [] as ProductType[] },
+    this.refresh$.pipe(
+      tap(() => {
+        this.isLoading.set(true);
+        this.errorMsg.set('');
+        this.hasFetchFailed.set(false); // ← reset on retry
+      }),
+
+      switchMap(() =>
+        this.productService.getProducts().pipe(
+          finalize(() => this.isLoading.set(false)),
+          catchError((err) => {
+            this.errorMsg.set(err?.error?.message ?? 'Failed to load products.');
+            this.hasFetchFailed.set(true); // ← add this
+            return of([] as ProductType[]);
+          }),
+        ),
+      ),
+    ),
+    {
+      initialValue: [] as ProductType[],
+    },
   );
   readonly brandListData = toSignal(
     this.refresh$.pipe(switchMap(() => this.brandService.getBrands())),

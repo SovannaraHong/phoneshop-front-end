@@ -20,6 +20,18 @@ export const routes: Routes = [
   {
     path: 'product',
     loadComponent: () => import('./pages/product/product').then((m) => m.Product),
+    children: [
+      {
+        path: 'lowStock', // ✅ keep consistent
+        loadComponent: () =>
+          import('./pages/inventory/low-stock/low-stock').then((m) => m.LowStock),
+      },
+      {
+        path: 'outOfStock', // ✅ fix capital O → lowercase o
+        loadComponent: () =>
+          import('./pages/inventory/out-of-stock/out-of-stock').then((m) => m.OutOfStock),
+      },
+    ],
     canActivate: [authGuard(['Admin', 'Manager', 'Stock'])],
   },
   {

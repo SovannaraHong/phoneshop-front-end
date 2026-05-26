@@ -50,6 +50,7 @@ export interface LoginResponse {
     roles: string[];
     accessToken: string;
     refreshToken: string;
+    imagePath: string;
   };
   timestamp: string;
 }
