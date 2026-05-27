@@ -1,10 +1,5 @@
-<!-- ============================================================
-     user.html  —  full Angular template
-     ============================================================ -->
-
 <div class="flex min-h-screen bg-slate-50 fontDMSans">
   <main class="flex-1 flex flex-col">
-    <!-- ── HEADER ─────────────────────────────────────────────── -->
     <header
       class="h-14 bg-white border-b border-slate-100 flex items-center px-7 gap-3 sticky top-0 z-10 shadow-sm"
     >
@@ -73,7 +68,6 @@
       </button>
     </header>
 
-    <!-- ── USER FORM MODAL ────────────────────────────────────── -->
     @if (isOpenForm()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div
@@ -96,7 +90,6 @@
       </div>
     }
 
-    <!-- ✅ ROLE FORM MODAL — OUTSIDE user modal, z-[60] sits above z-50 -->
     @if (isOpenRoleForm()) {
       <div
         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
@@ -116,382 +109,736 @@
       </div>
     }
 
-    <!-- ── CONTENT ─────────────────────────────────────────────── -->
-    <div class="p-7 flex-1">
-      <div class="flex items-start justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-800">User Management</h1>
-          <p class="text-sm text-slate-400 mt-1">Manage and monitor all registered users</p>
+    @if (showSkeleton()) {
+      <div class="p-7 flex-1">
+        <!-- ── PAGE TITLE ─────────────────────────────────────────── -->
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <div class="h-7 w-44 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div class="h-4 w-64 bg-slate-100 rounded-md animate-pulse"></div>
+          </div>
+          <div class="flex gap-2">
+            <div class="h-8 w-24 bg-slate-100 rounded-lg animate-pulse"></div>
+            <div class="h-8 w-24 bg-slate-100 rounded-lg animate-pulse"></div>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <button
-            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
-          >
-            📥 Import
-          </button>
-          <button
-            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
-          >
-            📤 Export
-          </button>
-        </div>
-      </div>
 
-      <!-- ── STATS ─────────────────────────────────────────────── -->
-      <div class="grid grid-cols-4 gap-4 mb-6">
-        <div
-          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-lg">
-              👥
+        <!-- ── STAT CARDS ──────────────────────────────────────────── -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <!-- Card 1 – Total Users -->
+          <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 animate-pulse"></div>
+              <div class="h-5 w-14 rounded-full bg-slate-100 animate-pulse"></div>
             </div>
-            <span
-              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
-              >{{ inUp(totalUsers()) ? '↑' : '↓' }} {{ getPercent(totalUsers()) }}</span
-            >
+            <div class="h-7 w-12 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
           </div>
-          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ totalUsers() }}</div>
-          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
-            Total Users
-          </div>
-        </div>
 
-        <div
-          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <div
-              class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-lg"
-            >
-              <i class="fa-regular fa-circle-check text-green-600"></i>
+          <!-- Card 2 – Active Users -->
+          <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 animate-pulse"></div>
+              <div class="h-5 w-14 rounded-full bg-slate-100 animate-pulse"></div>
             </div>
-            <span
-              class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
-              >{{ inUp(activeUsers()) ? '↑' : '↓' }} {{ getPercent(activeUsers()) }}</span
-            >
+            <div class="h-7 w-12 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
           </div>
-          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ activeUsers() }}</div>
-          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
-            Active Users
-          </div>
-        </div>
 
-        <div
-          class="bg-white fontDMSans rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg">
-              ➖
+          <!-- Card 3 – Inactive Users -->
+          <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 animate-pulse"></div>
+              <div class="h-5 w-14 rounded-full bg-slate-100 animate-pulse"></div>
             </div>
-            <span
-              [ngClass]="
-                inUp(inactiveUsers()) ? 'bg-emerald-50 text-emerald-600' : 'text-red-500 bg-red-50'
-              "
-              class="text-[11px] fontPoppins font-bold px-2 py-0.5 rounded-full"
-              >{{ inUp(inactiveUsers()) ? '↑' : '↓' }} {{ getPercent(inactiveUsers()) }}</span
-            >
+            <div class="h-7 w-12 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
           </div>
-          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ inactiveUsers() }}</div>
-          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
-            InActive user
-          </div>
-        </div>
 
-        <div
-          class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-lg">
-              ⛔
+          <!-- Card 4 – Suspended -->
+          <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 animate-pulse"></div>
+              <div class="h-5 w-14 rounded-full bg-slate-100 animate-pulse"></div>
             </div>
-            <span class="text-[11px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full"
-              >{{ inUp(suspendedUsers()) ? '↑' : '↓' }} {{ getPercent(suspendedUsers()) }}</span
-            >
-          </div>
-          <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ suspendedUsers() }}</div>
-          <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
-            Suspended
+            <div class="h-7 w-12 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
           </div>
         </div>
-      </div>
 
-      <!-- ── TABLE CARD ─────────────────────────────────────────── -->
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-          <div class="flex-1 flex items-center gap-2">
-            <span class="text-sm font-bold text-slate-800">All Users</span>
-            <span class="text-xs text-slate-400">· {{ filteredUsers().length }} total</span>
-            @if (searchQuery()) {
-              <span
-                class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full"
-              >
-                <svg
-                  class="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-                "{{ searchQuery() }}"
-                <button
-                  (click)="searchQuery.set('')"
-                  class="hover:text-indigo-800 cursor-pointer ml-0.5"
-                >
-                  ✕
-                </button>
-              </span>
-            }
+        <!-- ── TABLE CARD ──────────────────────────────────────────── -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <!-- Toolbar -->
+          <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+            <div class="flex-1 flex items-center gap-2">
+              <div class="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-4 w-12 bg-slate-100 rounded animate-pulse"></div>
+            </div>
+            <!-- Tab switcher -->
+            <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+              <div class="h-7 w-16 bg-white rounded-lg shadow-sm animate-pulse"></div>
+              <div class="h-7 w-16 bg-slate-100 rounded-lg animate-pulse"></div>
+              <div class="h-7 w-16 bg-slate-100 rounded-lg animate-pulse"></div>
+            </div>
+            <div class="h-8 w-24 bg-slate-200 rounded-xl animate-pulse"></div>
+            <div class="h-8 w-24 bg-slate-200 rounded-xl animate-pulse"></div>
           </div>
 
-          <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
-            @for (tab of tabs; track tab) {
-              <button
-                (click)="setTab(tab)"
-                [class]="
-                  selectedTab() === tab
-                    ? 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer bg-white text-slate-800 shadow-sm transition-all'
-                    : 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer text-slate-500 hover:text-slate-700 transition-all'
-                "
-              >
-                {{ tab }}
-              </button>
-            }
-          </div>
+          <!-- Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <!-- Head -->
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th class="px-5 py-3 text-left">
+                    <div class="h-2.5 w-10 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-10 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-20 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-8 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-12 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-14 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                  <th class="px-4 py-3 text-left">
+                    <div class="h-2.5 w-14 bg-slate-200 rounded animate-pulse"></div>
+                  </th>
+                </tr>
+              </thead>
 
-          <button
-            (click)="openFormCreate()"
-            class="px-3.5 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm cursor-pointer"
-          >
-            + Add User
-          </button>
-          <button
-            routerLink="/user/role"
-            routerLinkActive="active"
-            class="px-3.5 py-2 text-xs font-semibold bg-green-500 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm cursor-pointer"
-          >
-            + Add Role
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-100">
-                <th
-                  class="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  User
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Phone
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Place of Birth
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Role
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Status
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Created
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (user of filteredUsers(); track user.id) {
-                <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
+              <!-- Body – 6 skeleton rows -->
+              <tbody>
+                <!-- Row 1 -->
+                <tr class="border-b border-slate-50">
                   <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
-                      <!-- <img
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-28 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-20 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-24 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-28 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-16 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-20 rounded-md bg-slate-100 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-16 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 2 -->
+                <tr class="border-b border-slate-50">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-24 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-20 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-32 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-20 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-16 rounded-md bg-green-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-14 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 3 -->
+                <tr class="border-b border-slate-50">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-24 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-16 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-28 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-24 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-14 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-20 rounded-md bg-red-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-16 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 4 -->
+                <tr class="border-b border-slate-50">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-36 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-20 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-24 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-20 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-16 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-16 rounded-md bg-slate-100 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-14 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 5 -->
+                <tr class="border-b border-slate-50">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-28 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-18 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-20 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-28 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-20 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-20 rounded-md bg-green-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-16 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Row 6 -->
+                <tr class="border-b border-slate-50">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0"
+                      ></div>
+                      <div>
+                        <div class="h-3.5 w-24 bg-slate-200 rounded animate-pulse mb-1.5"></div>
+                        <div class="h-3 w-16 bg-slate-100 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-24 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-32 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-5 w-14 rounded-md bg-indigo-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-6 w-16 rounded-md bg-red-50 animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-3.5 w-14 bg-slate-100 rounded animate-pulse"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex gap-1.5">
+                      <div class="h-7 w-12 rounded-lg bg-emerald-100 animate-pulse"></div>
+                      <div class="h-7 w-14 rounded-lg bg-red-100 animate-pulse"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
+          >
+            <div class="h-3 w-56 bg-slate-200 rounded animate-pulse"></div>
+            <div class="flex gap-1">
+              <div class="w-7 h-7 rounded-lg bg-slate-200 animate-pulse"></div>
+              <div class="w-7 h-7 rounded-lg bg-indigo-200 animate-pulse"></div>
+              <div class="w-7 h-7 rounded-lg bg-slate-200 animate-pulse"></div>
+              <div class="w-7 h-7 rounded-lg bg-slate-200 animate-pulse"></div>
+              <div class="w-7 h-7 rounded-lg bg-slate-200 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="p-7 flex-1">
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-800">User Management</h1>
+            <p class="text-sm text-slate-400 mt-1">Manage and monitor all registered users</p>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
+            >
+              📥 Import
+            </button>
+            <button
+              class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
+            >
+              📤 Export
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div
+            class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-lg"
+              >
+                👥
+              </div>
+              <span
+                class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
+                >{{ inUp(totalUsers()) ? '↑' : '↓' }} {{ getPercent(totalUsers()) }}</span
+              >
+            </div>
+            <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ totalUsers() }}</div>
+            <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+              Total Users
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-lg"
+              >
+                <i class="fa-regular fa-circle-check text-green-600"></i>
+              </div>
+              <span
+                class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full"
+                >{{ inUp(activeUsers()) ? '↑' : '↓' }} {{ getPercent(activeUsers()) }}</span
+              >
+            </div>
+            <div class="fontPoppins text-[22px] font-bold text-slate-800">{{ activeUsers() }}</div>
+            <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+              Active Users
+            </div>
+          </div>
+
+          <div
+            class="bg-white fontDMSans rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-lg"
+              >
+                ➖
+              </div>
+              <span
+                [ngClass]="
+                  inUp(inactiveUsers())
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'text-red-500 bg-red-50'
+                "
+                class="text-[11px] fontPoppins font-bold px-2 py-0.5 rounded-full"
+                >{{ inUp(inactiveUsers()) ? '↑' : '↓' }} {{ getPercent(inactiveUsers()) }}</span
+              >
+            </div>
+            <div class="fontPoppins text-[22px] font-bold text-slate-800">
+              {{ inactiveUsers() }}
+            </div>
+            <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+              InActive user
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl border border-slate-100 p-5 hover:-translate-y-0.5 transition-all cursor-default shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-lg">
+                ⛔
+              </div>
+              <span class="text-[11px] font-bold bg-red-50 text-red-500 px-2 py-0.5 rounded-full"
+                >{{ inUp(suspendedUsers()) ? '↑' : '↓' }} {{ getPercent(suspendedUsers()) }}</span
+              >
+            </div>
+            <div class="fontPoppins text-[22px] font-bold text-slate-800">
+              {{ suspendedUsers() }}
+            </div>
+            <div class="text-xs text-slate-400 font-medium mt-1 uppercase tracking-wide">
+              Suspended
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+            <div class="flex-1 flex items-center gap-2">
+              <span class="text-sm font-bold text-slate-800">All Users</span>
+              <span class="text-xs text-slate-400">· {{ filteredUsers().length }} total</span>
+              @if (searchQuery()) {
+                <span
+                  class="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full"
+                >
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  "{{ searchQuery() }}"
+                  <button
+                    (click)="searchQuery.set('')"
+                    class="hover:text-indigo-800 cursor-pointer ml-0.5"
+                  >
+                    ✕
+                  </button>
+                </span>
+              }
+            </div>
+
+            <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+              @for (tab of tabs; track tab) {
+                <button
+                  (click)="setTab(tab)"
+                  [class]="
+                    selectedTab() === tab
+                      ? 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer bg-white text-slate-800 shadow-sm transition-all'
+                      : 'px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase cursor-pointer text-slate-500 hover:text-slate-700 transition-all'
+                  "
+                >
+                  {{ tab }}
+                </button>
+              }
+            </div>
+
+            <button
+              (click)="openFormCreate()"
+              class="px-3.5 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm cursor-pointer"
+            >
+              + Add User
+            </button>
+            <button
+              routerLink="/user/role"
+              routerLinkActive="active"
+              class="px-3.5 py-2 text-xs font-semibold bg-green-500 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm cursor-pointer"
+            >
+              + Add Role
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                  <th
+                    class="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    User
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Phone
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Place of Birth
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Role
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Created
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of filteredUsers(); track user.id) {
+                  <tr class="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
+                    <td class="px-5 py-3.5">
+                      <div class="flex items-center gap-3">
+                        <!-- <img
                         class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
                         [src]="user.imagePath"
                         (error)="onImageError($event, user)"
                         alt=""
                       /> -->
-                      <img
-                        class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
-                        [src]="user.imagePath"
-                        onerror="
-                          this.onerror = null;
-                          this.src =
-                            'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=64&bold=https://imgs.search.brave.com/7SgL8SmcEChejndOWu-cqTZfO1NmwOJZBPuWVgmbITQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9zaWxo/b3VldHRlLXZlY3Rv/ci1tYWxlLWF2YXRh/ci1mZWF0dXJpbmct/d2F2eS1oYWlyLWRl/c2lnbmVkLWJsYWNr/LW91dGxpbmUtbWlu/aW1hbGlzdGljLXN0/eWxlLXNlcnZlcy1h/cy0zNTY1NzA5NTMu/anBn';
-                        "
-                        alt=""
-                      />
-                      <div>
-                        <div class="text-sm font-semibold text-slate-800">
-                          {{ user.firstName }} {{ user.lastName }}
+                        <img
+                          class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0"
+                          [src]="user.imagePath"
+                          onerror="
+                            this.onerror = null;
+                            this.src =
+                              'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=64&bold=https://imgs.search.brave.com/7SgL8SmcEChejndOWu-cqTZfO1NmwOJZBPuWVgmbITQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9zaWxo/b3VldHRlLXZlY3Rv/ci1tYWxlLWF2YXRh/ci1mZWF0dXJpbmct/d2F2eS1oYWlyLWRl/c2lnbmVkLWJsYWNr/LW91dGxpbmUtbWlu/aW1hbGlzdGljLXN0/eWxlLXNlcnZlcy1h/cy0zNTY1NzA5NTMu/anBn';
+                          "
+                          alt=""
+                        />
+                        <div>
+                          <div class="text-sm font-semibold text-slate-800">
+                            {{ user.firstName }} {{ user.lastName }}
+                          </div>
+                          <div class="text-xs text-slate-400">&#64;{{ user.username }}</div>
                         </div>
-                        <div class="text-xs text-slate-400">&#64;{{ user.username }}</div>
                       </div>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.phoneNumber || '—' }}</td>
-                  <td class="px-4 py-3.5 text-sm text-slate-600">{{ user.placeOfBirth || '—' }}</td>
-                  <td class="px-4 py-3.5">
-                    <div class="flex flex-wrap gap-1">
-                      @for (role of user.roles; track role.id) {
-                        <span
-                          class="text-[11px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-md"
-                          >{{ role.name }}</span
-                        >
-                      }
-                      @if (!user.roles || user.roles.length === 0) {
-                        <span class="text-xs text-slate-400">No Role</span>
-                      }
-                    </div>
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md"
-                      [ngClass]="{
-                        'bg-green-50 text-green-600 border border-green-100':
-                          user.status === 'Active',
-                        'bg-slate-100 text-slate-500 border border-slate-200':
-                          user.status === 'Inactive',
-                        'bg-red-50 text-red-500 border border-red-100': user.status === 'Suspended',
-                      }"
-                    >
+                    </td>
+                    <td class="px-4 py-3.5 text-sm text-slate-600">
+                      {{ user.phoneNumber || '—' }}
+                    </td>
+                    <td class="px-4 py-3.5 text-sm text-slate-600">
+                      {{ user.placeOfBirth || '—' }}
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <div class="flex flex-wrap gap-1">
+                        @for (role of user.roles; track role.id) {
+                          <span
+                            class="text-[11px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-md"
+                            >{{ role.name }}</span
+                          >
+                        }
+                        @if (!user.roles || user.roles.length === 0) {
+                          <span class="text-xs text-slate-400">No Role</span>
+                        }
+                      </div>
+                    </td>
+                    <td class="px-4 py-3.5">
                       <span
-                        class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md"
                         [ngClass]="{
-                          'bg-green-500': user.status === 'Active',
-                          'bg-slate-400': user.status === 'Inactive',
-                          'bg-red-500': user.status === 'Suspended',
+                          'bg-green-50 text-green-600 border border-green-100':
+                            user.status === 'Active',
+                          'bg-slate-100 text-slate-500 border border-slate-200':
+                            user.status === 'Inactive',
+                          'bg-red-50 text-red-500 border border-red-100':
+                            user.status === 'Suspended',
                         }"
-                      ></span>
-                      {{ user.status }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3.5 text-xs text-slate-400">—</td>
-                  <td class="px-4 py-3.5">
-                    <div class="flex gap-1.5">
-                      <button
-                        (click)="openFormEdit(user)"
-                        class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all cursor-pointer"
                       >
-                        Edit
-                      </button>
-                      <button
-                        (click)="confirmDelete(user.id)"
-                        class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-
-              @if (filteredUsers().length === 0) {
-                <tr>
-                  <td colspan="7" class="px-5 py-14 text-center">
-                    <div class="flex flex-col items-center gap-3">
-                      <div
-                        class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl"
-                      >
-                        🔍
-                      </div>
-                      @if (searchQuery()) {
-                        <div>
-                          <p class="text-sm font-semibold text-slate-600">
-                            No results for "{{ searchQuery() }}"
-                          </p>
-                          <p class="text-xs text-slate-400 mt-1">
-                            Try a different name, username or role
-                          </p>
-                        </div>
+                        <span
+                          class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          [ngClass]="{
+                            'bg-green-500': user.status === 'Active',
+                            'bg-slate-400': user.status === 'Inactive',
+                            'bg-red-500': user.status === 'Suspended',
+                          }"
+                        ></span>
+                        {{ user.status }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3.5 text-xs text-slate-400">—</td>
+                    <td class="px-4 py-3.5">
+                      <div class="flex gap-1.5">
                         <button
-                          (click)="searchQuery.set('')"
-                          class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                          (click)="openFormEdit(user)"
+                          class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all cursor-pointer"
                         >
-                          Clear search
+                          Edit
                         </button>
-                      } @else {
-                        <div>
-                          <p class="text-sm font-semibold text-slate-600">No users found</p>
-                          <p class="text-xs text-slate-400 mt-1">
-                            Create your first user to get started
-                          </p>
+                        <button
+                          (click)="confirmDelete(user.id)"
+                          class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+
+                @if (filteredUsers().length === 0) {
+                  <tr>
+                    <td colspan="7" class="px-5 py-14 text-center">
+                      <div class="flex flex-col items-center gap-3">
+                        <div
+                          class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl"
+                        >
+                          🔍
                         </div>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                        @if (searchQuery()) {
+                          <div>
+                            <p class="text-sm font-semibold text-slate-600">
+                              No results for "{{ searchQuery() }}"
+                            </p>
+                            <p class="text-xs text-slate-400 mt-1">
+                              Try a different name, username or role
+                            </p>
+                          </div>
+                          <button
+                            (click)="searchQuery.set('')"
+                            class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                          >
+                            Clear search
+                          </button>
+                        } @else {
+                          <div>
+                            <p class="text-sm font-semibold text-slate-600">No users found</p>
+                            <p class="text-xs text-slate-400 mt-1">
+                              Create your first user to get started
+                            </p>
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
 
-        <!-- NEW - dynamic pagination -->
-        <div
-          class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
-        >
-          <span class="text-xs text-slate-400">
-            Showing {{ filteredUsers().length }} of {{ totalElements() }} users (Page
-            {{ currentPage() }} of {{ totalPages() }})
-          </span>
+          <!-- NEW - dynamic pagination -->
+          <div
+            class="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-t border-slate-100"
+          >
+            <span class="text-xs text-slate-400">
+              Showing {{ filteredUsers().length }} of {{ totalElements() }} users (Page
+              {{ currentPage() }} of {{ totalPages() }})
+            </span>
 
-          <div class="flex gap-1">
-            <!-- Prev -->
-            <button
-              (click)="prevPage()"
-              [disabled]="currentPage() === 1"
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              ‹
-            </button>
-
-            <!-- Dynamic page buttons -->
-            @for (page of pageNumbers(); track page) {
+            <div class="flex gap-1">
+              <!-- Prev -->
               <button
-                (click)="goToPage(page)"
-                [class]="
-                  currentPage() === page
-                    ? 'w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold'
-                    : 'w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all'
-                "
+                (click)="prevPage()"
+                [disabled]="currentPage() === 1"
+                class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {{ page }}
+                ‹
               </button>
-            }
 
-            <!-- Next -->
-            <button
-              (click)="nextPage()"
-              [disabled]="currentPage() >= totalPages()"
-              class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              ›
-            </button>
+              <!-- Dynamic page buttons -->
+              @for (page of pageNumbers(); track page) {
+                <button
+                  (click)="goToPage(page)"
+                  [class]="
+                    currentPage() === page
+                      ? 'w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold'
+                      : 'w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all'
+                  "
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <!-- Next -->
+              <button
+                (click)="nextPage()"
+                [disabled]="currentPage() >= totalPages()"
+                class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:border-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ›
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   </main>
 
-  <!-- ── DELETE CONFIRM MODAL ───────────────────────────────────── -->
   @if (isDelete()) {
     <div class="fixed inset-0 z-[70] flex items-center justify-center">
       <div class="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>

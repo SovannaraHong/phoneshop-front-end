@@ -9,23 +9,59 @@
       <h2 class="text-lg font-bold text-gray-800 mt-0.5">Product Management</h2>
     </div>
 
-    <button
-      (click)="openCreateForm()"
-      class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-indigo-200"
-    >
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2.5"
-          d="M12 4v16m8-8H4"
-        />
-      </svg>
-      Create Product
-    </button>
+    @if (activeTab() === 'products') {
+      <button
+        (click)="openCreateForm()"
+        class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-indigo-200"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Create Product
+      </button>
+    }
+
+    @if (activeTab() === 'lowStock') {
+      <button
+        (click)="exportReport()"
+        class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-orange-200"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+          />
+        </svg>
+        Export Report
+      </button>
+    }
+
+    @if (activeTab() === 'outOfStock') {
+      <button
+        (click)="exportReport()"
+        class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-red-200"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+          />
+        </svg>
+        Export Report
+      </button>
+    }
   </div>
 
-  <!-- ── SLIDE-IN DRAWER ──────────────────────────────────────────────────── -->
+  <!-- ── SLIDE-IN DRAWER (Create / Edit Product) ──────────────────────────── -->
   @if (isOpenForm()) {
     <div
       class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end"
@@ -35,15 +71,12 @@
         class="relative w-full max-w-[1000px] h-full bg-white shadow-2xl animate-slideInRight"
         (click)="$event.stopPropagation()"
       >
-        <!-- Close button -->
         <button
           (click)="closeForm()"
           class="absolute top-12 right-12 z-10 bg-blue-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-blue-500 transition-all"
         >
           ✕
         </button>
-
-        <!-- Form -->
         <div class="p-6 overflow-y-auto h-full">
           <app-product-form
             [editProduct]="selectedProduct()"
@@ -56,7 +89,7 @@
 
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- ── STATS STRIP ──────────────────────────────────────────────────────── -->
-    <div class="grid grid-cols-4 gap-4 px-7 py-4 bg-white border-b border-gray-100 shrink-0">
+    <div class="grid grid-cols-5 gap-4 px-7 py-4 bg-white border-b border-gray-100 shrink-0">
       <!-- Total -->
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
@@ -117,8 +150,23 @@
       </div>
 
       <!-- Low Stock -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+      <div class="flex items-center gap-3 cursor-pointer group" (click)="navigateTo('lowStock')">
+        <div
+          class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors"
+        >
+          <i class="fa-solid fa-chart-gantt text-orange-500"></i>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400">Low Stock</p>
+          <p class="text-lg font-bold text-orange-500">{{ statsService.getLowStock().length }}</p>
+        </div>
+      </div>
+
+      <!-- Out of Stock -->
+      <div class="flex items-center gap-3 cursor-pointer group" (click)="navigateTo('outOfStock')">
+        <div
+          class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors"
+        >
           <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
@@ -129,335 +177,394 @@
           </svg>
         </div>
         <div>
-          <p class="text-xs text-gray-400">Low Stock</p>
-          <p class="text-lg font-bold text-gray-800">{{ lowStock() }}</p>
+          <p class="text-xs text-gray-400">Out Of Stock</p>
+          <p class="text-lg font-bold text-red-500">{{ outOfStock() }}</p>
         </div>
       </div>
     </div>
 
-    <!-- ── FILTER BAR ────────────────────────────────────────────────────────── -->
-    <div class="px-7 py-3 bg-[#edf0f4] flex items-center gap-3 shrink-0">
-      <!-- Search -->
+    <!-- ── TAB TOGGLE ────────────────────────────────────────────────────────── -->
+    <div class="px-7 py-3 bg-[#edf0f4] border-b border-gray-200 shrink-0">
       <div
-        class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
+        class="flex items-center gap-2​ bg-white border border-gray-100 rounded-2xl p-1.5 w-fit shadow-sm"
       >
-        <svg
-          class="w-4 h-4 text-gray-400 shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-        <input
-          type="text"
-          placeholder="Search products..."
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-          class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
-        />
-      </div>
-
-      <!-- Brand filter -->
-      <select
-        [ngModel]="selectedBrandId()"
-        (ngModelChange)="selectedBrandId.set($event)"
-        class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
-      >
-        <option value="">All Brands</option>
-        <option *ngFor="let b of brandList()" [value]="b.id">{{ b.name }}</option>
-      </select>
-
-      <!-- Type filter -->
-      <select
-        [ngModel]="selectedTypeSell()"
-        (ngModelChange)="selectedTypeSell.set($event)"
-        class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
-      >
-        <option value="">All Types</option>
-        <option *ngFor="let t of typeSellOptions()">{{ t }}</option>
-      </select>
-      <input
-        id="excelFileInput"
-        type="file"
-        accept=".xlsx,.xls"
-        class="hidden"
-        (change)="onFileSelected($event)"
-      />
-
-      <!-- Import / Export buttons -->
-      <div class="flex gap-2">
+        <!-- Products Tab -->
         <button
-          (click)="triggerImport()"
-          [disabled]="isImporting()"
-          class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          (click)="navigateTo('products')"
+          [ngClass]="
+            activeTab() === 'products'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-gray-500 cursor-pointer hover:text-indigo-600'
+          "
+          class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
         >
-          {{ isImporting() ? '⏳ Importing...' : '📂 Import Excels' }}
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.2"
+              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+          Products
         </button>
-        <button
-          class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
-        >
-          Import
-        </button>
-      </div>
 
-      @if (importSuccess() || importErrors()) {
-        <!-- Backdrop -->
-        <div
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          (click)="closeImportResult()"
+        <!-- Low Stock Tab -->
+        <button
+          (click)="navigateTo('lowStock')"
+          [ngClass]="
+            activeTab() === 'lowStock'
+              ? 'bg-orange-500 text-white shadow-sm'
+              : 'text-gray-500 cursor-pointer hover:text-orange-500'
+          "
+          class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
         >
-          <!-- Modal box -->
-          <div
-            class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6 bg-white"
-            (click)="$event.stopPropagation()"
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+          Low Stock
+          <span
+            [ngClass]="
+              activeTab() === 'lowStock'
+                ? 'bg-white/30 text-white'
+                : 'bg-orange-100  text-orange-600'
+            "
+            class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            >{{ statsService.getLowStock().length }}</span
           >
-            <!-- Close button -->
-            <button
-              (click)="closeImportResult()"
-              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold leading-none"
-            >
-              ✕
-            </button>
+        </button>
 
-            <!-- Success -->
-            @if (importSuccess()) {
-              <div class="flex flex-col items-center text-center gap-3">
-                <div class="text-5xl">✅</div>
-                <h3 class="text-lg font-semibold text-green-700">Import Successful</h3>
-                <p class="text-sm text-gray-500">{{ importSuccess() }}</p>
-                <button
-                  (click)="closeImportResult()"
-                  class="mt-2 px-6 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-all"
-                >
-                  Done
-                </button>
-              </div>
-            }
-
-            <!-- Errors -->
-            @if (importErrors()) {
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl">❌</span>
-                  <h3 class="text-base font-semibold text-red-600">Import Errors</h3>
-                </div>
-                <p class="text-xs text-gray-400">
-                  {{ objectEntries(importErrors()!).length }} row(s) failed. Fix the issues and
-                  re-import.
-                </p>
-                <ul
-                  class="max-h-60 overflow-y-auto divide-y divide-red-100 rounded-xl border border-red-100 bg-red-50"
-                >
-                  @for (entry of objectEntries(importErrors()!); track entry[0]) {
-                    <li class="px-4 py-2.5 text-sm text-red-700">
-                      {{ entry[1] }}
-                    </li>
-                  }
-                </ul>
-                <button
-                  (click)="closeImportResult()"
-                  class="mt-1 px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-all"
-                >
-                  Close
-                </button>
-              </div>
-            }
-          </div>
-        </div>
-      }
+        <!-- Out of Stock Tab -->
+        <button
+          (click)="navigateTo('outOfStock')"
+          [ngClass]="
+            activeTab() === 'outOfStock'
+              ? 'bg-red-500 text-white shadow-sm'
+              : 'text-gray-500 cursor-pointer hover:text-red-500'
+          "
+          class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          Out of Stock
+          <span
+            [ngClass]="
+              activeTab() === 'outOfStock' ? 'bg-white/30 text-white' : 'bg-red-100 text-red-600'
+            "
+            class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            >{{ outOfStock() }}</span
+          >
+        </button>
+      </div>
     </div>
 
-    <!-- ── TABLE ─────────────────────────────────────────────────────────────── -->
-    <div class="flex-1 overflow-y-auto px-7 py-4">
-      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-100">
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Product
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Brand
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Color
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Price
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Units
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Type
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Status
-              </th>
-              <th
-                class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
-              >
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (product of filteredProducts(); track product.id) {
-              <tr class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors">
-                <!-- Product -->
-                <td class="px-5 py-3.5">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                      <img
-                        [src]="product.imagePath"
-                        class="w-full h-full object-cover"
-                        alt="{{ product.name }}"
-                        onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
-                      />
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
-                      <p class="font-semibold text-gray-800 text-[13px]">
-                        {{ product.modelName }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
+    <!-- ── PRODUCTS TAB CONTENT ──────────────────────────────────────────────── -->
+    @if (activeTab() === 'products') {
+      <!-- Filter Bar -->
+      <div class="px-7 py-3 bg-[#edf0f4] flex items-center gap-3 shrink-0">
+        <div
+          class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
+        >
+          <svg
+            class="w-4 h-4 text-gray-400 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search products..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
+          />
+        </div>
 
-                <!-- Brand -->
-                <td class="px-5 py-3.5 text-gray-600 text-[13px]">
-                  {{ getBrandName(product.brandId) }}
-                </td>
+        <select
+          [ngModel]="selectedBrandId()"
+          (ngModelChange)="selectedBrandId.set($event)"
+          class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+        >
+          <option value="">All Brands</option>
+          <option *ngFor="let b of brandList()" [value]="b.id">{{ b.name }}</option>
+        </select>
 
-                <!-- Color swatch + name -->
-                <td class="px-5 py-3.5">
+        <select
+          [ngModel]="selectedTypeSell()"
+          (ngModelChange)="selectedTypeSell.set($event)"
+          class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+        >
+          <option value="">All Types</option>
+          <option *ngFor="let t of typeSellOptions()">{{ t }}</option>
+        </select>
+
+        <input
+          id="excelFileInput"
+          type="file"
+          accept=".xlsx,.xls"
+          class="hidden"
+          (change)="onFileSelected($event)"
+        />
+
+        <div class="flex gap-2">
+          <button
+            (click)="triggerImport()"
+            [disabled]="isImporting()"
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isImporting() ? '⏳ Importing...' : '📂 Import Excels' }}
+          </button>
+          <button
+            (click)="openImportForm()"
+            class="px-3.5 py-2 text-xs font-semibold border border-slate-200 rounded-lg text-slate-600 bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all"
+          >
+            Import
+          </button>
+        </div>
+
+        @if (isOpenFormImport()) {
+          <div
+            class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end"
+            (click)="closeForm()"
+          >
+            <div
+              class="relative w-full max-w-[1000px] h-full bg-white shadow-2xl animate-slideInRight"
+              (click)="$event.stopPropagation()"
+            >
+              <button
+                (click)="closeFormImport()"
+                class="absolute top-12 right-12 z-10 bg-blue-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-blue-500 transition-all"
+              >
+                ✕
+              </button>
+              <div class="p-6 overflow-y-auto h-full">
+                <app-import-product-form (saveData)="onImportSave()"></app-import-product-form>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (importSuccess() || importErrors()) {
+          <div
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            (click)="closeImportResult()"
+          >
+            <div
+              class="relative w-full max-w-md mx-4 rounded-2xl shadow-2xl p-6 bg-white"
+              (click)="$event.stopPropagation()"
+            >
+              <button
+                (click)="closeImportResult()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold leading-none"
+              >
+                ✕
+              </button>
+              @if (importSuccess()) {
+                <div class="flex flex-col items-center text-center gap-3">
+                  <div class="text-5xl">✅</div>
+                  <h3 class="text-lg font-semibold text-green-700">Import Successful</h3>
+                  <p class="text-sm text-gray-500">{{ importSuccess() }}</p>
+                  <button
+                    (click)="closeImportResult()"
+                    class="mt-2 px-6 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-all"
+                  >
+                    Done
+                  </button>
+                </div>
+              }
+              @if (importErrors()) {
+                <div class="flex flex-col gap-3">
                   <div class="flex items-center gap-2">
+                    <span class="text-2xl">❌</span>
+                    <h3 class="text-base font-semibold text-red-600">Import Errors</h3>
+                  </div>
+                  <p class="text-xs text-gray-400">
+                    {{ objectEntries(importErrors()!).length }} row(s) failed.
+                  </p>
+                  <ul
+                    class="max-h-60 overflow-y-auto divide-y divide-red-100 rounded-xl border border-red-100 bg-red-50"
+                  >
+                    @for (entry of objectEntries(importErrors()!); track entry[0]) {
+                      <li class="px-4 py-2.5 text-sm text-red-700">{{ entry[1] }}</li>
+                    }
+                  </ul>
+                  <button
+                    (click)="closeImportResult()"
+                    class="mt-1 px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Products Table -->
+      <div class="flex-1 overflow-y-auto px-7 py-4">
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Product
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Brand
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Color
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Price
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Units
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Type
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of filteredProducts(); track product.id) {
+                <tr
+                  class="border-b border-gray-50 hover:bg-gray-50/70 transition-colors"
+                  [ngClass]="
+                    product.unit < 1 ? 'bg-red-50' : product.unit < 10 ? 'bg-orange-50' : ''
+                  "
+                >
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                        <img
+                          [src]="product.imagePath"
+                          class="w-full h-full object-cover"
+                          alt="{{ product.name }}"
+                          onerror="this.src = 'https://placehold.co/160x160/dce8ff/5b3ee6?text=📱'"
+                        />
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-800 text-[13px]">{{ product.name }}</p>
+                        <p class="font-semibold text-gray-800 text-[13px]">
+                          {{ product.modelName }}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-gray-600 text-[13px]">
+                    {{ getBrandName(product.brandId) }}
+                  </td>
+                  <td class="px-5 py-3.5">
                     <span
                       class="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0"
                       [style.background]="getColorHex(product.colorName)"
                       [title]="product.colorName"
                     ></span>
-                  </div>
-                </td>
-
-                <!-- Price -->
-                <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
-                  ${{ product.salePrice | number: '1.2-2' }}
-                </td>
-
-                <!-- Units -->
-                <td class="px-5 py-3.5">
-                  <span
-                    class="text-[13px]"
-                    [ngClass]="product.unit < 20 ? 'text-red-500 font-semibold' : 'text-gray-600'"
-                  >
-                    {{ product.unit }}
-                  </span>
-                </td>
-
-                <!-- Type -->
-                <td class="px-5 py-3.5">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
-                    [ngClass]="{
-                      'bg-indigo-50 text-indigo-600': product.typeSell === 'Best Seller',
-                      'bg-green-50 text-green-600': product.typeSell === 'Top Rated',
-                      'bg-amber-50 text-amber-600': product.typeSell === 'Premium',
-                      'bg-purple-50 text-purple-600': product.typeSell === 'Trending',
-                      'bg-gray-100 text-gray-500': product.typeSell === 'Clearance',
-                    }"
-                  >
-                    {{ product.typeSell }}
-                  </span>
-                </td>
-
-                <!-- Status -->
-                <td class="px-5 py-3.5">
-                  <span
-                    class="inline-flex items-center gap-1.5 text-[11px] font-semibold"
-                    [ngClass]="product.active ? 'text-green-600' : 'text-gray-400'"
-                  >
+                  </td>
+                  <td class="px-5 py-3.5 font-semibold text-gray-800 text-[13px]">
+                    ${{ product.salePrice | number: '1.2-2' }}
+                  </td>
+                  <td class="px-5 py-3.5">
                     <span
-                      class="w-1.5 h-1.5 rounded-full"
-                      [ngClass]="product.active ? 'bg-green-500' : 'bg-gray-300'"
-                    ></span>
-                    {{ product.active ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-
-                <!-- Actions -->
-                <td class="px-5 py-3.5 flex gap-2">
-                  <button
-                    (click)="openEditForm(product)"
-                    class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    (click)="confirmDelete(product.id)"
-                    class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-            @if (isDelete()) {
-              <div class="fixed inset-0 z-[70] flex items-center justify-center">
-                <div class="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
-                <div
-                  class="relative bg-white rounded-2xl shadow-md w-[340px] p-6 flex flex-col items-center gap-4 z-10"
-                >
-                  <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
-                    <svg
-                      class="w-7 h-7 text-red-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      class="text-[13px]"
+                      [ngClass]="product.unit < 20 ? 'text-red-500 font-semibold' : 'text-gray-600'"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </div>
-
-                  <div class="text-center">
-                    <h3 class="text-[15px] font-bold text-gray-800">Delete Product</h3>
-                    <p class="text-[13px] text-gray-400 mt-1">
-                      Are you sure you want to delete this product?<br />
-                      <span class="text-red-400 font-medium">This action cannot be undone.</span>
-                    </p>
-                  </div>
-
-                  @if (errorMessage()) {
-                    <div
-                      class="w-full bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-2"
+                      {{ product.unit }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                      [ngClass]="{
+                        'bg-indigo-50 text-indigo-600': product.typeSell === 'Best Seller',
+                        'bg-green-50 text-green-600': product.typeSell === 'Top Rated',
+                        'bg-amber-50 text-amber-600': product.typeSell === 'Premium',
+                        'bg-purple-50 text-purple-600': product.typeSell === 'Trending',
+                        'bg-gray-100 text-gray-500': product.typeSell === 'Clearance',
+                      }"
+                      >{{ product.typeSell }}</span
                     >
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <span
+                      class="inline-flex items-center gap-1.5 text-[11px] font-semibold"
+                      [ngClass]="product.active ? 'text-green-600' : 'text-gray-400'"
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full"
+                        [ngClass]="product.active ? 'bg-green-500' : 'bg-gray-300'"
+                      ></span>
+                      {{ product.active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3.5 flex gap-2">
+                    <button
+                      (click)="openEditForm(product)"
+                      class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      (click)="confirmDelete(product.id)"
+                      class="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              }
+
+              @if (isDelete()) {
+                <div class="fixed inset-0 z-[70] flex items-center justify-center">
+                  <div class="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
+                  <div
+                    class="relative bg-white rounded-2xl shadow-md w-[340px] p-6 flex flex-col items-center gap-4 z-10"
+                  >
+                    <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
                       <svg
-                        class="w-4 h-4 text-red-500 mt-0.5 shrink-0"
+                        class="w-7 h-7 text-red-500"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -465,65 +572,86 @@
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z"
+                          stroke-width="1.8"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                         />
                       </svg>
-                      <p class="text-[12px] text-red-500 font-medium">{{ errorMessage() }}</p>
                     </div>
-                  }
-
-                  <div class="flex gap-3 w-full mt-1">
-                    <button
-                      (click)="onCancelDelete()"
-                      class="flex-1 py-2.5 rounded-xl border cursor-pointer border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      (click)="onConfirmDelete()"
-                      class="flex-1 py-2.5 rounded-xl cursor-pointer bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
-                    >
-                      Yes, Delete
-                    </button>
+                    <div class="text-center">
+                      <h3 class="text-[15px] font-bold text-gray-800">Delete Product</h3>
+                      <p class="text-[13px] text-gray-400 mt-1">
+                        Are you sure you want to delete this product?<br />
+                        <span class="text-red-400 font-medium">This action cannot be undone.</span>
+                      </p>
+                    </div>
+                    @if (errorMessage()) {
+                      <div
+                        class="w-full bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-2"
+                      >
+                        <p class="text-[12px] text-red-500 font-medium">{{ errorMessage() }}</p>
+                      </div>
+                    }
+                    <div class="flex gap-3 w-full mt-1">
+                      <button
+                        (click)="onCancelDelete()"
+                        class="flex-1 py-2.5 rounded-xl border cursor-pointer border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        (click)="onConfirmDelete()"
+                        class="flex-1 py-2.5 rounded-xl cursor-pointer bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
+                      >
+                        Yes, Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-            <!-- Empty state -->
-            @if (filteredProducts().length === 0) {
-              <tr>
-                <td colspan="8" class="px-5 py-14 text-center">
-                  <div class="flex flex-col items-center gap-3">
-                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
-                      <svg
-                        class="w-7 h-7 text-gray-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+              }
+
+              @if (filteredProducts().length === 0) {
+                <tr>
+                  <td colspan="8" class="px-5 py-14 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                      <div
+                        class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center"
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="1.5"
-                          d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        />
-                      </svg>
+                        <svg
+                          class="w-7 h-7 text-gray-300"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <p class="text-gray-400 text-sm font-medium">No products found</p>
+                      <button
+                        (click)="openCreateForm()"
+                        class="text-indigo-600 text-sm font-semibold hover:underline"
+                      >
+                        + Add your first product
+                      </button>
                     </div>
-                    <p class="text-gray-400 text-sm font-medium">No products found</p>
-                    <button
-                      (click)="openCreateForm()"
-                      class="text-indigo-600 text-sm font-semibold hover:underline"
-                    >
-                      + Add your first product
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    }
+
+    <!-- ── ROUTER OUTLET for lowStock & outOfStock child routes ─────────────── -->
+    @if (activeTab() !== 'products') {
+      <div class="flex-1 overflow-hidden">
+        <router-outlet></router-outlet>
+      </div>
+    }
   </div>
 </div>

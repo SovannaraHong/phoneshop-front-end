@@ -20,6 +20,15 @@ export interface ReportProduct {
   productName: string;
   productUnit: number;
   totalAmount: number;
+  soldDate: Date;
+}
+
+export interface ExpenseReport {
+  productId: number;
+  productName: string;
+  expenseUnit: number;
+  totalAmount: number;
+  expenseDate: Date;
 }
 
 @Component({
@@ -36,35 +45,43 @@ export class Reports implements OnInit {
   private productService = inject(ProductService);
   private api = environment.baseUrl;
 
-  products = signal<ReportProduct[]>([]);
-  private allProducts = signal<ProductType[]>([]);
+  // ── Tab ──────────────────────────────────────────
+  activeTab = signal<'sales' | 'expense'>('sales');
 
+  quickRanges: { label: string; value: 'today' | 'week' | 'month' | 'year' }[] = [
+    { label: 'Today', value: 'today' },
+    { label: 'This Week', value: 'week' },
+    { label: 'This Month', value: 'month' },
+    { label: 'This Year', value: 'year' },
+  ];
+
+  // ── Shared state ─────────────────────────────────
+  private allProducts = signal<ProductType[]>([]);
   isLoading = signal(false);
   errorMsg = signal('');
   startDate = signal('');
   endDate = signal('');
+  reportDate = '';
+  private initialized = false;
 
+  // ── Sales ─────────────────────────────────────────
+  products = signal<ReportProduct[]>([]);
   searchQuery = signal('');
   selectedProduct = signal('');
 
   uniqueProducts = computed(() => [...new Set(this.products().map((p) => p.productName))].sort());
-
   filteredProducts = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    const product = this.selectedProduct().toLowerCase();
-    return this.products().filter((p) => {
-      const matchSearch = !query || p.productName.toLowerCase().includes(query);
-      const matchProduct = !product || p.productName.toLowerCase().includes(product);
-      return matchSearch && matchProduct;
-    });
+    const q = this.searchQuery().toLowerCase().trim();
+    const s = this.selectedProduct().toLowerCase();
+    return this.products().filter(
+      (p) =>
+        (!q || p.productName.toLowerCase().includes(q)) &&
+        (!s || p.productName.toLowerCase().includes(s)),
+    );
   });
-
   totalUnits = computed(() => this.products().reduce((sum, p) => sum + p.productUnit, 0));
   grandTotal = computed(() => this.products().reduce((sum, p) => sum + p.totalAmount, 0));
   maxAmount = computed(() => Math.max(...this.products().map((p) => p.totalAmount), 1));
-
-  reportDate = '';
-  private initialized = false;
 
   private barColors = [
     'bg-gradient-to-r from-indigo-400 to-violet-400',
@@ -75,10 +92,39 @@ export class Reports implements OnInit {
     'bg-gradient-to-r from-rose-400 to-pink-400',
   ];
 
+  // ── Expense ───────────────────────────────────────
+  expenses = signal<ExpenseReport[]>([]);
+  expenseSearchQuery = signal('');
+  selectedExpenseProduct = signal('');
+
+  uniqueExpenseProducts = computed(() =>
+    [...new Set(this.expenses().map((e) => e.productName))].sort(),
+  );
+  filteredExpenses = computed(() => {
+    const q = this.expenseSearchQuery().toLowerCase().trim();
+    const s = this.selectedExpenseProduct().toLowerCase();
+    return this.expenses().filter(
+      (e) =>
+        (!q || e.productName.toLowerCase().includes(q)) &&
+        (!s || e.productName.toLowerCase().includes(s)),
+    );
+  });
+  totalExpenseUnits = computed(() => this.expenses().reduce((sum, e) => sum + e.expenseUnit, 0));
+  grandExpense = computed(() => this.expenses().reduce((sum, e) => sum + e.totalAmount, 0));
+  maxExpenseAmount = computed(() => Math.max(...this.expenses().map((e) => e.totalAmount), 1));
+
+  private expenseBarColors = [
+    'bg-gradient-to-r from-rose-400 to-pink-400',
+    'bg-gradient-to-r from-orange-400 to-amber-400',
+    'bg-gradient-to-r from-red-400 to-rose-400',
+    'bg-gradient-to-r from-pink-400 to-fuchsia-400',
+    'bg-gradient-to-r from-amber-400 to-yellow-400',
+    'bg-gradient-to-r from-fuchsia-400 to-purple-400',
+  ];
+
+  // ── Lifecycle ─────────────────────────────────────
   ngOnInit(): void {
-    this.productService.getProducts().subscribe((data) => {
-      this.allProducts.set(data);
-    });
+    this.productService.getProducts().subscribe((data) => this.allProducts.set(data));
 
     const now = new Date();
     this.startDate.set(this.toDateInput(now));
@@ -90,40 +136,18 @@ export class Reports implements OnInit {
       day: 'numeric',
     });
     this.initialized = true;
-    this.fetchReport();
+    this.fetchAll();
   }
 
+  // ── Date handlers ─────────────────────────────────
   onStartDateChange(value: string): void {
     this.startDate.set(value);
-    if (this.initialized && this.startDate() && this.endDate()) this.fetchReport();
+    if (this.initialized && this.startDate() && this.endDate()) this.fetchAll();
   }
 
   onEndDateChange(value: string): void {
     this.endDate.set(value);
-    if (this.initialized && this.startDate() && this.endDate()) this.fetchReport();
-  }
-
-  private toDateInput(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
-  fetchReport(): void {
-    if (!this.startDate() || !this.endDate()) return;
-    this.isLoading.set(true);
-    this.errorMsg.set('');
-    this.searchQuery.set('');
-    this.selectedProduct.set('');
-
-    const start = `${this.startDate()} 00:00:00`.replace(' ', '%20');
-    const end = `${this.endDate()} 23:59:59`.replace(' ', '%20');
-
-    this.http
-      .get<ReportProduct[]>(`${this.api}/reports/${start}/${end}`)
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe({
-        next: (data) => this.products.set(data),
-        error: (err) => this.errorMsg.set(err?.error?.message ?? 'Failed to load report.'),
-      });
+    if (this.initialized && this.startDate() && this.endDate()) this.fetchAll();
   }
 
   setQuick(range: 'today' | 'week' | 'month' | 'year'): void {
@@ -140,14 +164,60 @@ export class Reports implements OnInit {
     } else if (range === 'year') {
       this.startDate.set(this.toDateInput(new Date(now.getFullYear(), 0, 1)));
     }
-    this.fetchReport();
+    this.fetchAll();
   }
 
+  private toDateInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  // ── Fetch both reports in parallel ────────────────
+  private fetchAll(): void {
+    if (!this.startDate() || !this.endDate()) return;
+    this.isLoading.set(true);
+    this.errorMsg.set('');
+    this.searchQuery.set('');
+    this.selectedProduct.set('');
+    this.expenseSearchQuery.set('');
+    this.selectedExpenseProduct.set('');
+
+    const start = `${this.startDate()} 00:00:00`.replace(' ', '%20');
+    const end = `${this.endDate()} 23:59:59`.replace(' ', '%20');
+
+    let done = 0;
+    const checkDone = () => {
+      if (++done === 2) this.isLoading.set(false);
+    };
+
+    // Sales
+    this.http
+      .get<ReportProduct[]>(`${this.api}/reports/${start}/${end}`)
+      .pipe(finalize(checkDone))
+      .subscribe({
+        next: (data) => this.products.set(data),
+        error: (err) => this.errorMsg.set(err?.error?.message ?? 'Failed to load sales report.'),
+      });
+
+    // Expense
+    this.http
+      .get<ExpenseReport[]>(`${this.api}/reports/expense/${this.startDate()}/${this.endDate()}`)
+      .pipe(finalize(checkDone))
+      .subscribe({
+        next: (data) => this.expenses.set(data),
+        error: (err) => this.errorMsg.set(err?.error?.message ?? 'Failed to load expense report.'),
+      });
+  }
+
+  // ── Helpers ───────────────────────────────────────
   getImage(productId: number): string {
     return this.allProducts().find((p) => p.id === productId)?.imagePath ?? '';
   }
 
   getBarColor(index: number): string {
     return this.barColors[index % this.barColors.length];
+  }
+
+  getExpenseBarColor(index: number): string {
+    return this.expenseBarColors[index % this.expenseBarColors.length];
   }
 }

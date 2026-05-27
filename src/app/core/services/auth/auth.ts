@@ -59,7 +59,10 @@ export class Auth {
   getUsername(): string {
     return this.currentUser()?.data.username ?? 'Guest';
   }
-
+  getImage(): string {
+    const path = this.currentUser()?.data.imagePath ?? '';
+    return path;
+  }
   getUserId(): number | null {
     return this.currentUser()?.data.userId ?? null;
   }

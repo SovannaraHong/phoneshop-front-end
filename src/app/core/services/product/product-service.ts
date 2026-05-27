@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environments';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { ProductType } from '../../models/product.model';
 import { ImportHistoryType } from '../../models/productHistoryImport.model';
+import { PageDTO } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -69,10 +70,18 @@ export class ProductService {
       formData,
     );
   }
-  getImportHistory(): Observable<ImportHistoryType[]> {
-    return this.http
-      .get<{ list: ImportHistoryType[]; pagination: any }>(`${this.api}/import`)
-      .pipe(map((res) => res.list));
+  getImportHistory(
+    page: number = 1,
+    limit: number = 10,
+    sortBy: string = 'id',
+    direction: 'asc' | 'desc' = 'asc',
+  ): Observable<PageDTO<ImportHistoryType>> {
+    const params = new HttpParams()
+      .set('_page', page.toString())
+      .set('_limit', limit.toString())
+      .set('sortBy', sortBy)
+      .set('direction', direction);
+    return this.http.get<PageDTO<ImportHistoryType>>(`${this.api}/import`, { params });
   }
 
   // product.service.ts — add this method

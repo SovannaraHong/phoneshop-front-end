@@ -22,6 +22,16 @@ export class Checkout {
   private brandService = inject(BrandService);
   public router = inject(Router);
 
+  //variables data
+  selectedTypeSell = signal('');
+  selectedBrandId = signal<number | ''>('');
+  searchQuery = signal('');
+  showMessage = signal(false);
+  triggerAdd = signal<number[]>([]);
+  // ── Refresh trigger ────────────────────────────────────────────────────────
+  private readonly refresh$ = new BehaviorSubject<void>(undefined);
+
+  // ── Raw product list ───────────────────────────────────────────────────────
   shipping = 3.99;
   taxRate = 0.1;
 
@@ -31,6 +41,20 @@ export class Checkout {
   isPlacing = signal(false);
   errorMsg = signal('');
   showSuccess = signal(false);
+
+  readonly productList = toSignal(
+    this.refresh$.pipe(switchMap(() => this.productService.getProducts())),
+    { initialValue: [] as ProductType[] },
+  );
+  readonly brandListData = toSignal(
+    this.refresh$.pipe(switchMap(() => this.brandService.getBrands())),
+    { initialValue: [] as BrandType[] },
+  );
+
+  selectedType = signal<string | null>(null);
+  readonly typeSellOption = computed(() =>
+    [...new Set(this.productList().map((p) => p.typeSell))].sort(),
+  );
 
   placeOrder() {
     if (this.cart.cartItems().length === 0) return;
@@ -77,28 +101,6 @@ export class Checkout {
     this.router.navigate(['/productList']);
   }
 
-  //variables data
-  selectedTypeSell = signal('');
-  selectedBrandId = signal<number | ''>('');
-  searchQuery = signal('');
-  // ── Refresh trigger ────────────────────────────────────────────────────────
-  private readonly refresh$ = new BehaviorSubject<void>(undefined);
-
-  // ── Raw product list ───────────────────────────────────────────────────────
-  readonly productList = toSignal(
-    this.refresh$.pipe(switchMap(() => this.productService.getProducts())),
-    { initialValue: [] as ProductType[] },
-  );
-  readonly brandListData = toSignal(
-    this.refresh$.pipe(switchMap(() => this.brandService.getBrands())),
-    { initialValue: [] as BrandType[] },
-  );
-
-  selectedType = signal<string | null>(null);
-  readonly typeSellOption = computed(() =>
-    [...new Set(this.productList().map((p) => p.typeSell))].sort(),
-  );
-
   readonly filteredProducts = computed(() => {
     const type = this.selectedType();
     const brandId = this.selectedBrandId();
@@ -114,5 +116,15 @@ export class Checkout {
   });
   refresh() {
     this.refresh$.next();
+  }
+  activeAdd(pro: ProductType) {
+    this.cart.addToCart(pro);
+    this.showMessage.set(true);
+    this.triggerAdd.update((ids) => [...ids, pro.id]);
+
+    setTimeout(() => {
+      this.showMessage.set(false);
+      this.triggerAdd.update((ids) => ids.filter((id) => id !== pro.id));
+    }, 3000);
   }
 }

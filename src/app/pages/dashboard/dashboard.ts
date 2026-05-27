@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   inject,
   Input,
   OnInit,
@@ -8,14 +10,16 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { BehaviorSubject, filter, Observable } from 'rxjs';
+import { BehaviorSubject, filter, Observable, switchMap } from 'rxjs';
 import { UserType } from '../../core/models/user.model';
-import { UserService } from '../../core/services/user/user-service';
 import { CommonModule } from '@angular/common';
 import { Auth } from '../../core/services/auth/auth';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { trigger } from '@angular/animations';
+
 import { CartService } from '../../core/services/cart/cart-service';
+import { ProductService } from '../../core/services/product/product-service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ProductType } from '../../core/models/product.model';
+import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,9 +31,9 @@ import { CartService } from '../../core/services/cart/cart-service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {
-  private authService = inject(UserService);
   public auth = inject(Auth);
   public cart = inject(CartService);
+  public statsService = inject(ProductStatsService);
 
   showProfile = false;
   private router = inject(Router);

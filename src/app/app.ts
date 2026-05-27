@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLinkWithHref, RouterLinkActive } from '@angular/router';
 
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Auth } from './core/services/auth/auth';
+import { ProductStatsService } from './shared/utils/product-shared/product-stats-service';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +17,13 @@ import { Auth } from './core/services/auth/auth';
 export class App {
   protected readonly title = signal('phoneshop-frontend');
   isLogin = signal(false);
+  private statsService = inject(ProductStatsService);
 
   constructor(private auth: Auth) {}
 
   ngOnInit() {
     this.checkToken();
+    this.statsService.loadProducts();
   }
 
   checkToken() {
