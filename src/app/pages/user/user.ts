@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../core/services/user/user-service';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, of, switchMap, tap } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RoleType, UserType, PageDTO } from '../../core/models/user.model';
 import { UserForm } from '../../content/user-form/user-form';
@@ -35,8 +35,11 @@ export class User implements OnInit {
   // ── pagination state ──────────────────────────────────────────
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
+  readonly hasFetchFailed = signal(false);
+  readonly isLoading = signal(false);
 
-  // ── refresh trigger ───────────────────────────────────────────
+  readonly showSkeleton = computed(() => this.isLoading() || this.hasFetchFailed());
+
   private refresh$ = new BehaviorSubject<{ page: number; size: number }>({
     page: 1,
     size: 10,
@@ -47,7 +50,36 @@ export class User implements OnInit {
 
   // ── HTTP → Signal ─────────────────────────────────────────────
   private pageData = toSignal(
-    this.refresh$.pipe(switchMap(({ page, size }) => this.userService.getUser(page, size))),
+    this.refresh$.pipe(
+      tap(() => {
+        this.isLoading.set(true);
+        this.hasFetchFailed.set(false);
+      }),
+
+      switchMap(({ page, size }) =>
+        this.userService.getUser(page, size).pipe(
+          tap(() => {
+            this.isLoading.set(false);
+          }),
+          catchError(() => {
+            (this.hasFetchFailed.set(true), this.isLoading.set(false));
+            return of({
+              list: [],
+              paginationDTO: {
+                empty: true,
+                first: true,
+                last: true,
+                numberOfElements: 0,
+                pageNumber: 1,
+                pageSize: 10,
+                totalElements: 0,
+                totalPage: 0,
+              },
+            } as PageDTO<UserType>);
+          }),
+        ),
+      ),
+    ),
     {
       initialValue: {
         list: [],

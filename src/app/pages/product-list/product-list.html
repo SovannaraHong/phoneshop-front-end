@@ -1,11 +1,9 @@
 <main class="px-[20px] py-[20px] bg-slate-50 h-screen">
-  <!-- HEADER -->
   <div class="flex items-center justify-between mb-4">
     <h1 class="brand-font text-2xl font-bold text-gray-900">Mobiles</h1>
     <span class="text-sm text-gray-400">{{ filteredProducts().length }} products</span>
   </div>
 
-  <!-- TYPE-SELL TABS + SORT BAR -->
   <div class="flex items-center justify-between border-b gap-3 pb-2 border-gray-200 mb-6">
     <div
       class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2"
@@ -57,7 +55,6 @@
     </select>
   </div>
 
-  <!-- SKELETON GRID — shown while loading or on fetch failure -->
   @if (showSkeleton()) {
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       @for (item of [1, 2, 3, 4]; track item) {
@@ -94,7 +91,6 @@
     </div>
   }
 
-  <!-- REAL PRODUCT GRID — only when not loading and no error -->
   @if (!showSkeleton()) {
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       @for (pro of filteredProducts(); track pro.id) {
