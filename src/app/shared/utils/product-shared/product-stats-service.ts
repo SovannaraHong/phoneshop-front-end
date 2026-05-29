@@ -12,7 +12,12 @@ export class ProductStatsService {
       this._products.set(products);
     });
   }
-
+  refresh(): void {
+    this.productService.getProducts().subscribe({
+      next: (list) => this._products.set(list),
+      error: () => {},
+    });
+  }
   setProducts(products: ProductType[]) {
     this._products.set(products);
   }
