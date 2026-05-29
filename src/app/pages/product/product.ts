@@ -21,6 +21,8 @@ import { ColorType } from '../../core/models/color.model';
 import { ProductForm } from '../../content/product-form/product-form';
 import { ImportProductForm } from '../../content/import-product-form/import-product-form';
 import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
+import { authGuard } from '../../guards/auth-guard';
+import { Auth } from '../../core/services/auth/auth';
 
 @Component({
   selector: 'app-product',
@@ -34,6 +36,7 @@ export class Product {
   private brandService = inject(BrandService);
   private colorService = inject(ColorService);
   readonly statsService = inject(ProductStatsService);
+  readonly auth = inject(Auth);
   private router = inject(Router);
 
   objectEntries = Object.entries;
@@ -119,30 +122,47 @@ export class Product {
     effect(() => {
       this.statsService.setProducts(this.productList());
     });
+
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
       const url: string = e.urlAfterRedirects;
       if (url.includes('lowStock')) {
         this.activeTab.set('lowStock');
       } else if (url.includes('OutOfStock') || url.includes('outOfStock')) {
         this.activeTab.set('outOfStock');
-      } else {
-        this.activeTab.set('products');
+      } else if (url === '/product' || url === '/product/') {
+        //  Only redirect when landing exactly on /product with no child
+        if (!this.auth.hasRole(['Admin', 'Manager'])) {
+          this.activeTab.set('lowStock');
+          this.router.navigate(['product', 'lowStock']);
+        } else {
+          this.activeTab.set('products');
+        }
       }
     });
 
-    // ✅ Also set on first load (in case user lands directly on child route)
+    // First load
     const url = this.router.url;
     if (url.includes('lowStock')) {
       this.activeTab.set('lowStock');
     } else if (url.includes('OutOfStock') || url.includes('outOfStock')) {
       this.activeTab.set('outOfStock');
-    } else {
-      this.activeTab.set('products');
+    } else if (url === '/product' || url === '/product/') {
+      //  Same exact-match check on first load
+      if (!this.auth.hasRole(['Admin', 'Manager'])) {
+        this.activeTab.set('lowStock');
+        this.router.navigate(['product', 'lowStock']);
+      } else {
+        this.activeTab.set('products');
+      }
     }
   }
 
   // ── Tab navigation ────────────────────────────────────────────────────────────
   navigateTo(tab: 'products' | 'lowStock' | 'outOfStock'): void {
+    // ✅ Guard: Stock/Sale can't navigate to products tab
+    if (tab === 'products' && !this.auth.hasRole(['Admin', 'Manager'])) {
+      tab = 'lowStock';
+    }
     this.activeTab.set(tab);
     if (tab === 'lowStock') {
       this.router.navigate(['product', 'lowStock']);
@@ -152,7 +172,6 @@ export class Product {
       this.router.navigate(['product']);
     }
   }
-
   // ── Export report ─────────────────────────────────────────────────────────────
   exportReport(): void {
     const tab = this.activeTab();

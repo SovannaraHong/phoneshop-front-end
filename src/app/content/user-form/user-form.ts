@@ -32,7 +32,6 @@ export class UserForm implements OnInit {
 
   private refresh$ = new BehaviorSubject<void>(undefined);
 
-  // ── step 2: inputs & outputs ──────────────────────────────────
   editUser = input<UserType | null>(null);
   userCreated = output<void>();
   openOtherRoles = output<void>();

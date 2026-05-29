@@ -2,9 +2,11 @@ import {
   Component,
   computed,
   EventEmitter,
-  HostListener,
   inject,
+  Input,
   input,
+  OnInit,
+  OnDestroy,
   Output,
   output,
   signal,
@@ -12,26 +14,47 @@ import {
 import { ProductType } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product/product-service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { nowDateTimeLocal } from '../../common/FormImport.validate';
+import { BehaviorSubject, combineLatest, Subscription, take } from 'rxjs';
+import { BrandType } from '../../core/models/brand.model';
+import { ModelService } from '../../core/services/model/model-service';
+import { ColorService } from '../../core/services/color/color-service';
+import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
+
+export type FormMode = 'create' | 'edit';
 
 @Component({
   selector: 'app-import-product-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './import-product-form.html',
   styleUrl: './import-product-form.css',
+  standalone: true,
 })
-export class ImportProductForm {
+export class ImportProductForm implements OnInit, OnDestroy {
   private productService = inject(ProductService);
+  private fb = inject(FormBuilder);
+  private statsService = inject(ProductStatsService);
+  private statusSub?: Subscription;
+  private valuesSub?: Subscription;
+  brands: BrandType[] = [];
 
   // ── Inputs / Outputs ───────────────────────────────────────────────────────
-  /** Pass the full product list in — or let the component fetch it itself */
   products = input<ProductType[]>([]);
   @Output() saveData = new EventEmitter<void>();
+  @Input() importForm: ProductType | null = null;
 
   saved = output<void>();
   cancelled = output<void>();
-
-  // ── Local product list (used when @input is empty) ─────────────────────────
+  mode = signal<FormMode>('create');
+  private refresh$ = new BehaviorSubject<void>(undefined);
+  // ── Local product list ─────────────────────────────────────────────────────
   private _localProducts = signal<ProductType[]>([]);
 
   allProducts = computed(() => {
@@ -39,7 +62,7 @@ export class ImportProductForm {
     return fromInput.length ? fromInput : this._localProducts();
   });
 
-  // ── Color map (matches your existing component) ────────────────────────────
+  // ── Color map ──────────────────────────────────────────────────────────────
   private colorMap: Record<string, string> = {
     red: '#FF0000',
     green: '#00FF00',
@@ -52,19 +75,28 @@ export class ImportProductForm {
     gold: '#FFD700',
   };
 
-  // ── Form state ─────────────────────────────────────────────────────────────
-  productSearch = signal('');
-  selectedProduct = signal<ProductType | null>(null);
-  importUnit = signal(0);
-  pricePerUnit = signal(0);
-  importDate = signal(this.nowDateTimeLocal());
-
-  showDropdown = signal(false);
+  // ── Reactive Form ──────────────────────────────────────────────────────────
+  form!: FormGroup;
 
   // ── UI state ───────────────────────────────────────────────────────────────
+  productSearch = signal('');
+  selectedProduct = signal<ProductType | null>(null);
+  showDropdown = signal(false);
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+
+  // Bridge Angular form state into signals so computed() can react
+  private formValid = signal(false);
+  formValues = signal<{
+    importUnit: number | null;
+    pricePerUnit: number | null;
+    importDate: string;
+  }>({
+    importUnit: null,
+    pricePerUnit: null,
+    importDate: nowDateTimeLocal(),
+  });
 
   // ── Computed ───────────────────────────────────────────────────────────────
   filteredProducts = computed(() => {
@@ -78,29 +110,58 @@ export class ImportProductForm {
     );
   });
 
-  totalCost = computed(() => this.importUnit() * this.pricePerUnit());
-
-  isFormValid = computed(
-    () =>
-      !!this.selectedProduct() &&
-      this.importUnit() > 0 &&
-      this.pricePerUnit() > 0 &&
-      !!this.importDate(),
+  totalCost = computed(
+    () => (this.formValues().importUnit ?? 0) * (this.formValues().pricePerUnit ?? 0),
   );
+
+  isFormValid = computed(() => !!this.selectedProduct() && this.formValid());
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    // If no products passed via @Input, fetch them
+    console.log(this.selectedProduct()?.brandId);
+    this.form = this.fb.group({
+      importUnit: [null, [Validators.required, Validators.min(1)]],
+      pricePerUnit: [null, [Validators.required, Validators.min(0.01)]],
+      importDate: [nowDateTimeLocal(), Validators.required],
+    });
+    if (this.importForm) {
+      this.selectedProduct.set(this.importForm);
+      this.productSearch.set(this.importForm.name);
+      this.refresh$.next();
+    } else if (!this.products().length) {
+      this.productService.getProducts().subscribe({
+        next: (list) => this._localProducts.set(list),
+        error: () => {},
+      });
+    }
+    this.formValid.set(this.form.valid);
+    this.formValues.set(this.form.value);
+
+    this.statusSub = this.form.statusChanges.subscribe((status) => {
+      this.formValid.set(status === 'VALID');
+    });
+
+    this.valuesSub = this.form.valueChanges.subscribe((v) => {
+      this.formValues.set(v);
+    });
+
     if (!this.products().length) {
       this.productService.getProducts().subscribe({
         next: (list) => this._localProducts.set(list),
-        error: () => {}, // silently fail — parent should handle
+        error: () => {},
       });
     }
   }
+
+  ngOnDestroy(): void {
+    this.statusSub?.unsubscribe();
+    this.valuesSub?.unsubscribe();
+  }
+
   closeDropdown(): void {
     setTimeout(() => this.showDropdown.set(false), 300);
   }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   getColorHex(colorName: string): string {
     if (!colorName) return '#000';
@@ -117,25 +178,16 @@ export class ImportProductForm {
   clearProduct(): void {
     this.selectedProduct.set(null);
     this.productSearch.set('');
-    this.importUnit.set(0);
-    this.pricePerUnit.set(0);
+    this.form.reset({
+      importUnit: null,
+      pricePerUnit: null,
+      importDate: nowDateTimeLocal(),
+    });
     this.errorMessage.set(null);
     this.successMessage.set(null);
   }
 
-  private nowDateTimeLocal(): string {
-    const now = new Date();
-    // Format: YYYY-MM-DDTHH:mm  (required by datetime-local input)
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return (
-      `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
-      `T${pad(now.getHours())}:${pad(now.getMinutes())}`
-    );
-  }
-
-  /** Convert datetime-local value to the backend format: "YYYY-MM-DD HH:mm:ss" */
   private toBackendDate(value: string): string {
-    // value is "YYYY-MM-DDTHH:mm"
     return value.replace('T', ' ') + ':00';
   }
 
@@ -144,25 +196,24 @@ export class ImportProductForm {
     if (!this.isFormValid() || this.isSubmitting()) return;
 
     const product = this.selectedProduct()!;
+    const { importUnit, pricePerUnit, importDate } = this.form.value;
+
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
     const payload = {
       productId: product.id,
-      importUnit: this.importUnit(),
-      pricePerUnit: this.pricePerUnit(),
-      importDate: this.toBackendDate(this.importDate()),
+      importUnit,
+      pricePerUnit,
+      importDate: this.toBackendDate(importDate),
     };
 
     this.productService.importProduct(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.saveData.emit();
-        this.successMessage.set(
-          `Successfully imported ${this.importUnit()} units of "${product.name}".`,
-        );
-        // Give user a moment to read the success message then emit
+        this.successMessage.set(`Successfully imported ${importUnit} units of "${product.name}".`);
         setTimeout(() => {
           this.saved.emit();
           this.resetForm();
@@ -183,10 +234,15 @@ export class ImportProductForm {
   private resetForm(): void {
     this.selectedProduct.set(null);
     this.productSearch.set('');
-    this.importUnit.set(0);
-    this.pricePerUnit.set(0);
-    this.importDate.set(this.nowDateTimeLocal());
+    this.form.reset({
+      importUnit: null,
+      pricePerUnit: null,
+      importDate: nowDateTimeLocal(),
+    });
     this.errorMessage.set(null);
     this.successMessage.set(null);
+  }
+  getBrandName(id: number): string {
+    return this.brands?.find((b) => b.id === id)?.name || '';
   }
 }

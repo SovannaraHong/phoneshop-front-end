@@ -49,7 +49,28 @@
 
     <input id="excelFileInput" type="file" accept=".xlsx,.xls" class="hidden" />
   </div>
-
+  @if (isOpenForm()) {
+    <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end">
+      <div
+        class="relative w-full max-w-[1000px] h-full bg-white shadow-2xl animate-slideInRight"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          (click)="isCloseForm()"
+          class="absolute top-12 right-12 z-10 bg-blue-400 w-8 h-8 flex items-center justify-center rounded-lg text-white hover:bg-blue-500 transition-all"
+        >
+          ✕
+        </button>
+        <div class="p-6 overflow-y-auto h-full">
+          <app-import-product-form
+            [importForm]="selectProduct()"
+            (saved)="onImportSaved()"
+            (cancelled)="isCloseForm()"
+          ></app-import-product-form>
+        </div>
+      </div>
+    </div>
+  }
   <!-- Warning Banner -->
   <div
     class="mx-7 mt-4 mb-3 px-4 py-3 rounded-xl bg-orange-50 border border-orange-200 flex items-center gap-3 shrink-0"
@@ -202,12 +223,13 @@
               <!-- Action -->
               <td class="px-5 py-3.5">
                 <div class="flex gap-2">
-                  <button
-                    class="px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all"
+                  <!-- <button
+                    class="px-3 py-1.5 cursor-pointer bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all"
                   >
                     Edit
-                  </button>
+                  </button> -->
                   <button
+                    (click)="openImportProduct(product)"
                     class="px-3 py-1.5 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-all"
                   >
                     Restock

@@ -22,17 +22,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/product/product').then((m) => m.Product),
     children: [
       {
-        path: 'lowStock', // ✅ keep consistent
+        path: 'lowStock',
         loadComponent: () =>
           import('./pages/inventory/low-stock/low-stock').then((m) => m.LowStock),
+        canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Sale'])],
       },
       {
-        path: 'outOfStock', // ✅ fix capital O → lowercase o
+        path: 'outOfStock',
         loadComponent: () =>
           import('./pages/inventory/out-of-stock/out-of-stock').then((m) => m.OutOfStock),
+        canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Sale'])],
       },
     ],
-    canActivate: [authGuard(['Admin', 'Manager', 'Stock'])],
+    canActivate: [authGuard(['Admin', 'Manager', 'Stock', 'Sale'])],
   },
   {
     path: 'user',
