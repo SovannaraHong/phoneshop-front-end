@@ -1,32 +1,33 @@
-import { Component, computed, EventEmitter, inject, Input, output, signal } from '@angular/core';
-import { ProductStatsService } from '../../../shared/utils/product-shared/product-stats-service';
+// low-stock.component.ts
+import { Component, computed, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { sign } from 'chart.js/helpers';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { BrandService } from '../../../core/services/brand/brand-service';
 import { BehaviorSubject, switchMap } from 'rxjs';
-import { BrandType } from '../../../core/models/brand.model';
-import { ProductType } from '../../../core/models/product.model';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ProductStatsService } from '../../../shared/utils/product-shared/product-stats-service';
+import { BrandService } from '../../../core/services/brand/brand-service';
 import { ImportProductForm } from '../../../content/import-product-form/import-product-form';
+import { ProductType } from '../../../core/models/product.model';
+import { BrandType } from '../../../core/models/brand.model';
+import { signal } from '@angular/core';
+import { ProductFilterService } from '../../../core/services/product-filter/product-filter-service';
+import { SharedFilterBar } from '../../../shared/components/shared-filter-bar/shared-filter-bar';
 
 @Component({
   selector: 'app-low-stock',
-  imports: [CommonModule, FormsModule, ImportProductForm],
+  standalone: true,
+  providers: [ProductFilterService], // ← scoped instance
+  imports: [CommonModule, FormsModule, ImportProductForm, SharedFilterBar],
   templateUrl: './low-stock.html',
-  styleUrl: './low-stock.css',
 })
 export class LowStock {
   private statsService = inject(ProductStatsService);
   private brandService = inject(BrandService);
-  restocked = output<void>();
-  @Input() import: ProductType | null = null;
+  readonly filter = inject(ProductFilterService);
 
-  selectBrandId = signal<number | ''>('');
-  Query = signal('');
-  selectType = signal('');
-  selectProduct = signal<ProductType | null>(null);
+  restocked = output<void>();
   isOpenForm = signal(false);
+  selectProduct = signal<ProductType | null>(null);
 
   private refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -34,35 +35,24 @@ export class LowStock {
     initialValue: [] as BrandType[],
   });
 
-  typeSellOption = computed(() => [...new Set(this.products().map((p) => p.typeSell))].sort());
-
   products = computed(() => this.statsService.getLowStock());
-  filteredProductLowStock = computed(() => {
-    const productLowStock = this.products();
-    const brandId = this.selectBrandId();
-    const selectType = this.selectType();
-    const searchQuery = this.Query().toLowerCase().trim();
-    return productLowStock.filter((p) => {
-      const matchSearch = !searchQuery || p.name?.toLowerCase().includes(searchQuery);
-      const matchBrandId = brandId === '' || p.brandId === Number(brandId);
-      const matchType = !selectType || p.typeSell === selectType;
-      return matchSearch && matchBrandId && matchType;
-    });
-  });
-  onImportSaved(): void {
-    this.isOpenForm.set(false);
-    this.selectProduct.set(null);
-    this.restocked.emit();
-    this.refresh$.next();
-    this.statsService.refresh();
-  }
+  typeOptions = this.filter.typeSellOptions(this.products);
+  filteredProducts = this.filter.filtered(this.products);
+
   openImportProduct(product: ProductType) {
     this.selectProduct.set(product);
     this.isOpenForm.set(true);
   }
 
-  isCloseForm() {
+  closeForm() {
     this.selectProduct.set(null);
     this.isOpenForm.set(false);
+  }
+
+  onImportSaved() {
+    this.closeForm();
+    this.restocked.emit();
+    this.refresh$.next();
+    this.statsService.refresh();
   }
 }

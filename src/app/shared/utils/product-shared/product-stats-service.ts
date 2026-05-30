@@ -33,4 +33,8 @@ export class ProductStatsService {
   getOutOfStock() {
     return this._products().filter((p) => p.unit < 1);
   }
+  getStock(id: number): number {
+    const product = this._products().find((p) => p.id === id);
+    return product?.unit ?? 0;
+  }
 }

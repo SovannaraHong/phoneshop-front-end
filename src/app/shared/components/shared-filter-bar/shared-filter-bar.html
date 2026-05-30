@@ -1,0 +1,46 @@
+<div class="flex items-center px-7 gap-2">
+  <div class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+    <svg
+      class="w-4 h-4 text-gray-400 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      />
+    </svg>
+    <input
+      [ngModel]="filter.searchQuery()"
+      (ngModelChange)="filter.searchQuery.set($event)"
+      type="text"
+      placeholder="Search products..."
+      class="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
+    />
+  </div>
+
+  <select
+    [ngModel]="filter.selectBrandId()"
+    (ngModelChange)="filter.selectBrandId.set(+$event || '')"
+    class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+  >
+    <option value="">All Brands</option>
+    @for (b of brandList(); track b.id) {
+      <option [value]="b.id">{{ b.name }}</option>
+    }
+  </select>
+
+  <select
+    [ngModel]="filter.selectType()"
+    (ngModelChange)="filter.selectType.set($event)"
+    class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+  >
+    <option value="">All Types</option>
+    @for (t of typeOptions(); track $index) {
+      <option>{{ t }}</option>
+    }
+  </select>
+</div>

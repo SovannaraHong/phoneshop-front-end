@@ -178,7 +178,7 @@
         </div>
         <div>
           <p class="text-xs text-gray-400">Out Of Stock</p>
-          <p class="text-lg font-bold text-red-500">{{ outOfStock() }}</p>
+          <p class="text-lg font-bold text-red-500">{{ statsService.getOutOfStock().length }}</p>
         </div>
       </div>
     </div>
@@ -266,7 +266,7 @@
                 activeTab() === 'outOfStock' ? 'bg-white/30 text-white' : 'bg-red-100 text-red-600'
               "
               class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-              >{{ outOfStock() }}</span
+              >{{ statsService.getOutOfStock().length }}</span
             >
           </button>
         }
@@ -515,7 +515,7 @@
                       class="text-[13px]"
                       [ngClass]="product.unit < 20 ? 'text-red-500 font-semibold' : 'text-gray-600'"
                     >
-                      {{ product.unit }}
+                      {{ statsService.getStock(product.id) }}
                     </span>
                   </td>
                   <td class="px-5 py-3.5">

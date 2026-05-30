@@ -40,13 +40,14 @@ export type FormMode = 'create' | 'edit';
 export class ImportProductForm implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private fb = inject(FormBuilder);
-  private statsService = inject(ProductStatsService);
   private statusSub?: Subscription;
   private valuesSub?: Subscription;
   brands: BrandType[] = [];
 
   // ── Inputs / Outputs ───────────────────────────────────────────────────────
   products = input<ProductType[]>([]);
+  @Input() import: ProductType | null = null;
+
   @Output() saveData = new EventEmitter<void>();
   @Input() importForm: ProductType | null = null;
 
