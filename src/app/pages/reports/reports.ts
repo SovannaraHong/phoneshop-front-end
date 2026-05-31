@@ -9,11 +9,10 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environments';
 import { finalize } from 'rxjs/operators';
 import { ProductType } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product/product-service';
+import { ReportService } from '../../core/services/report/report-service';
 
 export interface ReportProduct {
   productId: number;
@@ -41,9 +40,9 @@ export interface ExpenseReport {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Reports implements OnInit {
-  private http = inject(HttpClient);
+  // ── Services ──────────────────────────────────────
+  private reportService = inject(ReportService); // ← replaces HttpClient + environment
   private productService = inject(ProductService);
-  private api = environment.baseUrl;
 
   // ── Tab ──────────────────────────────────────────
   activeTab = signal<'sales' | 'expense'>('sales');
@@ -171,9 +170,10 @@ export class Reports implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
-  // ── Fetch both reports in parallel ────────────────
+  // ── Fetch via ReportService ────────────────────────
   private fetchAll(): void {
     if (!this.startDate() || !this.endDate()) return;
+
     this.isLoading.set(true);
     this.errorMsg.set('');
     this.searchQuery.set('');
@@ -181,26 +181,23 @@ export class Reports implements OnInit {
     this.expenseSearchQuery.set('');
     this.selectedExpenseProduct.set('');
 
-    const start = `${this.startDate()} 00:00:00`.replace(' ', '%20');
-    const end = `${this.endDate()} 23:59:59`.replace(' ', '%20');
-
     let done = 0;
     const checkDone = () => {
       if (++done === 2) this.isLoading.set(false);
     };
 
-    // Sales
-    this.http
-      .get<ReportProduct[]>(`${this.api}/reports/${start}/${end}`)
+    // Sales — now via service
+    this.reportService
+      .getSalesReport(this.startDate(), this.endDate())
       .pipe(finalize(checkDone))
       .subscribe({
         next: (data) => this.products.set(data),
         error: (err) => this.errorMsg.set(err?.error?.message ?? 'Failed to load sales report.'),
       });
 
-    // Expense
-    this.http
-      .get<ExpenseReport[]>(`${this.api}/reports/expense/${this.startDate()}/${this.endDate()}`)
+    // Expense — now via service
+    this.reportService
+      .getExpenseReport(this.startDate(), this.endDate())
       .pipe(finalize(checkDone))
       .subscribe({
         next: (data) => this.expenses.set(data),

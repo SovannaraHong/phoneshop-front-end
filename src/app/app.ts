@@ -7,10 +7,11 @@ import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Auth } from './core/services/auth/auth';
 import { ProductStatsService } from './shared/utils/product-shared/product-stats-service';
+import { Sidebar } from './shared/components/sidebar/sidebar';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule, CommonModule, Login, Dashboard],
+  imports: [FormsModule, CommonModule, Login, Sidebar],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

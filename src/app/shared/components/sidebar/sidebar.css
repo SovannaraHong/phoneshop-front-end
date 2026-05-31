@@ -1,0 +1,62 @@
+/* sidebar.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap');
+
+*,
+body {
+  scrollbar-width: none;
+  font-family: 'DM Sans', sans-serif;
+}
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4b9f7;
+  border-radius: 10px;
+}
+
+.brand-font {
+  font-family: 'Sora', sans-serif;
+}
+
+/* Nav section label */
+.nav-section {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+/* Nav links */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.nav-link:hover {
+  background: #f0ecff;
+  color: #5b3ee6;
+}
+.nav-link.active {
+  background: #ede9ff;
+  color: #5b3ee6;
+  font-weight: 600;
+  border-right: 3px solid #5b3ee6;
+  border-radius: 12px 0 0 12px;
+}
+
+/* Search focus ring */
+.search-wrap:focus-within {
+  border-color: #5b3ee6 !important;
+  box-shadow: 0 0 0 3px rgba(91, 62, 230, 0.12);
+}

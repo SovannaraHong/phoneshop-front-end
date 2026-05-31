@@ -1,5 +1,5 @@
 @if (isLogin()) {
-  <app-dashboard [toggleLogin]="toggleLogin.bind(this)"></app-dashboard>
+  <app-sidebar [toggleLogin]="toggleLogin.bind(this)"></app-sidebar>
 } @else {
   <app-login [onLoginSuccess]="checkToken.bind(this)"></app-login>
 }
