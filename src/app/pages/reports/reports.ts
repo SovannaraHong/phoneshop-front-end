@@ -20,6 +20,7 @@ export interface ReportProduct {
   productUnit: number;
   totalAmount: number;
   soldDate: Date;
+  imagePath: string;
 }
 
 export interface ExpenseReport {
@@ -40,11 +41,9 @@ export interface ExpenseReport {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Reports implements OnInit {
-  // ── Services ──────────────────────────────────────
-  private reportService = inject(ReportService); // ← replaces HttpClient + environment
+  private reportService = inject(ReportService);
   private productService = inject(ProductService);
 
-  // ── Tab ──────────────────────────────────────────
   activeTab = signal<'sales' | 'expense'>('sales');
 
   quickRanges: { label: string; value: 'today' | 'week' | 'month' | 'year' }[] = [
@@ -54,7 +53,6 @@ export class Reports implements OnInit {
     { label: 'This Year', value: 'year' },
   ];
 
-  // ── Shared state ─────────────────────────────────
   private allProducts = signal<ProductType[]>([]);
   isLoading = signal(false);
   errorMsg = signal('');

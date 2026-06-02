@@ -206,6 +206,52 @@
         </div>
       </div>
 
+      <!-- ── CONDITION ───────────────────────────────────────────────────── -->
+      <div class="field-group">
+        <label class="field-label">
+          <span class="label-dot bg-rose-400"></span>
+          Condition
+        </label>
+        <div class="condition-options">
+          @for (option of conditionOptions(); track $index) {
+            <label
+              class="condition-card"
+              [class.condition-card--new]="option.value === 'new' && form.value.condition === 'new'"
+              [class.condition-card--second-hand]="
+                option.value === 'second_hand' && form.value.condition === 'second_hand'
+              "
+              [class.condition-card--used]="
+                option.value === 'used' && form.value.condition === 'used'
+              "
+            >
+              <input
+                type="radio"
+                formControlName="condition"
+                [value]="option.value"
+                class="condition-radio"
+              />
+              <span class="condition-label">{{ option.label }}</span>
+              <span class="condition-desc">{{ option.desc }}</span>
+              @if (form.value.condition === option.value) {
+                <span class="condition-check">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="3"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </span>
+              }
+            </label>
+          }
+        </div>
+        @if (form.get('condition')?.invalid && form.get('condition')?.touched) {
+          <p class="field-hint red">Please select a condition</p>
+        }
+      </div>
+
       <!-- ── IMPORT DATE ─────────────────────────────────────────────────── -->
       <div class="field-group">
         <label class="field-label">
@@ -256,6 +302,14 @@
               ></span>
               {{ selectedProduct()!.colorName }}
             </span>
+
+            @if (form.value.condition) {
+              <span class="summary-key">Condition</span>
+              <span class="summary-val">
+                <span class="condition-badge" [class]="'condition-badge--' + form.value.condition">
+                </span>
+              </span>
+            }
 
             <span class="summary-key">Current Stock</span>
             <span class="summary-val">{{ selectedProduct()!.unit }}</span>

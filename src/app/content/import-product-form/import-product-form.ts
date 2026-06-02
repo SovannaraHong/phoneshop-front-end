@@ -10,6 +10,7 @@ import {
   Output,
   output,
   signal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ProductType } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product/product-service';
@@ -22,11 +23,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { nowDateTimeLocal } from '../../common/FormImport.validate';
-import { BehaviorSubject, combineLatest, Subscription, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription, switchMap, take } from 'rxjs';
 import { BrandType } from '../../core/models/brand.model';
-import { ModelService } from '../../core/services/model/model-service';
-import { ColorService } from '../../core/services/color/color-service';
-import { ProductStatsService } from '../../shared/utils/product-shared/product-stats-service';
 
 export type FormMode = 'create' | 'edit';
 
@@ -36,6 +34,7 @@ export type FormMode = 'create' | 'edit';
   templateUrl: './import-product-form.html',
   styleUrl: './import-product-form.css',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImportProductForm implements OnInit, OnDestroy {
   private productService = inject(ProductService);
@@ -63,7 +62,6 @@ export class ImportProductForm implements OnInit, OnDestroy {
     return fromInput.length ? fromInput : this._localProducts();
   });
 
-  // ── Color map ──────────────────────────────────────────────────────────────
   private colorMap: Record<string, string> = {
     red: '#FF0000',
     green: '#00FF00',
@@ -75,11 +73,13 @@ export class ImportProductForm implements OnInit, OnDestroy {
     white: '#FFFFFF',
     gold: '#FFD700',
   };
-
-  // ── Reactive Form ──────────────────────────────────────────────────────────
+  conditionOptions = signal([
+    { value: 'new', label: 'New', desc: 'Sealed / unused' },
+    { value: 'second_hand', label: 'Second Hand', desc: 'Lightly used' },
+    { value: 'used', label: 'Used', desc: 'Visibly worn' },
+  ]);
   form!: FormGroup;
 
-  // ── UI state ───────────────────────────────────────────────────────────────
   productSearch = signal('');
   selectedProduct = signal<ProductType | null>(null);
   showDropdown = signal(false);
@@ -87,7 +87,6 @@ export class ImportProductForm implements OnInit, OnDestroy {
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
-  // Bridge Angular form state into signals so computed() can react
   private formValid = signal(false);
   formValues = signal<{
     importUnit: number | null;
@@ -124,6 +123,7 @@ export class ImportProductForm implements OnInit, OnDestroy {
       importUnit: [null, [Validators.required, Validators.min(1)]],
       pricePerUnit: [null, [Validators.required, Validators.min(0.01)]],
       importDate: [nowDateTimeLocal(), Validators.required],
+      condition: [null, Validators.required],
     });
     if (this.importForm) {
       this.selectedProduct.set(this.importForm);
@@ -191,13 +191,20 @@ export class ImportProductForm implements OnInit, OnDestroy {
   private toBackendDate(value: string): string {
     return value.replace('T', ' ') + ':00';
   }
-
+  private toBackendCondition(value: string): string {
+    const map: Record<string, string> = {
+      new: 'NEW',
+      second_hand: 'SECOND HAND',
+      used: 'USED',
+    };
+    return map[value] ?? value.toUpperCase();
+  }
   // ── Actions ────────────────────────────────────────────────────────────────
   onSubmit(): void {
     if (!this.isFormValid() || this.isSubmitting()) return;
 
     const product = this.selectedProduct()!;
-    const { importUnit, pricePerUnit, importDate } = this.form.value;
+    const { importUnit, pricePerUnit, importDate, condition } = this.form.value;
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
@@ -208,6 +215,7 @@ export class ImportProductForm implements OnInit, OnDestroy {
       importUnit,
       pricePerUnit,
       importDate: this.toBackendDate(importDate),
+      conditionType: this.toBackendCondition(condition),
     };
 
     this.productService.importProduct(payload).subscribe({
@@ -239,6 +247,7 @@ export class ImportProductForm implements OnInit, OnDestroy {
       importUnit: null,
       pricePerUnit: null,
       importDate: nowDateTimeLocal(),
+      conditionType: null,
     });
     this.errorMessage.set(null);
     this.successMessage.set(null);

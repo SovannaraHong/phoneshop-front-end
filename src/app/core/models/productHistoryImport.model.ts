@@ -3,6 +3,7 @@ export interface ImportHistoryType {
   importUnit: number;
   pricePerUnit: number;
   importDate: string;
+  conditionType: string;
 
   product: {
     id: number;

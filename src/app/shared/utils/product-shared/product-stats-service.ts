@@ -1,6 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ProductType } from '../../../core/models/product.model';
 import { ProductService } from '../../../core/services/product/product-service';
+import { BrandService } from '../../../core/services/brand/brand-service';
+import { BrandType } from '../../../core/models/brand.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductStatsService {
@@ -29,6 +31,9 @@ export class ProductStatsService {
   getLowStock() {
     return this._products().filter((p) => p.unit < 10);
   }
+  getDataLowStock() {
+    return this._products();
+  }
 
   getOutOfStock() {
     return this._products().filter((p) => p.unit < 1);
@@ -36,5 +41,8 @@ export class ProductStatsService {
   getStock(id: number): number {
     const product = this._products().find((p) => p.id === id);
     return product?.unit ?? 0;
+  }
+  getBestSeller() {
+    return this._products().filter((p) => p.typeSell === 'Best Seller');
   }
 }

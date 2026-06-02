@@ -20,4 +20,8 @@ export class ReportService {
   getExpenseReport(startDate: string, endDate: string): Observable<ExpenseReport[]> {
     return this.http.get<ExpenseReport[]>(`${this.api}/reports/expense/${startDate}/${endDate}`);
   }
+
+  getTotalSold(): Observable<ReportProduct[]> {
+    return this.http.get<ReportProduct[]>(`${this.api}/reports`);
+  }
 }

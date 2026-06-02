@@ -377,7 +377,7 @@
           </div>
 
           <!-- Shipping Method card -->
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <!-- <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-50">
               <h3 class="text-[13px] font-bold text-gray-800">Shipping Method</h3>
             </div>
@@ -439,15 +439,13 @@
                 <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-300 shrink-0"></div>
               </div>
             </div>
-          </div>
+          </div> -->
 
-          <!-- Payment Method card -->
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <!-- <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-50">
               <h3 class="text-[13px] font-bold text-gray-800">Payment Method</h3>
             </div>
             <div class="p-4">
-              <!-- Method tabs -->
               <div class="grid grid-cols-4 gap-2 mb-4">
                 <div
                   class="border-2 border-indigo-500 bg-indigo-50/40 rounded-xl p-2.5 flex flex-col items-center gap-1 cursor-pointer"
@@ -474,7 +472,6 @@
                   <span class="text-[10px] font-semibold text-gray-500">Cash on Delivery</span>
                 </div>
               </div>
-              <!-- Card brand logos -->
               <div class="flex items-center gap-2 mb-3">
                 <span
                   class="text-[10px] font-bold text-blue-800 border border-gray-200 bg-gray-50 rounded px-2 py-1"
@@ -493,7 +490,6 @@
                   >PayPal</span
                 >
               </div>
-              <!-- Card form -->
               <div class="grid grid-cols-2 gap-2.5">
                 <div class="col-span-2 flex flex-col gap-1.5">
                   <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide"
@@ -553,9 +549,8 @@
                 <span class="text-[11px] text-gray-400">Secured by 256-bit SSL encryption</span>
               </div>
             </div>
-          </div>
+          </div> -->
 
-          <!-- Place Order button -->
           <button
             (click)="placeOrder()"
             [disabled]="isPlacing() || cart.cartItems().length === 0"
